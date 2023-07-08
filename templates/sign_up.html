@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="form-signin">
+    <form>
+        <div>
+        <input type="email" placeholder="name@example.com">
+        <label for="floatingInput">Email address</label>
+        </div>
+        <div>
+        <input type="password" placeholder="Password">
+        <label for="floatingPassword">Password</label>
+        </div>
+
+        <div>
+        <input  type="checkbox" value="remember-me" >
+        <label>
+            Remember me
+        </label>
+        </div>
+        <button type="submit">Sign up</button>
+
+    </form>
+</main>
+{% endblock %}
