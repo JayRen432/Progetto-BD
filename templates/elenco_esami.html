@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Elenco Esami per Corso di Laurea</title>
+</head>
+<body>
+  <h1>Elenco Esami per Corso di Laurea - {{ corso_di_laurea }}</h1>
+  {% if esami %}
+    {% for anno, elenco_esami in esami.items() %}
+      <h2>{{ anno }}</h2>
+      <ul>
+        {% for esame in elenco_esami %}
+          <li>{{ esame }}</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  {% else %}
+    <p>Nessun esame disponibile per questo corso di laurea.</p>
+  {% endif %}
+</body>
+</html>
