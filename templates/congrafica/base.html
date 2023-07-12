@@ -1,0 +1,26 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Bertocco Marco">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="topnav">
+        <a class="active" href="/">Home</a>
+        <a href="sign_up">Register</a>
+        <a href="login">Login</a>
+        <div class="search-container">
+            <form method="Post" action="search">
+                <input type="text" placeholder="Search..." name="search">
+                <button type="submit"><img src="/static/images/images.png" alt="Art"></button>
+            </form>
+        </div>>
+    </div>
+    {% block content %}
+
+    {% endblock %}
+    <div class="bottomnav">
+        <p>telephone: +39 XXX XXX XXXX</p>
+        <p>mail: univeservices@gmail.com</p>
+    </div>
+</body>

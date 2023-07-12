@@ -1,9 +1,44 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, url_for, request
 
+
+# Create Flask Instance
 app = Flask(__name__)
 
-
 @app.route('/')
+def index():
+    #first_name = "John"
+    #stuff = "This is bold text"
+
+    elenco_corsi_scientifici = ["Informatica", "Scienze Ambientali", "Chimica e tecnologie sostenibili", "Ingegneria Fisica", "Scienze e tecnologie per i beni culturali"]
+    elenco_corsi_umanistici = ["Lettere", "Filosofia", "Storia", "Conservazione e gestione dei beni e delle attività culturali"]
+    elenco_corsi_economici = ["Commercio estero e turismo", "Digital Management", "Economia aziendale", "Economia e commercio"]
+    elenco_corsi_lingua = ["Lingue, civiltà e scienze del linguaggio", "Lingue, culture e società dell'Asia e dell'Africa mediterranea"]
+    return render_template("index.html",
+                            elenco_corsi_scientifici=elenco_corsi_scientifici,
+                            elenco_corsi_economici=elenco_corsi_economici,
+                            elenco_corsi_umanistici=elenco_corsi_umanistici,
+                            elenco_corsi_lingua=elenco_corsi_lingua)
+
+@app.route('/reset_pwd')
+def resetpwd():
+    return render_template("reset_pwd.html")
+
+#localhost:5000/sign_up
+@app.route('/sign_up')
+def signUp():
+    return render_template("sign_up.html")
+
+#localhost:5000/login
+@app.route('/login')
+def login():
+    return render_template("login.html")
+
+#localhost:5000/user/John
+@app.route('/user/<name>')
+def user(name):
+    return render_template("user.html", user_name = name)
+
+@app.route('/user_data')
 def home():
     # Dati utente di esempio
     codice_fiscale = 'ABC123'
@@ -15,12 +50,6 @@ def home():
 
     return render_template('info_utente.html', codice_fiscale=codice_fiscale, nome=nome, cognome=cognome, mail=email,
                            anno_nascita=anno_nascita, ruolo=ruolo)
-
-
-@app.route('/corsi')
-def corsi():
-    return render_template('seleziona_corso.html')
-
 
 @app.route('/esami', methods=['POST'])
 def esami():
@@ -50,6 +79,14 @@ def esami():
     else:
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami={})
 
+# Invalid URL
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
 
-if __name__ == '__main__':
-    app.run()
+# Internal Server Error
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template("500.html"), 500
+
+
