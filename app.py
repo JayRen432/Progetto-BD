@@ -51,7 +51,7 @@ def home():
     return render_template('info_utente.html', codice_fiscale=codice_fiscale, nome=nome, cognome=cognome, mail=email,
                            anno_nascita=anno_nascita, ruolo=ruolo)
 
-@app.route('/esami', methods=['POST'])
+@app.route('/esami', methods=['GET', 'POST'])
 def esami():
     corso_di_laurea = request.form.get('corso_di_laurea')
 
