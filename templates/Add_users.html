@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elenco Utenti</title>
+    <style>
+        .container {
+            display: flex;
+        }
+        .utenti {
+            flex: 1;
+            padding: 20px;
+        }
+        .dettagli {
+            flex: 1;
+            padding: 20px;
+        }
+        .utente-selezionato {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="utenti">
+            <h2>Elenco Utenti</h2>
+            <ul>
+                {% for user in users %}
+                <li value="{{ user }}" onclick="mostraDettagli(this)">{{ user }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="dettagli">
+            <h2>Dettagli Utente</h2>
+            <div id="dettagli-utente">
+                Seleziona un utente per visualizzare i dettagli.
+            </div>
+            <button onclick="aggiungiUtente()">Aggiungi Utente</button>
+        </div>
+    </div>
+
+
+    <script>
+        function mostraDettagli(elemento) {
+            // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
+            var listaUtenti = document.querySelectorAll('.utenti ul li');
+            listaUtenti.forEach(function (utente) {
+                utente.classList.remove('utente-selezionato');
+            });
+
+            // Aggiunge la classe "utente-selezionato" all'elemento selezionato
+            elemento.classList.add('utente-selezionato');
+
+            // Ottiene il nome dell'utente selezionato
+            var nomeUtente = elemento.innerHTML;
+
+            // In questo esempio, i dettagli sono predefiniti
+            var dettagliUtente = {
+                nome: nomeUtente,
+                cognome: 'Rossi',
+                annoNascita: 1990,
+                email: 'utente@example.com',
+                ruolo: 'studente'
+            };
+
+            // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
+            var dettagliElemento = document.getElementById('dettagli-utente');
+            dettagliElemento.innerHTML = `
+                <p><strong>Nome:</strong> ${dettagliUtente.nome}</p>
+                <p><strong>Cognome:</strong> ${dettagliUtente.cognome}</p>
+                <p><strong>Anno di Nascita:</strong> ${dettagliUtente.annoNascita}</p>
+                <input type="text" name="email" placeholder="${dettagliUtente.email}"></input>
+                </br></br>
+                <select name="Ruolo">
+                    <option value="" selected disabled hidden>-----</option>
+                    <option value="Studente">Studente</option>
+                    <option value="Docente">Docente</option>
+                    <option value="Amministratore">Admin</option>
+                </select>
+                </br></br>
+            `;
+        }
+
+        function aggiungiUtente() {
+            var utenteSelezionato = document.querySelector('.utente-selezionato');
+            if (utenteSelezionato) {
+                var nomeUtente = utenteSelezionato.innerHTML;
+
+                // Effettua una richiesta al server per eliminare l'utente
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/add', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        // Ricarica la pagina dopo aver aggiunto l'utente
+                        window.location.reload();
+                    }
+                };
+                xhr.send('user=' + encodeURIComponent(nomeUtente));
+            }
+        }
+    </script>
+</body>
+</html>

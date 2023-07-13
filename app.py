@@ -4,6 +4,8 @@ from flask import Flask, render_template, url_for, request
 # Create Flask Instance
 app = Flask(__name__)
 
+#valori statici globali per test di add/delete
+users = ['Utente 1', 'Utente 2', 'Utente 3']
 @app.route('/')
 def index():
     #first_name = "John"
@@ -78,6 +80,33 @@ def esami():
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami=esami[corso_di_laurea])
     else:
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami={})
+
+@app.route('/Admin')
+def administrator():
+    return render_template('Admin.html')
+
+@app.route('/Admin/delete_user')
+def delete():
+    return render_template('Delete_users.html', users=users)
+
+@app.route('/Admin/add_user')
+def add():
+    return render_template('Add_users.html', users=users)
+
+@app.route('/delete', methods=['POST'])
+def delete_user():
+    user_to_delete = request.form['user']
+    if user_to_delete in users:
+        users.remove(user_to_delete)
+    return 'Utente eliminato con successo'
+
+@app.route('/add', methods=['POST'])
+def add_user():
+    user_to_add = request.form['user']
+    #aggiungere controllo se l'utente è gia presente nel db
+    users.insert(len(users), user_to_add)
+    return 'Utente aggiunto con successo'
+
 
 # Invalid URL
 @app.errorhandler(404)
