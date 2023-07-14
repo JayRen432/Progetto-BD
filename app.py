@@ -80,6 +80,34 @@ def esami():
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami=esami[corso_di_laurea])
     else:
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami={})
+    
+@app.route('/testiEsami')
+def testi():
+    # Dati degli esami di esempio
+    corsi = {'informatica','ingegneria','economia'}
+    esami = {
+        'informatica': {
+            'Primo anno': ['Matematica', 'Programmazione e laboratorio', 'Architettura dei calcolatori'],
+            'Secondo anno': ['Algoritmi e strutture dati', 'Basi di dati', 'Reti di calcolatori'],
+            'Terzo anno': ['Intelligenza artificiale', 'Sistemi distribuiti', 'Sicurezza informatica']
+        },
+        'ingegneria': {
+            'Primo anno': ['Matematica', 'Fisica', 'Chimica'],
+            'Secondo anno': ['Meccanica', 'Elettrotecnica', 'Materiali'],
+            'Terzo anno': ['Termodinamica', 'Ingegneria dei trasporti', 'Ingegneria ambientale']
+        },
+        'economia': {
+            'Primo anno': ['Microeconomia', 'Macroeconomia', 'Statistica'],
+            'Secondo anno': ['Economia aziendale', 'Finanza', 'Marketing'],
+            'Terzo anno': ['Economia internazionale', 'Economia del lavoro', 'Economia dello sviluppo']
+        }
+    }
+    return render_template('testi_esami.html', esami=esami, corsiLaurea=corsi)
+
+@app.route('/Admin/iscrittiAppelli')
+def iscritti():
+    corsi = {'informatica','ingegneria','economia'}
+    return render_template('elenco_appelli_studenti.html', corsi)
 
 @app.route('/Admin')
 def administrator():
@@ -107,7 +135,6 @@ def add_user():
     users.insert(len(users), user_to_add)
     return 'Utente aggiunto con successo'
 
-
 # Invalid URL
 @app.errorhandler(404)
 def page_not_found(e):
@@ -117,7 +144,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html"), 500
-
 
 if __name__ == '__main__':
     app.run()
