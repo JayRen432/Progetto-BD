@@ -4,9 +4,12 @@
   <title>Elenco Esami per Corso di Laurea</title>
 </head>
 <body>
+  {% extends 'base.html' %}
+  {% block content %}
   <h1>Seleziona Corso di Laurea</h1>
     <form action="/esami" method="POST">
       <select name="corso_di_laurea">
+        <option value="null">----------</option>
         <option value="informatica">Informatica</option>
         <option value="ingegneria">Ingegneria</option>
         <option value="economia">Economia</option>
@@ -30,7 +33,7 @@
       <p>Nessun esame disponibile per questo corso di laurea.</p>
     {% endif %}
 
-
+  {% endblock %}
   
 </body>
 </html>
