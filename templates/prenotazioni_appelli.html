@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tabella dinamica</title>
+</head>
+
+<body>
+    <table id="tabella" border="1">
+        <thead>
+            <tr>
+                <th>Codice corso</th>
+                <th>Nome corso</th>
+                <th>Data esame</th>
+                <th>Aula</th>
+                <th>Prenotati</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Ciclo per costruire le righe della tabella -->
+            {% for riga in righe %}
+            <tr>
+                <td>{{ riga["codice_corso"] }}</td>
+                <td>{{ riga["nome_corso"] }}</td>
+                <td>{{ riga["data_esame"] }}</td>
+                <td>{{ riga["aula"] }}</td>
+                <td><button onclick="aggiungiRiga(this)">Prenota</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function aggiungiRiga(button) {
+            var riga = button.parentElement.parentElement;
+
+            var rigaDati = {
+                "codice_corso": riga.cells[0].innerText,
+                "nome_corso": riga.cells[1].innerText,
+                "data_esame": riga.cells[2].innerText,
+                "aula": riga.cells[3].innerText
+            };
+
+            // Invia i dati della riga al server Python
+            fetch('/aggiungi_riga', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rigaDati) })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); })// Messaggio di conferma dal server
+            .catch(error => console.error('Errore:', error));
+            location.reload();
+        }
+    </script>
+</body>
+
+</html>

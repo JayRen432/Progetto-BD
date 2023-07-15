@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabella Esami</title>
+</head>
+<body>
+    <h1>Tabella Esami</h1>
+    <table border="1">
+        <tr>
+            <th>Codice del corso</th>
+            <th>Nome del corso</th>
+            <th>Sostenuto in data</th>
+            <th>Voto ottenuto</th>
+            <th>Peso in crediti</th>
+        </tr>
+        {% for corso in corsi %}
+            <tr>
+                <td>{{ corso.codice }}</td>
+                <td>{{ corso.nome }}</td>
+                <td>{{ corso.data_esame }}</td>
+                {% if corso.voto is none %}
+                    <td></td> <!-- Mostra la cella vuota -->
+                {% else %}
+                    <td>{{ corso.voto }}</td>
+                {% endif %}
+                <td>{{ corso.crediti }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

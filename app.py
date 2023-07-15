@@ -1,11 +1,19 @@
-from flask import Flask, render_template, url_for, request
-
+from flask import Flask, render_template, url_for, request, jsonify, redirect
+import pymysql
 
 # Create Flask Instance
 app = Flask(__name__)
 
-#valori statici globali per test di add/delete
+#valori statici globali per test di add/delete utente
 users = ['Utente 1', 'Utente 2', 'Utente 3']
+#lista vuoto che indica a quali appelli un utente si è prenotato
+righe_uniche = []
+#lista delgli appelli statici per test
+righe_iniziali = [
+        {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
+        {"codice_corso": "DEF456", "nome_corso": "Corso B", "data_esame": "2023-07-25", "aula": "Aula 2"},
+        # Aggiungere altre righe come necessario
+    ]
 @app.route('/')
 def index():
     #first_name = "John"
@@ -144,6 +152,66 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html"), 500
+
+
+
+
+@app.route('/stud/lista_esami_utente')
+def show_list_exam():
+    corsi = [
+        {
+            'codice': 'C001',
+            'nome': 'Matematica',
+            'data_esame': '2023-07-01',
+            'voto': 28,
+            'crediti': 6
+        },
+        {
+            'codice': 'C002',
+            'nome': 'Informatica',
+            'data_esame': '2023-07-10',
+            'voto': 30,
+            'crediti': 9
+        },
+        {
+            'codice': 'C003',
+            'nome': 'Fisica',
+            'data_esame': '2023-07-15',
+            'voto': None,
+            'crediti': 6
+        },
+        {
+            'codice': 'C004',
+            'nome': 'Programmazione',
+            'data_esame': '2023-07-15',
+
+            'crediti': 6
+        }
+    ]
+    #Nel caso il voto sia None, oppure assente la cella corrispondente nella tabella html risulterà essere vuota
+    return render_template('lista_esami_utente.html', corsi=corsi)
+
+@app.route('/stud/prenotazioni_appelli')
+def prenotazioni_appelli():
+    return render_template('prenotazioni_appelli.html', righe=righe_iniziali)
+
+@app.route('/stud/bacheca_prenotazione_appelli')
+def bacheca_appelli():
+    return render_template('bacheca_prenotazione_appelli.html', righe=righe_uniche)
+@app.route('/aggiungi_riga', methods=['POST'])
+def aggiungi_riga():
+    riga = request.get_json()
+    if riga not in righe_uniche:
+        righe_uniche.append(riga)
+    return jsonify({"message": "Riga aggiunta con successo"})
+
+@app.route('/delete_appello', methods=['POST'])
+def delete_appello():
+    riga = request.get_json()
+    if riga in righe_uniche:
+        righe_uniche.remove(riga)
+    return jsonify({"message": "Riga rimossa con successo"})
+
 
 if __name__ == '__main__':
     app.run()
