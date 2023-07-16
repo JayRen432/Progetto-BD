@@ -1,7 +1,22 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify
+import pymysql
+import bcrypt
+
 
 # Create Flask Instance
 app = Flask(__name__)
+
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
+app.config['MYSQL_DATABASE_DB'] = 'progettobasi'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+mysql = pymysql.connect(
+    host=app.config['MYSQL_DATABASE_HOST'],
+    user=app.config['MYSQL_DATABASE_USER'],
+    password=app.config['MYSQL_DATABASE_PASSWORD'],
+    db=app.config['MYSQL_DATABASE_DB']
+)
 
 #valori statici globali per test di add/delete utente
 users = ['Utente 1', 'Utente 2', 'Utente 3']
@@ -26,13 +41,42 @@ def index():
                             elenco_corsi_umanistici=elenco_corsi_umanistici,
                             elenco_corsi_lingua=elenco_corsi_lingua)
 
-@app.route('/reset_pwd')
+@app.route('/reset_pwd', methods=['GET', 'POST'])
 def resetpwd():
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        email = request.form['email']
+        if password == confirm_password:
+            hash_password = bcrypt.hashpw(confirm_password.encode('utf-8'), bcrypt.gensalt())
+            cursor = mysql.cursor()
+            query = 'UPDATE temporaryuser SET password = %s WHERE mail = %s'
+            cursor.execute(query,(hash_password, email))
+            mysql.commit()
+            cursor.close()
+            return redirect('/login')
     return render_template("reset_pwd.html")
 
 #localhost:5000/sign_up
-@app.route('/sign_up')
+@app.route('/sign_up', methods=['GET', 'POST'])
 def signUp():
+    if request.method == 'POST':
+        codicefiscale = request.form['Codicefiscale']
+        name = request.form['Nome']
+        surname = request.form['Cognome']
+        dateofbirth = request.form['AnnoNascita']
+        email = request.form['Email']
+        password = request.form['password']
+
+        hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        cursor = mysql.cursor()
+        query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (codicefiscale, name, surname, dateofbirth, email, "000000", hash_password))
+        mysql.commit()
+        cursor.close()
+
+        return redirect('/login')
+
     return render_template("sign_up.html")
 
 #localhost:5000/login
