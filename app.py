@@ -1,5 +1,4 @@
-from flask import Flask, render_template, url_for, request, jsonify, redirect
-import pymysql
+from flask import Flask, render_template, request, jsonify
 
 # Create Flask Instance
 app = Flask(__name__)
@@ -16,8 +15,6 @@ righe_iniziali = [
     ]
 @app.route('/')
 def index():
-    #first_name = "John"
-    #stuff = "This is bold text"
 
     elenco_corsi_scientifici = ["Informatica", "Scienze Ambientali", "Chimica e tecnologie sostenibili", "Ingegneria Fisica", "Scienze e tecnologie per i beni culturali"]
     elenco_corsi_umanistici = ["Lettere", "Filosofia", "Storia", "Conservazione e gestione dei beni e delle attività culturali"]
@@ -155,7 +152,9 @@ def page_not_found(e):
 
 
 
-
+@app.route('/stud')
+def index_studenti():
+    return render_template('menu_studenti.html')
 @app.route('/stud/lista_esami_utente')
 def show_list_exam():
     corsi = [
@@ -211,6 +210,27 @@ def delete_appello():
     if riga in righe_uniche:
         righe_uniche.remove(riga)
     return jsonify({"message": "Riga rimossa con successo"})
+
+
+@app.route('/stud/bacheca_esiti')
+def exam_details():
+    # Esempio di lista di dettagli delle prove d'esame
+    exam_list = [
+        {'codice_corso': 'C001', 'nome_corso': 'Matematica', 'voto': 'insufficente', 'data_esame': '2023-07-15'},
+        {'codice_corso': 'C002', 'nome_corso': 'Fisica', 'voto': 25, 'data_esame': '2023-07-14'},
+        {'codice_corso': 'C001', 'nome_corso': 'Matematica', 'voto': 30, 'data_esame': '2023-07-10'},
+        {'codice_corso': 'C003', 'nome_corso': 'Informatica', 'voto': 24, 'data_esame': '2023-07-12'}
+    ]
+
+    # Raggruppa gli elementi con lo stesso codice corso
+    grouped_exam_list = {}
+    for exam in exam_list:
+        codice_corso = exam['codice_corso']
+        if codice_corso not in grouped_exam_list:
+            grouped_exam_list[codice_corso] = []
+        grouped_exam_list[codice_corso].append(exam)
+
+    return render_template('Bacheca_esiti.html', grouped_exam_list=grouped_exam_list)
 
 
 if __name__ == '__main__':
