@@ -1,19 +1,28 @@
+from flask import Flask, render_template, request, redirect, session, jsonify
+import pymysql
 import json
-
-from flask import Flask, render_template, request, jsonify
+import bcrypt
 
 # Create Flask Instance
 app = Flask(__name__)
 
-# valori statici globali per test di add/delete utente
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
+app.config['MYSQL_DATABASE_DB'] = 'progettobasi'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+mysql = pymysql.connect(
+    host=app.config['MYSQL_DATABASE_HOST'],
+    user=app.config['MYSQL_DATABASE_USER'],
+    password=app.config['MYSQL_DATABASE_PASSWORD'],
+    db=app.config['MYSQL_DATABASE_DB']
+)
+
 users = ['Utente 1', 'Utente 2', 'Utente 3']
-# lista vuoto che indica a quali appelli un utente si è prenotato
 righe_uniche = []
-# lista delgli appelli statici per test
 righe_iniziali = [
     {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
     {"codice_corso": "DEF456", "nome_corso": "Corso B", "data_esame": "2023-07-25", "aula": "Aula 2"},
-    # Aggiungere altre righe come necessario
 ]
 corsi_di_laurea = []
 corsi = []
@@ -44,14 +53,44 @@ def index():
                            elenco_corsi_lingua=elenco_corsi_lingua)
 
 
-@app.route('/reset_pwd')
+@app.route('/reset_pwd', methods=['GET', 'POST'])
 def resetpwd():
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        email = request.form['email']
+        if password == confirm_password:
+            hash_password = bcrypt.hashpw(confirm_password.encode('utf-8'), bcrypt.gensalt())
+            cursor = mysql.cursor()
+            query = 'UPDATE temporaryuser SET password = %s WHERE mail = %s'
+            cursor.execute(query, (hash_password, email))
+            mysql.commit()
+            cursor.close()
+            return redirect('/login')
     return render_template("reset_pwd.html")
 
 
 # localhost:5000/sign_up
-@app.route('/sign_up')
+# localhost:5000/sign_up
+@app.route('/sign_up', methods=['GET', 'POST'])
 def signUp():
+    if request.method == 'POST':
+        codicefiscale = request.form['Codicefiscale']
+        name = request.form['Nome']
+        surname = request.form['Cognome']
+        dateofbirth = request.form['AnnoNascita']
+        email = request.form['Email']
+        password = request.form['password']
+
+        hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        cursor = mysql.cursor()
+        query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (codicefiscale, name, surname, dateofbirth, email, "000000", hash_password))
+        mysql.commit()
+        cursor.close()
+
+        return redirect('/login')
+
     return render_template("sign_up.html")
 
 
@@ -146,21 +185,13 @@ def administrator():
 
 
 @app.route('/Admin/delete_user')
-def delete_user_html():
+def delete():
     return render_template('Delete_users.html', users=users)
 
 
 @app.route('/Admin/add_user')
-def add_user_html():
+def add():
     return render_template('Add_users.html', users=users)
-
-
-
-
-
-
-
-
 
 
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
@@ -292,9 +323,11 @@ def invia_dati():
     response = {'messaggio': 'Dati ricevuti correttamente dal server'}
     return jsonify(response)
 
+
 @app.route('/Admin/delete_docente')
 def delete_docenti_html():
-    return render_template('Delete_docenti.html', users=json.dumps(docenti))
+    return render_template('Delete_docenti.html', users = json.dumps(docenti))
+
 
 @app.route('/delete_docente', methods=['POST'])
 def delete_docenti():
@@ -306,11 +339,6 @@ def delete_docenti():
         docenti = [docente for docente in docenti if docente['codice_fiscale'] != codice_fiscale_da_eliminare]
 
         return jsonify("Docente eliminato")
-
-
-
-
-
 
 
 # Invalid URL
