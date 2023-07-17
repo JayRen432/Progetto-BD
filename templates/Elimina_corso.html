@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabella Corsi di Laurea</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Codice Corso</th>
+                <th>Nome Corso</th>
+                <th>Elimina</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for corso in corsi %}
+                <tr>
+                    <td>{{ corso.codice }}</td>
+                    <td>{{ corso.nome }}</td>
+                    <td>
+                        <form action="/elimina_corso" method="post">
+                            <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
+                            <input type="submit" value="Elimina">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

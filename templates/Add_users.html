@@ -85,7 +85,7 @@
             if (utenteSelezionato) {
                 var nomeUtente = utenteSelezionato.innerHTML;
 
-                // Effettua una richiesta al server per eliminare l'utente
+                // Effettua una richiesta al server per aggiungere l'utente
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/add', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

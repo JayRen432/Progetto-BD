@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabella Corsi di Laurea</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Codice Corso di Laurea</th>
+                <th>Nome Corso di Laurea</th>
+                <th>Specializzazione</th>
+                <th>Indirizzo</th>
+                <th>Elimina</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for corso in corsi_di_laurea %}
+                <tr>
+                    <td>{{ corso.codice }}</td>
+                    <td>{{ corso.nome }}</td>
+                    <td>{{ corso.specializzazione }}</td>
+                    <td>{{ corso.indirizzo }}</td>
+                    <td>
+                        <form action="/elimina_corso_laurea" method="post">
+                            <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
+                            <input type="submit" value="Elimina">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
