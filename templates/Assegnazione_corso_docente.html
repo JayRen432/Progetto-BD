@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Associa il docente al corso:</h2>
+    <div>
+
+        <label for="Docente">Selezione docente</label>
+        <select id="Docente">
+            <option selected disabled hidden>-----------</option>
+            {% for docente in docenti %}
+                <option value="{{ docente.codice_fiscale }}">{{ docente.nome + " " + docente.cognome }}</option>
+            {% endfor %}
+        </select>
+        </br>
+        <label for="Corso">Seleziona corso d'insegnamento</label>
+        <select id="Corso">
+            <option selected disabled hidden>-----------</option>
+            {% for corso in corsi %}
+                <option value="{{ corso.codice }}">{{ corso.nome }}</option>
+            {% endfor %}
+        </select>
+        </br>
+    </div>
+    <button onclick="inviaDati()">Associa</button>
+
+    <script>
+        function inviaDati(){
+            let selettore_docente = document.getElementById("Docente");
+            let selettore_corso = document.getElementById("Corso");
+            let docente = selettore_docente.value;
+            let corso = selettore_corso.value;
+            alert(docente + "   " + corso);
+            if (docente === '-----------' || corso === '-----------'){
+                alert("Seleziona dei dati validi");
+            }
+            else{
+               fetch('/Admin/associazioneCorso_Docente', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
+                },
+                    body: JSON.stringify({
+                        cod_Docente : docente,
+                        cod_Corso : corso
+                    })
+                })
+                .then(data => {
+                    alert(data);
+                    // Puoi gestire qui la risposta del server se necessario
+                })
+                location.reload();
+            }
+        }
+
+    </script>
+
+</body>
+</html>

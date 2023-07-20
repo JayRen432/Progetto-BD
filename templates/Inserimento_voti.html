@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabella Voti</title>
+</head>
+<body>
+    <table id="votiTable">
+        <thead>
+            <tr>
+                <th>Matricola</th>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Voto</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- I dati della tabella verranno popolati dinamicamente qui -->
+        </tbody>
+    </table>
+    <button onclick="inviaDati()">Invia Dati al Server</button>
+
+    <script>
+        // Funzione per popolare dinamicamente la tabella con una lista di dati
+        function popolaTabella(dati) {
+            var tableBody = document.getElementById("votiTable").getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Svuota il corpo della tabella
+
+            for (var i = 0; i < dati.length; i++) {
+                var riga = document.createElement("tr");
+
+                var matricolaCell = document.createElement("td");
+                matricolaCell.textContent = dati[i].matricola;
+                riga.appendChild(matricolaCell);
+
+                var nomeCell = document.createElement("td");
+                nomeCell.textContent = dati[i].nome;
+                riga.appendChild(nomeCell);
+
+                var cognomeCell = document.createElement("td");
+                cognomeCell.textContent = dati[i].cognome;
+                riga.appendChild(cognomeCell);
+
+                var votoCell = document.createElement("td");
+                var votoSelect = document.createElement("select");
+
+                var opzioniVoto = ['hidden option', 'Insufficente'];
+                for (var j = 18; j <= 30; j++) {
+                    opzioniVoto.push(j.toString());
+                }
+                opzioniVoto.push('30L');
+
+                for (var k = 0; k < opzioniVoto.length; k++) {
+                    var opzione = document.createElement("option");
+                    opzione.textContent = opzioniVoto[k];
+                    votoSelect.appendChild(opzione);
+                }
+
+                votoCell.appendChild(votoSelect);
+                riga.appendChild(votoCell);
+
+                tableBody.appendChild(riga);
+            }
+        }
+
+        // Funzione per inviare i dati al server (sarà necessario un backend server per ricevere i dati)
+        function inviaDati() {
+            var tableData = [];
+            var tableRows = document.getElementById("votiTable").getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (var i = 0; i < tableRows.length; i++) {
+                var cells = tableRows[i].getElementsByTagName('td');
+                var rowData = {
+                    matricola: cells[0].textContent,
+                    nome: cells[1].textContent,
+                    cognome: cells[2].textContent,
+                    voto: cells[3].getElementsByTagName('select')[0].value
+                };
+                if(rowData.voto !== 'hidden') {
+                    tableData.push(rowData);
+                }
+            }
+
+            // Invio dei dati al server tramite fetch o una richiesta HTTP
+            console.log(tableData);
+            fetch('/Docenti/ricevi-voti', {
+                 method: 'POST',
+                headers: {
+                     'Content-Type': 'application/json'
+                },
+                 body: JSON.stringify({tableData})
+             })
+             .then(response => response.json())
+             .then(data => {
+                 alert(data)
+             })
+             .catch(error => console.error('Errore:', error));
+        }
+
+
+
+        //const queryString = window.location.search;
+        //const urlParams = new URLSearchParams(window.location.search).get('data');
+        //const jsonData = urlParams.get('data');
+        // Decodifica il valore JSON e lo trasforma in un oggetto JavaScript
+        //const data = JSON.parse(decodeURIComponent(new URLSearchParams(window.location.search).get('data')));
+
+
+        const data = JSON.parse('{{ studenti | safe }}');
+        popolaTabella(data);
+    </script>
+</body>
+</html>

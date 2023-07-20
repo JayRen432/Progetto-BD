@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista esami</title>
+</head>
+<body>
+    <h1>Lista esami:</h1>
+    <table border="1">
+        <tr>
+            <th>Corso</th>
+            <th>Nome esame</th>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Valore</th>
+            <th>Elimina</th>
+        </tr>
+        {% for esame in esami %}
+        <tr>
+            <td>{{ esame['corso'] }}</td>
+            <td>{{ esame['nome_esame'] }}</td>
+            <td>{{ esame['data'] }}</td>
+            <td>{{ esame['tipo'] }}</td>
+            <td>{{ esame['valore'] }} crediti</td>
+            <td>
+                <form action="/delete/{{ esame['id'] }}" method="post">
+                    <button type="submit">Elimina</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

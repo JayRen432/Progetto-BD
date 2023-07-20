@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title></title>
+</head>
+<body>
+    <h1>Menù a Tendina Dinamico</h1>
+    <label for="dropdown">Docente: </label>
+    <select id="dropdown">
+        <option selected disabled hidden>-----------</option>
+    </select>
+    <button onclick="showTable()">Visualizza Tabella</button>
+
+    <div id="tableContainer" style="display: none;">
+        <form>
+            <table border="1">
+                <tr>
+                    <th>Codice Docente</th>
+                    <th>Nome Docente</th>
+                    <th>Codice Corso</th>
+                    <th>Nome Corso</th>
+                    <th>Azione</th>
+                </tr>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </form>
+    </div>
+
+    <script>
+        // Lista di test
+        var test_list = JSON.parse('{{ list | safe }}');
+        populateDropdown();
+
+        function populateDropdown() {
+            var dropdown = document.getElementById('dropdown');
+            var addedCodiciFiscali = {}; // Oggetto per tenere traccia dei codici fiscali già aggiunti
+
+            for (var i = 0; i < test_list.length; i++) {
+                var codiceFiscale = test_list[i].codice_fiscale_docente;
+                // Verifica se il codice fiscale è già stato aggiunto, se sì, passa al prossimo elemento
+                if (addedCodiciFiscali[codiceFiscale]) {
+                    continue;
+                }
+
+                var option = document.createElement('option');
+                option.value = codiceFiscale;
+                option.textContent = test_list[i].nome_docente + " " + test_list[i].cognome_docente;
+                dropdown.appendChild(option);
+
+                // Segna il codice fiscale come aggiunto nell'oggetto addedCodiciFiscali
+                addedCodiciFiscali[codiceFiscale] = true;
+            }
+        }
+        function showTable() {
+            var selectedOption = document.getElementById('dropdown').value;
+            if (selectedOption === "") {
+                alert('Seleziona un\'opzione dalla lista.');
+                return;
+            }
+            var filteredData = filterData(selectedOption);
+            var tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            for (var i = 0; i < filteredData.length; i++) {
+                var row = tableBody.insertRow();
+                var rowData = filteredData[i];
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+
+                cell1.innerHTML = rowData.codice_fiscale_docente;
+                cell2.innerHTML = rowData.nome_docente + " " + rowData.cognome_docente;
+                cell3.innerHTML = rowData.codice_corso;
+                cell4.innerHTML = rowData.nome_corso;
+                cell5.innerHTML = '<button onclick="sendData(' + i + ')">Invia</button>';
+            }
+            document.getElementById('tableContainer').style.display = 'block';
+        }
+
+        function filterData(selectedOption) {
+            return test_list.filter(function (item) {
+                return item.codice_fiscale_docente === selectedOption;
+            });
+        }
+
+        function sendData(rowIndex) {
+            var table = document.getElementById('tableBody');
+            var rowData = table.rows[rowIndex].cells;
+
+            var dataToSend = {
+                'doc_code': rowData[0].innerHTML,
+                'doc_name+surname': rowData[1].innerHTML,
+                'course_code': rowData[2].innerHTML,
+                'course_name': rowData[3].innerHTML
+            };
+
+            // Invia i dati al server (implementazione a tua discrezione)
+            console.log('Dati da inviare:', dataToSend);
+
+            fetch('/Admin/delete_corso_Docente', {
+                 method: 'POST',
+                headers: {
+                     'Content-Type': 'application/json'
+                },
+                 body: JSON.stringify({dataToSend})
+             })
+             .then(response => response.json())
+             .then(data => {
+                 alert(data)
+
+             })
+             .catch(error => console.error('Errore:', error));
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

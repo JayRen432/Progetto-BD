@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 import pymysql
+from classes.Esame import Esame
 import json
 import bcrypt
 
@@ -7,16 +8,16 @@ import bcrypt
 app = Flask(__name__)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'FinisDierum'
 app.config['MYSQL_DATABASE_DB'] = 'progettobasi'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-
-mysql = pymysql.connect(
+mysql = 0
+"""mysql = pymysql.connect(
     host=app.config['MYSQL_DATABASE_HOST'],
     user=app.config['MYSQL_DATABASE_USER'],
     password=app.config['MYSQL_DATABASE_PASSWORD'],
     db=app.config['MYSQL_DATABASE_DB']
-)
+)"""
 
 users = ['Utente 1', 'Utente 2', 'Utente 3']
 righe_uniche = []
@@ -26,6 +27,7 @@ righe_iniziali = [
 ]
 corsi_di_laurea = []
 corsi = []
+esami = []
 docenti = [
     {'codice_fiscale': 'ABC123', 'nome': 'Mario', 'cognome': 'Rossi', 'mail': 'mario.rossi@example.com',
      'anno_di_nascita': 1985},
@@ -34,8 +36,41 @@ docenti = [
     {'codice_fiscale': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi', 'mail': 'luigi.bianchi@example.com',
      'anno_di_nascita': 1980}
 ]
-
-
+dettagli_corsi_Docenti = [
+    {"codice_fiscale_docente": "ABC123", "nome_docente": "Mario", "cognome_docente": "Rossi", "codice_corso": "C1",
+     "nome_corso": "Matematica"},
+    {"codice_fiscale_docente": "GHI789", "nome_docente": "Luigi", "cognome_docente": "Bianchi", "codice_corso": "C2",
+     "nome_corso": "Informatica"},
+    {"codice_fiscale_docente": "GHI789", "nome_docente": "Luigi", "cognome_docente": "Bianchi", "codice_corso": "C3",
+     "nome_corso": "Programmazione"}
+]
+lista_corsi = [
+    {"codice": "Corso A", "nome": "informatica"},
+    {"codice": "Corso B", "nome": "matematica"},
+]
+lista_esami = [
+    {"id": 1, "corso": "Corso A", "nome_esame": "Esame 1", "data": "2023-07-19", "tipo": "Scritto", "valore": "6"},
+    {"id": 2, "corso": "Corso B", "nome_esame": "Esame 2", "data": "2023-07-20", "tipo": "Orale", "valore": "3"},
+    {"id": 3, "corso": "Corso C", "nome_esame": "Esame 3", "data": "2023-07-21", "tipo": "Progetto", "valore": "12"},
+]
+phone_numbers = ['1234567890', '9876543210', '5555555555']
+data_esami = [
+    {'codiceEsame': "E001", 'corso': "Matematica", 'data': "2023-07-25", 'tipo': "Scritto"},
+    {'codiceEsame': "E002", 'corso': "Fisica", 'data': "2023-08-10", 'tipo': "Orale"},
+    {'codiceEsame': "E003", 'corso': "Informatica", 'data': "2023-08-15", 'tipo': "Pratico"}
+]
+studenti = [
+    {'matricola': 'ABC123', 'nome': 'Mario', 'cognome': 'Rossi'},
+    {'matricola': 'DEF456', 'nome': 'Paola', 'cognome': 'Verdi'},
+    {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
+]
+dettagli_corsi_corsiLaurea = [
+    #Valori molto ge
+    {"string1": "opt1", "string2": "Valore 1", "string3": "Valore 1b", "string4": "Valore 1c"},
+    {"string1": "opt1", "string2": "Valore 2", "string3": "Valore 2b", "string4": "Valore 2c"},
+    {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
+    {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
+]
 @app.route('/')
 def index():
     elenco_corsi_scientifici = ["Informatica", "Scienze Ambientali", "Chimica e tecnologie sostenibili",
@@ -181,7 +216,7 @@ def iscritti():
 
 @app.route('/Admin')
 def administrator():
-    return render_template('Admin.html')
+    return render_template('menu_amministatore.html')
 
 
 @app.route('/Admin/delete_user')
@@ -326,7 +361,7 @@ def invia_dati():
 
 @app.route('/Admin/delete_docente')
 def delete_docenti_html():
-    return render_template('Delete_docenti.html', users = json.dumps(docenti))
+    return render_template('Delete_docenti.html', users=json.dumps(docenti))
 
 
 @app.route('/delete_docente', methods=['POST'])
@@ -339,6 +374,116 @@ def delete_docenti():
         docenti = [docente for docente in docenti if docente['codice_fiscale'] != codice_fiscale_da_eliminare]
 
         return jsonify("Docente eliminato")
+
+
+@app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
+def assegna_Corso_Docente():
+    if (request.method == 'POST'):
+        data = request.get_json()
+        docente = data.get('cod_Docente')
+        corso = data.get('cod_Corso')
+        return jsonify(message=docente + "   " + corso)
+    else:
+        return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=lista_corsi)
+
+
+@app.route('/Admin/delete_corso_corsoLaurea', methods=['GET', 'POST'])
+def delete_corso_crosoLaurea():
+    if request.method == 'POST':
+        data = request.get_json().get('dataToSend')
+        c1 = data['string1']
+        c2 = data['string2']
+        c3= data['string3']
+        c4= data['string4']
+        return jsonify(c1 + " " +c2 + " " +c3 + " " +c4)
+    else:
+        return render_template('Delete_corsi_CorsiLaurea.html', list=json.dumps(dettagli_corsi_corsiLaurea))
+@app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
+def delete_corso_Docente():
+    if request.method == 'POST':
+        data = request.get_json().get('dataToSend')
+
+        return jsonify("Tuttok ")
+    else:
+        return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
+
+@app.route('/Docenti/Assegna_voti')
+def asse():
+    return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
+@app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['POST'])
+def assegna_voti(codiceEsame):
+    return json.dumps(studenti)
+
+@app.route('/Docenti/ricevi-voti', methods=['POST'])
+def ricevi_dati():
+    dati = request.get_json()
+    tableData = dati.get('tableData', [])
+    mat=tableData[0]['matricola']
+    return jsonify(mat)
+
+
+@app.route('/Docenti/Elenco_esami')
+def table_esami():
+    return render_template('Tabella_esami.html', esami=json.dumps(data_esami))
+
+
+# Endpoint per la gestione della richiesta del pulsante "Assegna voti"
+
+@app.route('/Docenti/Crea_Esame', methods=['GET', 'POST'])
+def crea_esame():
+    if (request.method == 'POST'):
+        corso = request.form['corso']
+        nome_esame = request.form['nome_esame']
+        data = request.form['data']
+        tipo = request.form['tipo']
+        valore = request.form['valore']
+
+        return render_template('Crea_esame.html', corsi=lista_corsi)
+    else:
+        return render_template('Crea_esame.html', corsi=lista_corsi)
+
+
+@app.route('/Docenti/Emilina_Esame')
+def elimina_Esame():
+    return render_template('Delete_esame.html', esami=lista_esami)
+
+
+@app.route('/delete/<int:esame_id>', methods=['POST'])
+def delete_esame(esame_id):
+    global lista_esami
+    lista_esami = [esame for esame in lista_esami if esame['id'] != esame_id]
+    return render_template('Delete_esame.html', esami=lista_esami)
+
+
+@app.route('/Docenti/Numeri_di_telefono')
+def phone_number():
+    return render_template('Numeri_telefono.html', phone_numbers=phone_numbers)
+
+
+@app.route('/add_phone', methods=['POST'])
+def add_phone_number():
+    data = request.get_json()
+    number_to_add = data.get('number')
+    if number_to_add not in phone_numbers:
+        phone_numbers.append(number_to_add)
+    return jsonify(message=number_to_add)
+
+
+@app.route('/delete_phone', methods=['POST'])
+def delete_phone_number():
+    data = request.get_json()
+    number_to_delete = data.get('number')
+    if number_to_delete in phone_numbers:
+        phone_numbers.remove(number_to_delete)
+    return jsonify(message=number_to_delete)
+
+
+
+
+
+
+
+
 
 
 # Invalid URL
@@ -356,6 +501,14 @@ def page_not_found(e):
 @app.route('/stud')
 def index_studenti():
     return render_template('menu_studenti.html')
+
+@app.route('/Docenti')
+def index_docenti():
+    return render_template('menu_docenti.html')
+
+@app.route('/Admin')
+def index_admin():
+    return render_template('menu_amministatore.html')
 
 
 @app.route('/stud/lista_esami_utente')

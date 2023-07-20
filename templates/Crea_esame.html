@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserimento dati</title>
+</head>
+<body>
+    <h1>Inserisci i dati:</h1>
+    <form action="/Docenti/Crea_Esame" method="POST">
+        <label for="corso">Corso:</label>
+        <select name="corso" id="corso">
+            <option selected disabled hidden>-----------</option>
+            {% for corso in corsi %}
+                <option value={{corso}}>{{corso}}</option>
+            {% endfor %}
+        </select>
+
+        <br>
+
+        <label for="nome_esame">Nome esame:</label>
+        <input type="text" name="nome_esame" required>
+
+        <br>
+
+        <label for="data">Data:</label>
+        <input type="date" name="data" required>
+
+        <br>
+
+        <label for="tipo">Tipo:</label>
+        <select name="tipo" id="tipo">
+            <option value="Scritto">Scritto</option>
+            <option value="Orale">Orale</option>
+            <option value="Progetto">Progetto</option>
+            <option value="Compitino">Compitino</option>
+        </select>
+
+        <br>
+
+        <label for="valore">Valore:</label>
+        <select name="valore" id="valore">
+            <option value="0">0 crediti</option>
+            <option value="3">3 crediti</option>
+            <option value="6">6 crediti</option>
+            <option value="12">12 crediti</option>
+        </select>
+
+        <br>
+
+        <button type="submit">Invia dati</button>
+    </form>
+</body>
+</html>

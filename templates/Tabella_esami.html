@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabella Esami</title>
+</head>
+<body>
+  <h1>Tabella Esami</h1>
+  <table id="esamiTable">
+    <thead>
+      <tr>
+        <th>Codice Esame</th>
+        <th>Corso</th>
+        <th>Data</th>
+        <th>Tipo</th>
+        <th>Assegna voti</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Qui verranno aggiunte le righe dinamicamente -->
+    </tbody>
+  </table>
+    <p>E' necessario </p>
+  <script>
+    // Funzione per creare una riga della tabella
+    function createRow(codiceEsame, corso, data, tipo) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${codiceEsame}</td>
+        <td>${corso}</td>
+        <td>${data}</td>
+        <td>${tipo}</td>
+        <td><button onclick="assegnaVoti('${codiceEsame}')">Assegna</button></td>
+      `;
+      return row;
+    }
+
+    // Funzione per aggiungere le righe alla tabella
+    function populateTable(data) {
+      const tableBody = document.querySelector("tbody");
+      data.forEach(entry => {
+        const { codiceEsame, corso, data, tipo } = entry;
+        const row = createRow(codiceEsame, corso, data, tipo);
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Funzione per inviare i dati al server
+    function assegnaVoti(codiceEsame) {
+    // Dati da inviare al server
+        const dataToSend = { codiceEsame };
+
+        // Effettua la richiesta fetch al server Flask con metodo POST
+        fetch(`/Docenti/${codiceEsame}/Assegna_voti`, {
+            method: "POST", // Assicurati che sia specificato il metodo POST
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataToSend),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Puoi gestire la risposta del server qui
+            console.log(data); // Mostra la lista di studenti ricevuta dal server
+
+            // Ora cambia la pagina HTML e passa il parametro data alla nuova pagina
+            //window.location.href = `/Docenti/${codiceEsame}/Assegna_voti?data=${encodeURIComponent(JSON.stringify(data))}`;
+        })
+        .catch(error => console.error("Errore:", error));
+    }
+
+    // Esempio di dati della tabella
+    const data = JSON.parse('{{ esami | safe }}');
+    // Popola la tabella con i dati
+    populateTable(data);
+  </script>
+</body>
+</html>
