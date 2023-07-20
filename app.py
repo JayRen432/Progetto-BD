@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 import pymysql
-from classes.Esame import Esame
 import json
 import bcrypt
 
@@ -8,16 +7,15 @@ import bcrypt
 app = Flask(__name__)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'FinisDierum'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
 app.config['MYSQL_DATABASE_DB'] = 'progettobasi'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql = 0
-"""mysql = pymysql.connect(
+mysql = pymysql.connect(
     host=app.config['MYSQL_DATABASE_HOST'],
     user=app.config['MYSQL_DATABASE_USER'],
     password=app.config['MYSQL_DATABASE_PASSWORD'],
     db=app.config['MYSQL_DATABASE_DB']
-)"""
+)
 
 users = ['Utente 1', 'Utente 2', 'Utente 3']
 righe_uniche = []
