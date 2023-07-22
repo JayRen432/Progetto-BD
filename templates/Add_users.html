@@ -15,7 +15,7 @@
             padding: 20px;
         }
         .utente-selezionato {
-            background-color: lightgray;
+            background-color: rgb(191, 191, 191);
         }
     </style>
 </head>
@@ -24,8 +24,8 @@
         <div class="utenti">
             <h2>Elenco Utenti</h2>
             <ul>
-                {% for user in users %}
-                <li value="{{ user }}" onclick="mostraDettagli(this)">{{ user }}</li>
+                {% for user,info in users.items() %}
+                <li value="{{ info[0] }} {{ info[1] }} {{ info[2] }} {{ info[3] }} {{ info[4] }} {{ info[5] }} {{ info[6] }} {{ info[7] }}" onclick="mostraDettagli(this)">{{ user }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -37,8 +37,6 @@
             <button onclick="aggiungiUtente()">Aggiungi Utente</button>
         </div>
     </div>
-
-
     <script>
         function mostraDettagli(elemento) {
             // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
@@ -51,41 +49,45 @@
             elemento.classList.add('utente-selezionato');
 
             // Ottiene il nome dell'utente selezionato
-            var nomeUtente = elemento.innerHTML;
+
+            // codicefiscale, nome, cognome, annoNascita, mail, matricola, password
+            var st = elemento.getAttribute('value');
+            const stringSplitted = st.split(" ")
 
             // In questo esempio, i dettagli sono predefiniti
             var dettagliUtente = {
-                nome: nomeUtente,
-                cognome: 'Rossi',
-                annoNascita: 1990,
-                email: 'utente@example.com',
-                ruolo: 'studente'
+                cf: stringSplitted[0],
+                name: stringSplitted[1],
+                srname: stringSplitted[2],
+                mail: stringSplitted[3],
+                byear: stringSplitted[4],
+                matr : stringSplitted[5],
+                pwd : stringSplitted[6],
+                corsoLaurea : stringSplitted[7]
             };
-
+             // Use the split values as needed
+            console.log(dettagliUtente.cf, dettagliUtente.name, dettagliUtente.srname, dettagliUtente.byear);
             // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
             var dettagliElemento = document.getElementById('dettagli-utente');
             dettagliElemento.innerHTML = `
-                <p><strong>Nome:</strong> ${dettagliUtente.nome}</p>
-                <p><strong>Cognome:</strong> ${dettagliUtente.cognome}</p>
-                <p><strong>Anno di Nascita:</strong> ${dettagliUtente.annoNascita}</p>
-                <input type="text" name="email" placeholder="${dettagliUtente.email}"></input>
+                <p><strong>Nome :</strong> ${dettagliUtente.name}</p>
+                <p><strong>Cognome :</strong> ${dettagliUtente.srname}</p>
+                <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cf}</p>
+                <p><strong>Anno Nascita :</strong> ${dettagliUtente.byear}</p>
+                <p><strong>Corso di Laurea :</strong> ${dettagliUtente.corsoLaurea}</p>
+                <input type="text" name="matricola" placeholder="000000"></input>
+                <input type="text" name="mail" placeholder="example@stud.unive.it"></input>
                 </br></br>
-                <select name="Ruolo">
-                    <option value="" selected disabled hidden>-----</option>
-                    <option value="Studente">Studente</option>
-                    <option value="Docente">Docente</option>
-                    <option value="Amministratore">Admin</option>
-                </select>
-                </br></br>
+                Pussy Surprise
             `;
         }
 
         function aggiungiUtente() {
             var utenteSelezionato = document.querySelector('.utente-selezionato');
             if (utenteSelezionato) {
-                var nomeUtente = utenteSelezionato.innerHTML;
-
-                // Effettua una richiesta al server per aggiungere l'utente
+                var stringSplitted = (utenteSelezionato.innerHTML).split();
+                
+                // Effettua una richiesta al server per eliminare l'utente
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/add', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -95,7 +97,7 @@
                         window.location.reload();
                     }
                 };
-                xhr.send('user=' + encodeURIComponent(nomeUtente));
+                xhr.send('cf=' + encodeURIComponent(stringSplitted[0]));
             }
         }
     </script>
