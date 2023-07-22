@@ -151,8 +151,23 @@ def signUp():
     return render_template("sign_up.html",corsiLaurea=corsi)
 
 # localhost:5000/login
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        print(request.form)
+        mail = request.form['mail']
+        password = request.form['password']
+        print(mail, password)
+       # hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        cursor = mysql.cursor()
+        query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
+        cursor.execute(query, (mail, password)) 
+        user = cursor.fetchone()
+        cursor.close()
+        if user:
+            return redirect('/user_data')
+        else:
+            return "Invalid username or password. <a href='/login'>Try again</a>"
     return render_template("login.html")
 
 
