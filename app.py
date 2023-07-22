@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, redirect, session, jsonify
 import pymysql
 import json
 import bcrypt
+#python3 -m venv venv
+#
 
 # Create Flask Instance
 app = Flask(__name__)
+# Set debug mode to True
+app.debug = True
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
@@ -63,13 +67,17 @@ studenti = [
     {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
 ]
 dettagli_corsi_corsiLaurea = [
-    # Valori molto ge
+    #Valori molto ge
     {"string1": "opt1", "string2": "Valore 1", "string3": "Valore 1b", "string4": "Valore 1c"},
     {"string1": "opt1", "string2": "Valore 2", "string3": "Valore 2b", "string4": "Valore 2c"},
     {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
     {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
 ]
-
+def insertResult(users_l, row, n):
+    #codicefiscale, nome, cognome, annoNascita, mail, matricola, password
+    st= 'user'+str(n)
+    user = {st:[row[0],row[1],row[2],row[3],row[4],row[5],row[6]]}
+    users_l.update(user)
 
 @app.route('/')
 def index():
@@ -104,9 +112,8 @@ def resetpwd():
             return redirect('/login')
     return render_template("reset_pwd.html")
 
+# localhost:5000/sign_up
 
-# localhost:5000/sign_up
-# localhost:5000/sign_up
 @app.route('/sign_up', methods=['GET', 'POST'])
 def signUp():
     if request.method == 'POST':
@@ -127,8 +134,37 @@ def signUp():
         return redirect('/login')
 
     return render_template("sign_up.html")
+""" 
+@app.route('/sign_up', methods=['GET', 'POST'])
+def signUp():
+    corsi = {}
+    if request.method == 'POST':
+        codicefiscale = request.form['Codicefiscale']
+        name = request.form['Nome']
+        surname = request.form['Cognome']
+        dateofbirth = request.form['AnnoNascita']
+        email = request.form['Email']
+        password = request.form['password']
+        corsolaurea = request.form['corsoLaurea']
+        hash_password = bcrypt.hashpw(
+            password.encode('utf-8'), bcrypt.gensalt())
+        cursor = mysql.cursor()
+        query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(query, (codicefiscale, name, surname,
+                       dateofbirth, email, "000000", hash_password, corsolaurea))
+        mysql.commit()
+        cursor.close()
+        return redirect('/login')
+    cursor = mysql.cursor()
+    query = 'SELECT NomeCorsoLaurea FROM Corsi_di_Laurea'
+    cursor.execute(query)
 
+    # Retrieve the results
+    corsi = cursor.fetchall()
+    print(f"All users: {corsi}")  # Print all users for debugging purposes
 
+    return render_template("sign_up.html",corsiLaurea=corsi)
+"""
 # localhost:5000/login
 @app.route('/login')
 def login():
@@ -226,7 +262,19 @@ def delete():
 
 @app.route('/Admin/add_user')
 def add():
-    return render_template('Add_users.html', users=users)
+    users_info = {}
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM temporaryuser'
+    cursor.execute(query)
+
+    # Retrieve the results
+    rows = cursor.fetchall()
+    i = 0
+    for row in rows:
+        insertResult(users_info, row, i)
+        i += 1
+    print(f"All users: {users_info}")  # Print all users for debugging purposes
+    return render_template('Add_users.html', users=users_info)
 
 
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
@@ -329,6 +377,45 @@ def elimina_corso():
     return render_template('Elimina_corso.html', corsi=corsi)
 
 
+@app.route('/add', methods=['POST'])
+def add_user():
+    cf = request.form['cf']
+    # Step 0: Control if user is already in studenti
+    cursor = mysql.cursor()
+    select_query = 'SELECT * FROM studenti where codicefiscale = %s'
+    
+    cursor.execute(select_query, (cf))
+    rows = cursor.fetchall()
+    
+    if rows:# Query returned rows, do something with the data
+        print("Utente presente in studenti")
+        return 'Utente aggiunto in precedenza'
+
+    # Step 1: Download the user's data from temporaryuser
+    select_query1 = 'SELECT * FROM temporaryuser WHERE codicefiscale = %s'
+    cursor.execute(select_query1, (cf))
+    user_data = cursor.fetchone()
+    string=""
+
+    if user_data:
+        # Step 2: Delete the user from temporaryuser
+        delete_query = 'DELETE FROM temporaryuser WHERE codicefiscale = %s'
+        cursor.execute(delete_query, (cf))
+        mysql.commit()
+
+        # Step 3: Insert the user data into studenti
+        insert_query = 'INSERT INTO studenti (codicefiscale, nome, cognome, annoNascita, mail, matricola, password) ' \
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(insert_query, user_data)
+        mysql.commit()
+
+        string="User data moved from temporaryuser to studenti successfully."
+    else:
+        string="User not found in temporaryuser."
+
+    return string
+
+
 @app.route('/delete', methods=['POST'])
 def delete_user():
     user_to_delete = request.form['user']
@@ -336,13 +423,6 @@ def delete_user():
         users.remove(user_to_delete)
     return 'Utente eliminato con successo'
 
-
-@app.route('/add', methods=['POST'])
-def add_user():
-    user_to_add = request.form['user']
-    # aggiungere controllo se l'utente è gia presente nel db
-    users.insert(len(users), user_to_add)
-    return 'Utente aggiunto con successo'
 
 
 @app.route('/associazioneCorso_CorsoLaurea', methods=['POST'])
@@ -393,13 +473,11 @@ def delete_corso_crosoLaurea():
         data = request.get_json().get('dataToSend')
         c1 = data['string1']
         c2 = data['string2']
-        c3 = data['string3']
-        c4 = data['string4']
-        return jsonify(c1 + " " + c2 + " " + c3 + " " + c4)
+        c3= data['string3']
+        c4= data['string4']
+        return jsonify(c1 + " " +c2 + " " +c3 + " " +c4)
     else:
         return render_template('Delete_corsi_CorsiLaurea.html', list=json.dumps(dettagli_corsi_corsiLaurea))
-
-
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
 def delete_corso_Docente():
     if request.method == 'POST':
@@ -409,17 +487,18 @@ def delete_corso_Docente():
     else:
         return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
 
-
-@app.route('/Docenti/<codeEsame>/Assegna_voti')
-def dati_pagina_html(codeEsame):
+@app.route('/Docenti/Assegna_voti')
+def asse():
     return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
-
+@app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['POST'])
+def assegna_voti(codiceEsame):
+    return json.dumps(studenti)
 
 @app.route('/Docenti/ricevi-voti', methods=['POST'])
 def ricevi_dati():
     dati = request.get_json()
     tableData = dati.get('tableData', [])
-    mat = tableData[0]['matricola']
+    mat=tableData[0]['matricola']
     return jsonify(mat)
 
 
@@ -495,11 +574,9 @@ def page_not_found(e):
 def index_studenti():
     return render_template('menu_studenti.html')
 
-
 @app.route('/Docenti')
 def index_docenti():
     return render_template('menu_docenti.html')
-
 
 @app.route('/Admin')
 def index_admin():
