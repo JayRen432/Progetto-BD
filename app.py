@@ -256,7 +256,7 @@ def add():
     rows = cursor.fetchall()
     i = 0
     for row in rows:
-        insertResult(users_info, row, i)
+        insertResult(users_info, row, "Studente ",i)
         i += 1
     return render_template('Add_users.html', users=users_info)
 
