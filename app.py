@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, jsonify
 import pymysql
 import json
 import bcrypt
+from classes import Studente
 #python3 -m venv venv
 #
 
@@ -73,11 +74,16 @@ dettagli_corsi_corsiLaurea = [
     {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
     {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
 ]
-def insertResult(users_l, row, n):
+def insertResult(dictionaryL, rowSQL, string, number=None):
     #codicefiscale, nome, cognome, annoNascita, mail, matricola, password
-    st= 'user'+str(n)
-    user = {st:[row[0],row[1],row[2],row[3],row[4],row[5],row[6]]}
-    users_l.update(user)
+    if number is not None:
+        st = string + str(number)
+    else:
+        st = string
+    
+    dic = {st: rowSQL}
+
+    dictionaryL.update(dic)
 
 @app.route('/')
 def index():
@@ -113,28 +119,6 @@ def resetpwd():
     return render_template("reset_pwd.html")
 
 # localhost:5000/sign_up
-
-@app.route('/sign_up', methods=['GET', 'POST'])
-def signUp():
-    if request.method == 'POST':
-        codicefiscale = request.form['Codicefiscale']
-        name = request.form['Nome']
-        surname = request.form['Cognome']
-        dateofbirth = request.form['AnnoNascita']
-        email = request.form['Email']
-        password = request.form['password']
-
-        hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        cursor = mysql.cursor()
-        query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(query, (codicefiscale, name, surname, dateofbirth, email, "000000", hash_password))
-        mysql.commit()
-        cursor.close()
-
-        return redirect('/login')
-
-    return render_template("sign_up.html")
-""" 
 @app.route('/sign_up', methods=['GET', 'POST'])
 def signUp():
     corsi = {}
@@ -156,15 +140,16 @@ def signUp():
         cursor.close()
         return redirect('/login')
     cursor = mysql.cursor()
-    query = 'SELECT NomeCorsoLaurea FROM Corsi_di_Laurea'
+    query = 'SELECT NomeCorsoLaurea, CodCorsoLaurea FROM Corsi_di_Laurea'
     cursor.execute(query)
 
-    # Retrieve the results
-    corsi = cursor.fetchall()
-    print(f"All users: {corsi}")  # Print all users for debugging purposes
-
+    rows = cursor.fetchall()
+    i = 0
+    for row in rows:
+        insertResult(corsi, row[0], row[1])
+        i += 1
     return render_template("sign_up.html",corsiLaurea=corsi)
-"""
+
 # localhost:5000/login
 @app.route('/login')
 def login():
@@ -273,8 +258,52 @@ def add():
     for row in rows:
         insertResult(users_info, row, i)
         i += 1
-    print(f"All users: {users_info}")  # Print all users for debugging purposes
     return render_template('Add_users.html', users=users_info)
+
+
+@app.route('/add', methods=['POST'])
+def add_user():
+    cf = request.form['cf']
+    cursor = mysql.cursor()
+    select_query = 'SELECT * FROM studenti where codicefiscale = %s'
+    
+    cursor.execute(select_query, (cf))
+    rows = cursor.fetchall()
+    
+    if rows:
+        print("Utente presente in studenti")
+        return 'Utente aggiunto in precedenza'
+
+    select_query1 = 'SELECT * FROM temporaryuser WHERE codicefiscale = %s'
+    cursor.execute(select_query1, (cf))
+    user_data = cursor.fetchone()
+    string=""
+
+    if user_data:
+
+        delete_query = 'DELETE FROM temporaryuser WHERE codicefiscale = %s'
+        cursor.execute(delete_query, (cf))
+        mysql.commit()
+
+        insert_query = 'INSERT INTO studenti (codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) ' \
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+        cursor.execute(insert_query, user_data)
+        mysql.commit()
+
+        string="User data moved from temporaryuser to studenti successfully."
+    else:
+        string="User not found in temporaryuser."
+
+    return string
+
+
+@app.route('/delete', methods=['POST'])
+def delete_user():
+    user_to_delete = request.form['user']
+    if user_to_delete in users:
+        users.remove(user_to_delete)
+    return 'Utente eliminato con successo'
+
 
 
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
@@ -375,54 +404,6 @@ def elimina_corso():
         corsi_di_laurea.remove(corso_da_elim)
 
     return render_template('Elimina_corso.html', corsi=corsi)
-
-
-@app.route('/add', methods=['POST'])
-def add_user():
-    cf = request.form['cf']
-    # Step 0: Control if user is already in studenti
-    cursor = mysql.cursor()
-    select_query = 'SELECT * FROM studenti where codicefiscale = %s'
-    
-    cursor.execute(select_query, (cf))
-    rows = cursor.fetchall()
-    
-    if rows:# Query returned rows, do something with the data
-        print("Utente presente in studenti")
-        return 'Utente aggiunto in precedenza'
-
-    # Step 1: Download the user's data from temporaryuser
-    select_query1 = 'SELECT * FROM temporaryuser WHERE codicefiscale = %s'
-    cursor.execute(select_query1, (cf))
-    user_data = cursor.fetchone()
-    string=""
-
-    if user_data:
-        # Step 2: Delete the user from temporaryuser
-        delete_query = 'DELETE FROM temporaryuser WHERE codicefiscale = %s'
-        cursor.execute(delete_query, (cf))
-        mysql.commit()
-
-        # Step 3: Insert the user data into studenti
-        insert_query = 'INSERT INTO studenti (codicefiscale, nome, cognome, annoNascita, mail, matricola, password) ' \
-                    'VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(insert_query, user_data)
-        mysql.commit()
-
-        string="User data moved from temporaryuser to studenti successfully."
-    else:
-        string="User not found in temporaryuser."
-
-    return string
-
-
-@app.route('/delete', methods=['POST'])
-def delete_user():
-    user_to_delete = request.form['user']
-    if user_to_delete in users:
-        users.remove(user_to_delete)
-    return 'Utente eliminato con successo'
-
 
 
 @app.route('/associazioneCorso_CorsoLaurea', methods=['POST'])
