@@ -4,6 +4,7 @@
     <title>Tabella Voti</title>
 </head>
 <body>
+<div id="contenitore">
     <table id="votiTable">
         <thead>
             <tr>
@@ -18,6 +19,8 @@
         </tbody>
     </table>
     <button onclick="inviaDati()">Invia Dati al Server</button>
+</div>
+
 
     <script>
         // Funzione per popolare dinamicamente la tabella con una lista di dati
@@ -95,17 +98,11 @@
              .catch(error => console.error('Errore:', error));
         }
 
+        //funzione per caricare il contenuto della pagina htlm quando questa è passata come input da url
 
-
-        //const queryString = window.location.search;
-        //const urlParams = new URLSearchParams(window.location.search).get('data');
-        //const jsonData = urlParams.get('data');
-        // Decodifica il valore JSON e lo trasforma in un oggetto JavaScript
-        //const data = JSON.parse(decodeURIComponent(new URLSearchParams(window.location.search).get('data')));
-
-
-        const data = JSON.parse('{{ studenti | safe }}');
+        let data = JSON.parse('{{  studenti | safe }}');
         popolaTabella(data);
+
     </script>
 </body>
 </html>

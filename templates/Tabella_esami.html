@@ -48,26 +48,7 @@
 
     // Funzione per inviare i dati al server
     function assegnaVoti(codiceEsame) {
-    // Dati da inviare al server
-        const dataToSend = { codiceEsame };
-
-        // Effettua la richiesta fetch al server Flask con metodo POST
-        fetch(`/Docenti/${codiceEsame}/Assegna_voti`, {
-            method: "POST", // Assicurati che sia specificato il metodo POST
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(dataToSend),
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Puoi gestire la risposta del server qui
-            console.log(data); // Mostra la lista di studenti ricevuta dal server
-
-            // Ora cambia la pagina HTML e passa il parametro data alla nuova pagina
-            //window.location.href = `/Docenti/${codiceEsame}/Assegna_voti?data=${encodeURIComponent(JSON.stringify(data))}`;
-        })
-        .catch(error => console.error("Errore:", error));
+        window.location.href = '/Docenti/' + codiceEsame + '/Assegna_voti';
     }
 
     // Esempio di dati della tabella

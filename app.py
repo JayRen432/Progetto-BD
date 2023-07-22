@@ -63,12 +63,14 @@ studenti = [
     {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
 ]
 dettagli_corsi_corsiLaurea = [
-    #Valori molto ge
+    # Valori molto ge
     {"string1": "opt1", "string2": "Valore 1", "string3": "Valore 1b", "string4": "Valore 1c"},
     {"string1": "opt1", "string2": "Valore 2", "string3": "Valore 2b", "string4": "Valore 2c"},
     {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
     {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
 ]
+
+
 @app.route('/')
 def index():
     elenco_corsi_scientifici = ["Informatica", "Scienze Ambientali", "Chimica e tecnologie sostenibili",
@@ -391,11 +393,13 @@ def delete_corso_crosoLaurea():
         data = request.get_json().get('dataToSend')
         c1 = data['string1']
         c2 = data['string2']
-        c3= data['string3']
-        c4= data['string4']
-        return jsonify(c1 + " " +c2 + " " +c3 + " " +c4)
+        c3 = data['string3']
+        c4 = data['string4']
+        return jsonify(c1 + " " + c2 + " " + c3 + " " + c4)
     else:
         return render_template('Delete_corsi_CorsiLaurea.html', list=json.dumps(dettagli_corsi_corsiLaurea))
+
+
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
 def delete_corso_Docente():
     if request.method == 'POST':
@@ -405,18 +409,17 @@ def delete_corso_Docente():
     else:
         return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
 
-@app.route('/Docenti/Assegna_voti')
-def asse():
+
+@app.route('/Docenti/<codeEsame>/Assegna_voti')
+def dati_pagina_html(codeEsame):
     return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
-@app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['POST'])
-def assegna_voti(codiceEsame):
-    return json.dumps(studenti)
+
 
 @app.route('/Docenti/ricevi-voti', methods=['POST'])
 def ricevi_dati():
     dati = request.get_json()
     tableData = dati.get('tableData', [])
-    mat=tableData[0]['matricola']
+    mat = tableData[0]['matricola']
     return jsonify(mat)
 
 
@@ -476,14 +479,6 @@ def delete_phone_number():
     return jsonify(message=number_to_delete)
 
 
-
-
-
-
-
-
-
-
 # Invalid URL
 @app.errorhandler(404)
 def page_not_found(e):
@@ -500,9 +495,11 @@ def page_not_found(e):
 def index_studenti():
     return render_template('menu_studenti.html')
 
+
 @app.route('/Docenti')
 def index_docenti():
     return render_template('menu_docenti.html')
+
 
 @app.route('/Admin')
 def index_admin():
