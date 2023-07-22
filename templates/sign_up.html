@@ -29,8 +29,8 @@
         <div>
             <select name="corsoLaurea" id="corso_di_laurea">
                 <option selected disabled hidden>-----------</option>
-                {% for corso in corsiLaurea %}
-                  <option value={{corso}}>{{corso}}</option>
+                {% for codice, info in corsiLaurea.items() %}
+                    <option value="{{ codice }}">{{ info }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -43,4 +43,4 @@
             <button type="submit">Sign up</button>
     </form>
 </main>
-{% endblock %}
+{% endblock %}
