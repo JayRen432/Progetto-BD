@@ -86,7 +86,6 @@
             var utenteSelezionato = document.querySelector('.utente-selezionato');
             if (utenteSelezionato) {
                 var stringSplitted = (utenteSelezionato.innerHTML).split();
-                
                 // Effettua una richiesta al server per eliminare l'utente
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/add', true);
