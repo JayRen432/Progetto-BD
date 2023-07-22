@@ -26,7 +26,14 @@
             <input type="password" name="password" placeholder="Password">
             <label for="floatingPassword">Password</label>
         </div>
-
+        <div>
+            <select name="corsoLaurea" id="corso_di_laurea">
+                <option selected disabled hidden>-----------</option>
+                {% for corso in corsiLaurea %}
+                  <option value={{corso}}>{{corso}}</option>
+                {% endfor %}
+            </select>
+        </div>
         <div>
             <input type="checkbox" name="remember-me" value="remember-me">
         <label>
@@ -36,4 +43,4 @@
             <button type="submit">Sign up</button>
     </form>
 </main>
-{% endblock %}
+{% endblock %}
