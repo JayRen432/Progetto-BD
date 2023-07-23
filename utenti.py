@@ -8,18 +8,8 @@ app = Flask(__name__)
 
 app.debug = True
 
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
-app.config['MYSQL_DATABASE_DB'] = 'progettobasi'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql = pymysql.connect(
-    host=app.config['MYSQL_DATABASE_HOST'],
-    user=app.config['MYSQL_DATABASE_USER'],
-    password=app.config['MYSQL_DATABASE_PASSWORD'],
-    db=app.config['MYSQL_DATABASE_DB']
-)
 
-def login_aux(mail, password):#ritorna 1 se è uno studente, 2 se è un docente, 0 se è un amministratore
+def login_aux(mail, password, mysql):#ritorna 1 se è uno studente, 2 se è un docente, 0 se è un amministratore
     # hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     cursor = mysql.cursor()
     query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
@@ -49,7 +39,7 @@ def insertResult(dictionaryL, rowSQL, string, number=None):
     dictionaryL.update(dic)
 
 
-def sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea):#inserisce uno studente nella tabella temporaryuser e ritorna 1
+def sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea, mysql):#inserisce uno studente nella tabella temporaryuser e ritorna 1
     hash_password = bcrypt.hashpw(
             password.encode('utf-8'), bcrypt.gensalt())
     cursor = mysql.cursor()
@@ -60,7 +50,7 @@ def sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, cors
     cursor.close()
     return 1
     
-def sign_up_corsolaurea(corsi):
+def sign_up_corsolaurea(corsi, mysql):
     cursor = mysql.cursor()
     query = 'SELECT NomeCorsoLaurea, CodCorsoLaurea FROM Corsi_di_Laurea'
     cursor.execute(query)
@@ -70,6 +60,3 @@ def sign_up_corsolaurea(corsi):
     for row in rows:
         insertResult(corsi, row[0], row[1])
         i += 1
-
-if __name__ == "__main__":
-    app.run()
