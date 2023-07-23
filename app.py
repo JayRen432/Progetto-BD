@@ -111,7 +111,7 @@ def resetpwd():
 
 # localhost:5000/sign_up
 @app.route('/sign_up', methods=['GET', 'POST'])#se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
-def signUp():
+def signUp(mysql):
     corsi = {}
     if request.method == 'POST':
         codicefiscale = request.form['Codicefiscale']
@@ -121,23 +121,23 @@ def signUp():
         email = request.form['Email']
         password = request.form['password']
         corsolaurea = request.form['corsoLaurea']
-        number = sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea)
+        number = sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea, mysql)
         if number == 1:
             return redirect('/login')
-    sign_up_corsolaurea(corsi)
+    sign_up_corsolaurea(corsi, mysql)
     return render_template("sign_up.html",corsiLaurea=corsi)
 
 # localhost:5000/login
 @app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
-def login():
+def login(mysql):
     if request.method == 'POST':
         mail = request.form['mail']
         password = request.form['password']
-        number = login_aux(mail, password)
+        number = login_aux(mail, password, mysql)
         if number==1:
             return render_template("menu_studenti.html")
         else:
-            number = login_aux(mail, password)
+            number = login_aux(mail, password, mysql)
             if number==2:
                 return render_template("menu_docenti.html")
             elif mail == "admin@administrator.com" and password == "admin":
