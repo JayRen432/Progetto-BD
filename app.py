@@ -3,9 +3,10 @@ import pymysql
 import json
 import bcrypt
 from classes import Studente
+from utenti import login_aux, sign_up_aux, sign_up_corsolaurea, insertResult
 #python3 -m venv venv
 #
-
+corsi = {}
 # Create Flask Instance
 app = Flask(__name__)
 # Set debug mode to True
@@ -119,7 +120,7 @@ def resetpwd():
     return render_template("reset_pwd.html")
 
 # localhost:5000/sign_up
-@app.route('/sign_up', methods=['GET', 'POST'])
+@app.route('/sign_up', methods=['GET', 'POST'])#se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
 def signUp():
     corsi = {}
     if request.method == 'POST':
@@ -130,44 +131,28 @@ def signUp():
         email = request.form['Email']
         password = request.form['password']
         corsolaurea = request.form['corsoLaurea']
-        hash_password = bcrypt.hashpw(
-            password.encode('utf-8'), bcrypt.gensalt())
-        cursor = mysql.cursor()
-        query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(query, (codicefiscale, name, surname,
-                       dateofbirth, email, "000000", hash_password, corsolaurea))
-        mysql.commit()
-        cursor.close()
-        return redirect('/login')
-    cursor = mysql.cursor()
-    query = 'SELECT NomeCorsoLaurea, CodCorsoLaurea FROM Corsi_di_Laurea'
-    cursor.execute(query)
-
-    rows = cursor.fetchall()
-    i = 0
-    for row in rows:
-        insertResult(corsi, row[0], row[1])
-        i += 1
+        number = sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea)
+        if number == 1:
+            return redirect('/login')
+    sign_up_corsolaurea(corsi)
     return render_template("sign_up.html",corsiLaurea=corsi)
 
 # localhost:5000/login
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
 def login():
     if request.method == 'POST':
-        print(request.form)
         mail = request.form['mail']
         password = request.form['password']
-        print(mail, password)
-       # hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        cursor = mysql.cursor()
-        query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
-        cursor.execute(query, (mail, password)) 
-        user = cursor.fetchone()
-        cursor.close()
-        if user:
-            return redirect('/user_data')
+        number = login_aux(mail, password)
+        if number==1:
+            return render_template("menu_studenti.html")
         else:
-            return "Invalid username or password. <a href='/login'>Try again</a>"
+            number = login_aux(mail, password)
+            if number==2:
+                return render_template("menu_docenti.html")
+            elif mail == "admin@administrator.com" and password == "admin":
+                return render_template("menu_amministatore.html")
+                
     return render_template("login.html")
 
 
