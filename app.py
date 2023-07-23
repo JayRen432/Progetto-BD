@@ -75,16 +75,6 @@ dettagli_corsi_corsiLaurea = [
     {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
     {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
 ]
-def insertResult(dictionaryL, rowSQL, string, number=None):
-    #codicefiscale, nome, cognome, annoNascita, mail, matricola, password
-    if number is not None:
-        st = string + str(number)
-    else:
-        st = string
-    
-    dic = {st: rowSQL}
-
-    dictionaryL.update(dic)
 
 @app.route('/')
 def index():
