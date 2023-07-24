@@ -80,9 +80,48 @@ def get_couse(mysql):
 
 
 def assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql):
-
     cursor = mysql.cursor()
     query = 'INSERT INTO appartenenti(CorsoLaurea, CodCorso, Anno) VALUES (%s, %s, %s)'
     cursor.execute(query, (corso_laurea, corso, anno))
     mysql.commit()
     cursor.close()
+
+
+def add_docente_aux(doc, mysql):
+    pwd = doc['password']
+    hash_password = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
+    cursor = mysql.cursor()
+    query = 'INSERT INTO docenti(CodiceFiscale, Nome, Cognome, mail, annoNascita, password) VALUES (%s, %s, %s, %s, %s, %s)'
+    cursor.execute(query, (doc['codice_fiscale'], doc['nome'],
+                           doc['cognome'], doc['mail'], doc['anno_nascita'], hash_password))
+    mysql.commit()
+    cursor.close()
+
+
+def delete_docenti_aux(codice_fiscale, mysql):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM docenti WHERE CodiceFiscale = %s'
+    cursor.execute(query, codice_fiscale)
+    mysql.commit()
+    cursor.close()
+
+
+def get_docenti(mysql):
+    docenti = []
+    cursor = mysql.cursor()
+    query = 'SELECT CodiceFiscale, Nome, Cognome, mail, annoNascita FROM docenti'
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    for row in rows:
+        doc_info = {
+            'codice_fiscale': row[0],
+            'nome': row[1],
+            'cognome' : row[2],
+            'mail' : row[3],
+            'anno_di_nascita' : row[4]
+        }
+        docenti.append(doc_info)
+    mysql.commit()
+    cursor.close()
+    return docenti

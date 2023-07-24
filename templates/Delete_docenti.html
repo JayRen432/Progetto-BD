@@ -82,7 +82,7 @@
             if (utenteSelezionato) {
                 var codiceFiscaleUtente = JSON.parse(utenteSelezionato.getAttribute("data-user")).codice_fiscale;
                 // Effettua una richiesta al server per eliminare l'utente
-                fetch('/delete_docente', {
+                fetch('/Admin/delete_docente', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -35,14 +35,7 @@ righe_iniziali = [
 ]
 corsi = []
 esami = []
-docenti = [
-    {'codice_fiscale': 'ABC123', 'nome': 'Mario', 'cognome': 'Rossi', 'mail': 'mario.rossi@example.com',
-     'anno_di_nascita': 1985},
-    {'codice_fiscale': 'DEF456', 'nome': 'Paola', 'cognome': 'Verdi', 'mail': 'paola.verdi@example.com',
-     'anno_di_nascita': 1990},
-    {'codice_fiscale': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi', 'mail': 'luigi.bianchi@example.com',
-     'anno_di_nascita': 1980}
-]
+
 dettagli_corsi_Docenti = [
     {"codice_fiscale_docente": "ABC123", "nome_docente": "Mario", "cognome_docente": "Rossi", "codice_corso": "C1",
      "nome_corso": "Matematica"},
@@ -133,8 +126,10 @@ def signUp(mysql):
     sign_up_corsolaurea(corsi, mysql)
     return render_template("sign_up.html", corsiLaurea=corsi)
 
+
 # localhost:5000/login
-@app.route('/login', methods=['GET','POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
+@app.route('/login', methods=['GET',
+                              'POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
 def login(mysql):
     if request.method == 'POST':
         mail = request.form['mail']
@@ -301,7 +296,7 @@ def delete_user():
     return 'Utente eliminato con successo'
 
 
-# Complete page
+# Administator
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
 def add_degree_course():
     if request.method == 'POST':
@@ -350,6 +345,7 @@ def delete_course():
         corsi = get_couse(mysql)
         return render_template('Elimina_corso.html', corsi=corsi)
 
+
 @app.route('/Admin/assegnaCorso_CorsoLaurea', methods=['GET', 'POST'])
 def assegnaCorsoCorsoLaurea():
     if request.method == 'POST':
@@ -366,39 +362,37 @@ def assegnaCorsoCorsoLaurea():
                                lista_corsi=corsi)
 
 
-
-# Not Complete page
-@app.route('/Admin/aggiungi_docente', methods=['GET', 'POST'])
-def add_docente():
-    if request.method == 'POST':
-        data = request.get_json()
-        codice_fiscale = data.get('codiceFiscale')
-        nome = data.get('nome')
-        cognome = data.get('cognome')
-        mail = data.get('mail')
-        anno_nascita = data.get('annoNascita')
-        return render_template('Add_docente.html')
-    else:
-        return render_template('Add_docente.html')
-
-
-@app.route('/Admin/delete_docente')
-def delete_docenti_html():
-    return render_template('Delete_docenti.html', users=json.dumps(docenti))
-
-
-@app.route('/delete_docente', methods=['POST'])
+@app.route('/Admin/delete_docente', methods=['GET', 'POST'])
 def delete_docenti():
     if request.method == 'POST':
         data = request.get_json()
         codice_fiscale_da_eliminare = data.get('codice_fiscale')
 
-        global docenti
-        docenti = [docente for docente in docenti if docente['codice_fiscale'] != codice_fiscale_da_eliminare]
+        delete_docenti_aux(codice_fiscale_da_eliminare, mysql)
+    else:
+        docenti = get_docenti(mysql)
+        return render_template('Delete_docenti.html', users=json.dumps(docenti))
 
-        return jsonify("Docente eliminato")
 
+@app.route('/Admin/aggiungi_docente', methods=['GET', 'POST'])
+def add_docente():
+    if request.method == 'POST':
+        data = request.get_json()
+        docente = {
+            'codice_fiscale': data.get('codiceFiscale'),
+            'nome': data.get('nome'),
+            'cognome': data.get('cognome'),
+            'mail': data.get('mail'),
+            'anno_nascita': data.get('annoNascita'),
+            'password': data.get('password')
+        }
+        add_docente_aux(docente, mysql)
 
+        return render_template('Add_docente.html')
+    else:
+        return render_template('Add_docente.html')
+
+# Not Complete page
 @app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
 def assegna_Corso_Docente():
     if (request.method == 'POST'):
@@ -407,6 +401,7 @@ def assegna_Corso_Docente():
         corso = data.get('cod_Corso')
         return jsonify(message=docente + "   " + corso)
     else:
+        docenti = []
         return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=lista_corsi)
 
 
