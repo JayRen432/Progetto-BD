@@ -60,3 +60,24 @@ def sign_up_corsolaurea(corsi, mysql):
     for row in rows:
         insertResult(corsi, row[0], row[1])
         i += 1
+
+def login_aux(mail, password, mysql):
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
+    cursor.execute(query, (mail, password)) 
+    studente = cursor.fetchone()
+    cursor.close()
+
+    if studente:
+        return True, False
+    else:
+        cursor = mysql.cursor()
+        query = 'SELECT * FROM docenti WHERE mail = %s AND password = %s'
+        cursor.execute(query, (mail, password)) 
+        docente = cursor.fetchone()
+        cursor.close()
+
+        if docente:
+            return False, True 
+
+    return False, False
