@@ -22,7 +22,7 @@
                     <td>{{ corso.specializzazione }}</td>
                     <td>{{ corso.indirizzo }}</td>
                     <td>
-                        <form action="/elimina_corso_laurea" method="post">
+                        <form action="/Admin/elimina_corso_laurea" method="post">
                             <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
                             <input type="submit" value="Elimina">
                         </form>

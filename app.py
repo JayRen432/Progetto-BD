@@ -1,10 +1,14 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 import pymysql
 import json
 import bcrypt
+
+from administrator import *
 from classes import Studente
-from utenti import login_aux, sign_up_aux, sign_up_corsolaurea, insertResult
-#python3 -m venv venv
+from classes import CorsoLaurea
+from utenti import *
+
+# python3 -m venv venv
 #
 corsi = {}
 # Create Flask Instance
@@ -29,7 +33,6 @@ righe_iniziali = [
     {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
     {"codice_corso": "DEF456", "nome_corso": "Corso B", "data_esame": "2023-07-25", "aula": "Aula 2"},
 ]
-corsi_di_laurea = []
 corsi = []
 esami = []
 docenti = [
@@ -69,12 +72,13 @@ studenti = [
     {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
 ]
 dettagli_corsi_corsiLaurea = [
-    #Valori molto ge
+    # Valori molto ge
     {"string1": "opt1", "string2": "Valore 1", "string3": "Valore 1b", "string4": "Valore 1c"},
     {"string1": "opt1", "string2": "Valore 2", "string3": "Valore 2b", "string4": "Valore 2c"},
     {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
     {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
 ]
+
 
 @app.route('/')
 def index():
@@ -109,8 +113,10 @@ def resetpwd():
             return redirect('/login')
     return render_template("reset_pwd.html")
 
+
 # localhost:5000/sign_up
-@app.route('/sign_up', methods=['GET', 'POST'])#se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
+@app.route('/sign_up', methods=['GET',
+                                'POST'])  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
 def signUp(mysql):
     corsi = {}
     if request.method == 'POST':
@@ -125,24 +131,24 @@ def signUp(mysql):
         if number == 1:
             return redirect('/login')
     sign_up_corsolaurea(corsi, mysql)
-    return render_template("sign_up.html",corsiLaurea=corsi)
+    return render_template("sign_up.html", corsiLaurea=corsi)
 
 # localhost:5000/login
-@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
+@app.route('/login', methods=['GET','POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
 def login(mysql):
     if request.method == 'POST':
         mail = request.form['mail']
         password = request.form['password']
         number = login_aux(mail, password, mysql)
-        if number==1:
+        if number == 1:
             return render_template("menu_studenti.html")
         else:
             number = login_aux(mail, password, mysql)
-            if number==2:
+            if number == 2:
                 return render_template("menu_docenti.html")
             elif mail == "admin@administrator.com" and password == "admin":
                 return render_template("menu_amministatore.html")
-                
+
     return render_template("login.html")
 
 
@@ -246,7 +252,7 @@ def add():
     rows = cursor.fetchall()
     i = 0
     for row in rows:
-        insertResult(users_info, row, "Studente ",i)
+        insertResult(users_info, row, "Studente ", i)
         i += 1
     return render_template('Add_users.html', users=users_info)
 
@@ -256,10 +262,10 @@ def add_user():
     cf = request.form['cf']
     cursor = mysql.cursor()
     select_query = 'SELECT * FROM studenti where codicefiscale = %s'
-    
+
     cursor.execute(select_query, (cf))
     rows = cursor.fetchall()
-    
+
     if rows:
         print("Utente presente in studenti")
         return 'Utente aggiunto in precedenza'
@@ -267,7 +273,7 @@ def add_user():
     select_query1 = 'SELECT * FROM temporaryuser WHERE codicefiscale = %s'
     cursor.execute(select_query1, (cf))
     user_data = cursor.fetchone()
-    string=""
+    string = ""
 
     if user_data:
 
@@ -276,13 +282,13 @@ def add_user():
         mysql.commit()
 
         insert_query = 'INSERT INTO studenti (codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) ' \
-                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+                       'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(insert_query, user_data)
         mysql.commit()
 
-        string="User data moved from temporaryuser to studenti successfully."
+        string = "User data moved from temporaryuser to studenti successfully."
     else:
-        string="User not found in temporaryuser."
+        string = "User not found in temporaryuser."
 
     return string
 
@@ -295,77 +301,73 @@ def delete_user():
     return 'Utente eliminato con successo'
 
 
-
+# Complete page
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
-def add_curse():
+def add_degree_course():
     if request.method == 'POST':
-        codice = request.form['codice_corso']
-        nome = request.form['nome_corso']
-        specializzazione = request.form['specializzazione']
+        cod_corso = request.form['codice_corso']
+        nome_corso = request.form['nome_corso']
+        spec = request.form['specializzazione']
         indirizzo = request.form['indirizzo']
 
-        corso_di_laurea = {'codice': codice, 'nome': nome, 'specializzazione': specializzazione, 'indirizzo': indirizzo}
-        corsi_di_laurea.append(corso_di_laurea)
-
-        return render_template('Crea_corso_di_laurea.html')
+        add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo, mysql)
     else:
         return render_template('Crea_corso_di_laurea.html')
 
 
-@app.route('/Admin/elimina_corso_laurea', methods=['GET'])
-def elimina_corso_laurea_html():
-    return render_template('Elimina_corso_di_laurea.html', corsi_di_laurea=corsi_di_laurea)
-
-
-@app.route('/elimina_corso_laurea', methods=['POST'])
-def elimina_corso_laurea():
-    codice_corso = request.form['codice_corso']
-    corso_da_elim = None
-    # da rivedere
-    for corso in corsi_di_laurea:
-        if corso.codice == codice_corso:
-            corso_da_elim = corso
-            break
-    if corso_da_elim:
-        corsi_di_laurea.remove(corso_da_elim)
-
-    return render_template('Elimina_corso_di_laurea.html', corsi_di_laurea=corsi_di_laurea)
+@app.route('/Admin/elimina_corso_laurea', methods=['GET', 'POST'])
+def delete_degree_course():
+    if request.method == 'POST':
+        codice_corso = request.form['codice_corso']
+        delete_degree_course_aux_post(codice_corso, mysql)
+        return redirect(url_for('index_admin'))
+    else:
+        corsi_di_laurea = get_degree_course(mysql)
+        return render_template('Elimina_corso_di_laurea.html', corsi_di_laurea=corsi_di_laurea)
 
 
 @app.route('/Admin/aggiungi_corso', methods=['GET', 'POST'])
-def aggiungi_corso():
+def add_course():
     if request.method == 'POST':
         codice = request.form['codice_corso']
         nome = request.form['nome_corso']
 
-        corso = {'codice': codice, 'nome': nome}
-        corsi.append(corso)
-        return render_template('Crea_corso.html')
+        add_course_aux(codice, nome, mysql)
+
+        return redirect(url_for('add_course'))
     else:
         return render_template('Crea_corso.html')
 
 
-@app.route('/Admin/elimina_corso', methods=['GET'])
-def elimina_corso_html():
-    return render_template('Elimina_corso.html', corsi=corsi)
+@app.route('/Admin/elimina_corso', methods=['GET', 'POST'])
+def delete_course():
+    if request.method == 'POST':
+        codice_corso = request.form['codice_corso']
+        delete_course_aux_post(codice_corso, mysql)
 
+        return redirect(url_for('delete_course'))
+    else:
+        corsi = get_couse(mysql)
+        return render_template('Elimina_corso.html', corsi=corsi)
 
-@app.route('/Admin/assegnaCorso_CorsoLaurea', methods=['GET'])
+@app.route('/Admin/assegnaCorso_CorsoLaurea', methods=['GET', 'POST'])
 def assegnaCorsoCorsoLaurea():
-    listaCorsi1 = [
-        {'codice': "01", 'nome': "Ingegneria"},
-        {'codice': "02", 'nome': "Informatica"},
-        {'codice': "03", 'nome': "Scienze Matematiche"}
-    ]
-    listaCorsi2 = [
-        {'codice': "101", 'nome': "Storia dell'Arte"},
-        {'codice': "102", 'nome': "Lettere Moderne"},
-        {'codice': "103", 'nome': "Filosofia"}
-    ]
-    return render_template('Associazione_corso_corsolaurea.html', lista_corsi_laurea=listaCorsi1,
-                           lista_corsi=listaCorsi2)
+    if request.method == 'POST':
+        data = request.get_json()
+        corso_laurea = data.get('corso1')
+        corso = data.get('corso2')
+        anno = data.get('anno')
+        assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql)
+        return "Operation Complete"
+    else:
+        corsi_laurea = get_degree_course(mysql)
+        corsi = get_couse(mysql)
+        return render_template('Associazione_corso_corsolaurea.html', lista_corsi_laurea=corsi_laurea,
+                               lista_corsi=corsi)
 
 
+
+# Not Complete page
 @app.route('/Admin/aggiungi_docente', methods=['GET', 'POST'])
 def add_docente():
     if request.method == 'POST':
@@ -378,36 +380,6 @@ def add_docente():
         return render_template('Add_docente.html')
     else:
         return render_template('Add_docente.html')
-
-
-@app.route('/elimina_corso', methods=['POST'])
-def elimina_corso():
-    codice_corso = request.form['codice_corso']
-    corso_da_elim = None
-    # da rivedere
-    for corso in corsi_di_laurea:
-        if corso.codice == codice_corso:
-            corso_da_elim = corso
-            break
-
-    if corso_da_elim:
-        corsi_di_laurea.remove(corso_da_elim)
-
-    return render_template('Elimina_corso.html', corsi=corsi)
-
-
-@app.route('/associazioneCorso_CorsoLaurea', methods=['POST'])
-def invia_dati():
-    data = request.get_json()
-    corso1 = data.get('corso1')
-    corso2 = data.get('corso2')
-
-    # Esegui qui la logica per elaborare i dati ricevuti dal client
-    # Ad esempio, puoi salvare i dati nel database o fare altre operazioni
-
-    # Ritorna una risposta al client (opzionale)
-    response = {'messaggio': 'Dati ricevuti correttamente dal server'}
-    return jsonify(response)
 
 
 @app.route('/Admin/delete_docente')
@@ -444,11 +416,13 @@ def delete_corso_crosoLaurea():
         data = request.get_json().get('dataToSend')
         c1 = data['string1']
         c2 = data['string2']
-        c3= data['string3']
-        c4= data['string4']
-        return jsonify(c1 + " " +c2 + " " +c3 + " " +c4)
+        c3 = data['string3']
+        c4 = data['string4']
+        return jsonify(c1 + " " + c2 + " " + c3 + " " + c4)
     else:
         return render_template('Delete_corsi_CorsiLaurea.html', list=json.dumps(dettagli_corsi_corsiLaurea))
+
+
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
 def delete_corso_Docente():
     if request.method == 'POST':
@@ -458,18 +432,22 @@ def delete_corso_Docente():
     else:
         return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
 
+
 @app.route('/Docenti/Assegna_voti')
 def asse():
     return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
+
+
 @app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['POST'])
 def assegna_voti(codiceEsame):
     return json.dumps(studenti)
+
 
 @app.route('/Docenti/ricevi-voti', methods=['POST'])
 def ricevi_dati():
     dati = request.get_json()
     tableData = dati.get('tableData', [])
-    mat=tableData[0]['matricola']
+    mat = tableData[0]['matricola']
     return jsonify(mat)
 
 
@@ -545,9 +523,11 @@ def page_not_found(e):
 def index_studenti():
     return render_template('menu_studenti.html')
 
+
 @app.route('/Docenti')
 def index_docenti():
     return render_template('menu_docenti.html')
+
 
 @app.route('/Admin')
 def index_admin():
