@@ -110,7 +110,7 @@ def resetpwd():
 # localhost:5000/sign_up
 @app.route('/sign_up', methods=['GET',
                                 'POST'])  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
-def signUp(mysql):
+def signUp():
     corsi = {}
     if request.method == 'POST':
         codicefiscale = request.form['Codicefiscale']
