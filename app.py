@@ -103,7 +103,7 @@ def resetpwd():
 # localhost:5000/sign_up
 @app.route('/sign_up', methods=['GET',
                                 'POST'])  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
-def signUp(mysql):
+def signUp():
     corsi = {}
     if request.method == 'POST':
         codicefiscale = request.form['Codicefiscale']
@@ -121,23 +121,32 @@ def signUp(mysql):
 
 
 # localhost:5000/login
-@app.route('/login', methods=['GET',
-                              'POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
-def login(mysql):
+@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
+def login():
     if request.method == 'POST':
         mail = request.form['mail']
         password = request.form['password']
-        number = login_aux(mail, password, mysql)
-        if number == 1:
-            return render_template("menu_studenti.html")
-        else:
-            number = login_aux(mail, password, mysql)
-            if number == 2:
-                return render_template("menu_docenti.html")
-            elif mail == "admin@administrator.com" and password == "admin":
-                return render_template("menu_amministatore.html")
-
+        studente, docente = login_aux(mail, password, mysql)
+        if studente:
+            return redirect('/menu_studenti')
+        elif docente:
+            return redirect('/menu_docenti')
+        elif mail == "admin@administrator.com" and password == "admin":
+            return redirect('/menu_amministratore')
+                
     return render_template("login.html")
+
+@app.route('/menu_studenti')
+def menu_studenti():
+    return render_template("menu_studenti.html")
+
+@app.route('/menu_docenti')
+def menu_docenti():
+    return render_template("menu_docenti.html")
+
+@app.route('/menu_amministratore')
+def menu_amminsitratore():
+    return render_template("menu_amministratore.html")
 
 
 # localhost:5000/user/John

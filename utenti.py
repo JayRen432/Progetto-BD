@@ -9,23 +9,26 @@ app = Flask(__name__)
 app.debug = True
 
 
-def login_aux(mail, password, mysql):#ritorna 1 se è uno studente, 2 se è un docente, 0 se è un amministratore
-    # hash_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+def login_aux(mail, password, mysql):
     cursor = mysql.cursor()
     query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
     cursor.execute(query, (mail, password)) 
-    user = cursor.fetchone()
+    studente = cursor.fetchone()
     cursor.close()
-    if user: 
-        return 1
+
+    if studente:
+        return True, False
     else:
         cursor = mysql.cursor()
         query = 'SELECT * FROM docenti WHERE mail = %s AND password = %s'
         cursor.execute(query, (mail, password)) 
-        user = cursor.fetchone()
+        docente = cursor.fetchone()
         cursor.close()
-        if user:
-            return 2
+
+        if docente:
+            return False, True 
+
+    return False, False
 
 def insertResult(dictionaryL, rowSQL, string, number=None):
     #codicefiscale, nome, cognome, annoNascita, mail, matricola, password
@@ -60,3 +63,5 @@ def sign_up_corsolaurea(corsi, mysql):
     for row in rows:
         insertResult(corsi, row[0], row[1])
         i += 1
+
+
