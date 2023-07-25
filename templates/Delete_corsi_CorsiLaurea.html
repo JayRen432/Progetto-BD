@@ -1,111 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <title></title>
+    <title>Menù a tendina e tabella</title>
 </head>
 <body>
-    <h1>Menù a Tendina Dinamico</h1>
-    <label for="dropdown">Corso di laurea</label>
-    <select id="dropdown">
-        <option selected disabled hidden>-----------</option>
-    </select>
-    <button onclick="showTable()">Visualizza Tabella</button>
+    <h2>Menù a tendina</h2>
+    <form>
+        <select id="corsoLaureaSelect" name="corsoLaurea">
+            {% for corso in corsi_Laurea %}
+                <option value="{{ corso.codice }}">{{ corso.nome }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" onclick="showTable()">Mostra Tabella</button>
+    </form>
 
     <div id="tableContainer" style="display: none;">
-        <form>
-            <table border="1">
+        <h2>Tabella</h2>
+        <table border="1">
+            <thead>
                 <tr>
-                    <th>String1</th>
-                    <th>String2</th>
-                    <th>String3</th>
-                    <th>String4</th>
+                    <th>Codice Corso Laurea</th>
+                    <th>Nome Corso Laurea</th>
+                    <th>Codice Corso</th>
+                    <th>Nome Corso</th>
                     <th>Azione</th>
                 </tr>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </form>
+            </thead>
+            <tbody id="tableBody">
+                <!-- La tabella verrà popolata tramite JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script>
-        // Lista di test
-        var test_list = JSON.parse('{{ list | safe }}');
-        populateDropdown();
-
-        function populateDropdown() {
-            var dropdown = document.getElementById('dropdown');
-
-            for (var i = 0; i < test_list.length; i++) {
-                var option = document.createElement('option');
-                option.value = test_list[i].string1;
-                option.textContent = test_list[i].string2;
-                dropdown.appendChild(option);
-            }
-        }
         function showTable() {
-            var selectedOption = document.getElementById('dropdown').value;
-            if (selectedOption === "") {
-                alert('Seleziona un\'opzione dalla lista.');
-                return;
-            }
-            var filteredData = filterData(selectedOption);
-            var tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            for (var i = 0; i < filteredData.length; i++) {
-                var row = tableBody.insertRow();
-                var rowData = filteredData[i];
+            var corsoLaureaSelect = document.getElementById("corsoLaureaSelect");
+            var selectedCodice = corsoLaureaSelect.value;
+            var selectedNome = corsoLaureaSelect.options[corsoLaureaSelect.selectedIndex].text;
 
-                var cell1 = row.insertCell(0);
-                var cell2 = row.insertCell(1);
-                var cell3 = row.insertCell(2);
-                var cell4 = row.insertCell(3);
-                var cell5 = row.insertCell(4);
+            var degCourseData = JSON.parse('{{ deg_course|safe }}');
+            var corsiData = JSON.parse('{{ corsi|safe }}');
 
-                cell1.innerHTML = rowData.string1;
-                cell2.innerHTML = rowData.string2;
-                cell3.innerHTML = rowData.string3;
-                cell4.innerHTML = rowData.string4;
-                cell5.innerHTML = '<button onclick="sendData(' + i + ')">Invia</button>';
-            }
-            document.getElementById('tableContainer').style.display = 'block';
+            populateTable(selectedCodice, selectedNome, degCourseData, corsiData);
         }
 
-        function filterData(selectedOption) {
-            return test_list.filter(function (item) {
-                return item.string1 === selectedOption;
-            });
-        }
-
-        function sendData(rowIndex) {
-            var table = document.getElementById('tableBody');
-            var rowData = table.rows[rowIndex].cells;
-
-            var dataToSend = {
-                'string1': rowData[0].innerHTML,
-                'string2': rowData[1].innerHTML,
-                'string3': rowData[2].innerHTML,
-                'string4': rowData[3].innerHTML
+        function sendFormData_aux(codiceCorsoLaurea, codiceDegCourse) {
+            const data = {
+                codiceCorsoLaurea: codiceCorsoLaurea,
+                codiceCourse: codiceDegCourse
             };
 
-            // Invia i dati al server (implementazione a tua discrezione)
-            console.log('Dati da inviare:', dataToSend);
-
             fetch('/Admin/delete_corso_corsoLaurea', {
-                 method: 'POST',
+                method: 'POST',
                 headers: {
-                     'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'
                 },
-                 body: JSON.stringify({dataToSend})
-             })
-             .then(response => response.json())
-             .then(data => {
-                 alert(data)
-
-             })
-             .catch(error => console.error('Errore:', error));
-            window.location.reload();
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Puoi gestire la risposta del server qui se necessario
+                // ...
+                alert('Dati inviati con successo al server!');
+            })
         }
+
+        function populateTable(selectedCodice, selectedNome, degCourseData, corsiData) {
+            var tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = '';
+
+            for (let item of degCourseData) {
+                if (item.CorsoLaurea === selectedCodice) {
+                    var row = document.createElement("tr");
+
+                    var codiceCorsoLaureaCell = document.createElement("td");
+                    codiceCorsoLaureaCell.innerText = item.CorsoLaurea;
+                    row.appendChild(codiceCorsoLaureaCell);
+
+                    var nomeCorsoLaureaCell = document.createElement("td");
+                    nomeCorsoLaureaCell.innerText = selectedNome;
+                    row.appendChild(nomeCorsoLaureaCell);
+
+                    var codiceDegCourseCell = document.createElement("td");
+                    codiceDegCourseCell.innerText = item.CodCorso;
+                    row.appendChild(codiceDegCourseCell);
+
+                    var nomeCorsoCell = document.createElement("td");
+                    var matchingCorso = corsiData.find(corso => corso.codice === item.CodCorso);
+                    nomeCorsoCell.innerText = matchingCorso ? matchingCorso.nome : '';
+                    row.appendChild(nomeCorsoCell);
+
+                    var buttonCell = document.createElement("td");
+                    var sendButton = document.createElement("button");
+                    sendButton.innerText = "Invia";
+                    sendButton.onclick = sendFormData.bind(null, row);
+                    buttonCell.appendChild(sendButton);
+                    row.appendChild(buttonCell);
+
+
+                    tableBody.appendChild(row);
+                }
+            }
+
+            var tableContainer = document.getElementById("tableContainer");
+            tableContainer.style.display = "block";
+        }
+        function sendFormData(row) {
+        var cells = row.getElementsByTagName("td");
+        var codiceCorsoLaurea = cells[0].innerText;
+        var codiceDegCourse = cells[2].innerText;
+        sendFormData_aux(codiceCorsoLaurea,codiceDegCourse)
+
+    }
     </script>
 </body>
 </html>

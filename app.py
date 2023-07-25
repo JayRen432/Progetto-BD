@@ -64,13 +64,6 @@ studenti = [
     {'matricola': 'DEF456', 'nome': 'Paola', 'cognome': 'Verdi'},
     {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
 ]
-dettagli_corsi_corsiLaurea = [
-    # Valori molto ge
-    {"string1": "opt1", "string2": "Valore 1", "string3": "Valore 1b", "string4": "Valore 1c"},
-    {"string1": "opt1", "string2": "Valore 2", "string3": "Valore 2b", "string4": "Valore 2c"},
-    {"string1": "opt3", "string2": "Valore 3", "string3": "Valore 3b", "string4": "Valore 3c"},
-    {"string1": "opt2", "string2": "Valore 4", "string3": "Valore 4b", "string4": "Valore 4c"}
-]
 
 
 @app.route('/')
@@ -392,6 +385,7 @@ def add_docente():
     else:
         return render_template('Add_docente.html')
 
+
 # Not Complete page
 @app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
 def assegna_Corso_Docente():
@@ -408,14 +402,19 @@ def assegna_Corso_Docente():
 @app.route('/Admin/delete_corso_corsoLaurea', methods=['GET', 'POST'])
 def delete_corso_crosoLaurea():
     if request.method == 'POST':
-        data = request.get_json().get('dataToSend')
-        c1 = data['string1']
-        c2 = data['string2']
-        c3 = data['string3']
-        c4 = data['string4']
-        return jsonify(c1 + " " + c2 + " " + c3 + " " + c4)
+        data = request.get_json()
+        deg_course = data.get('codiceCorsoLaurea')
+        course = data.get('codiceCourse')
+        delete_corso_crosoLaurea_aux_post(deg_course, course, mysql)
+        return "Operation Complete"
     else:
-        return render_template('Delete_corsi_CorsiLaurea.html', list=json.dumps(dettagli_corsi_corsiLaurea))
+        corsiLaurea = get_degree_course(mysql)
+        cors = get_couse(mysql)
+        corsi_corsiLaurea = get_couse_degree_course(mysql)
+        return render_template('Delete_corsi_CorsiLaurea.html',
+                               corsi_Laurea=corsiLaurea,
+                               corsi=json.dumps(cors),
+                               deg_course=json.dumps(corsi_corsiLaurea))
 
 
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])

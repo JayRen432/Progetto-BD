@@ -36,6 +36,7 @@ def get_degree_course(mysql):
 
 
 def delete_degree_course_aux_post(codice_corso, mysql):
+    delete_corso_crosoLaurea_aux_post(codice_corso, None, mysql)
     cursor = mysql.cursor()
     query = 'DELETE FROM Corsi_di_laurea WHERE CodCorsoLaurea = %s'
     cursor.execute(query, (codice_corso,))
@@ -52,6 +53,7 @@ def add_course_aux(codice, nome, mysql):
 
 
 def delete_course_aux_post(codice_corso, mysql):
+    delete_corso_crosoLaurea_aux_post(None, codice_corso, mysql)
     cursor = mysql.cursor()
     query = 'DELETE FROM corsi WHERE CodiceCorso = %s'
     cursor.execute(query, (codice_corso,))
@@ -117,11 +119,45 @@ def get_docenti(mysql):
         doc_info = {
             'codice_fiscale': row[0],
             'nome': row[1],
-            'cognome' : row[2],
-            'mail' : row[3],
-            'anno_di_nascita' : row[4]
+            'cognome': row[2],
+            'mail': row[3],
+            'anno_di_nascita': row[4]
         }
         docenti.append(doc_info)
     mysql.commit()
     cursor.close()
     return docenti
+
+
+def get_couse_degree_course(mysql):
+    dettagli = []
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM appartenenti'
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    for row in rows:
+        info = {
+            'CorsoLaurea': row[0],
+            'CodCorso': row[1],
+        }
+        dettagli.append(info)
+    mysql.commit()
+    cursor.close()
+    return dettagli
+
+
+def delete_corso_crosoLaurea_aux_post(deg_course, course, mysql):
+    cursor = mysql.cursor()
+    if (deg_course is not None) and (course is not None):
+        query = 'DELETE FROM appartenenti WHERE CodCorso = %s AND CorsoLaurea = %s'
+        cursor.execute(query, (deg_course, course))
+    elif (deg_course is None) and (course is not None):
+        query = 'DELETE FROM appartenenti WHERE CodCorso = %s'
+        cursor.execute(query, course)
+    elif (deg_course is not None) and (course is None):
+        query = 'DELETE FROM appartenenti WHERE CorsoLaurea = %s'
+        cursor.execute(query, deg_course)
+
+    mysql.commit()
+    cursor.close()
