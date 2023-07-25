@@ -78,27 +78,37 @@
                 <input type="text" name="matricola" placeholder="000000"></input>
                 <input type="text" name="mail" placeholder="example@stud.unive.it"></input>
                 </br></br>
-                Pussy Surprise
             `;
         }
 
         function aggiungiUtente() {
             var utenteSelezionato = document.querySelector('.utente-selezionato');
             if (utenteSelezionato) {
-                var stringSplitted = (utenteSelezionato.innerHTML).split();
+                var stringSplitted = utenteSelezionato.innerHTML.split();
                 // Effettua una richiesta al server per eliminare l'utente
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/add', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                fetch('/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'cf=' + encodeURIComponent(stringSplitted[1])
+                })
+                .then(response => {
+                    if (response.ok) {
                         // Ricarica la pagina dopo aver aggiunto l'utente
                         window.location.reload();
+                    } else {
+                        // Handle the error case if needed
+                        console.error('Request failed:', response.status, response.statusText);
                     }
-                };
-                xhr.send('cf=' + encodeURIComponent(stringSplitted[0]));
+                })
+                .catch(error => {
+                    // Handle any network error
+                    console.error('Network error:', error);
+                });
             }
         }
+
     </script>
 </body>
 </html>
