@@ -161,3 +161,10 @@ def delete_corso_crosoLaurea_aux_post(deg_course, course, mysql):
 
     mysql.commit()
     cursor.close()
+
+def assegna_Corso_Docente_aux(docente, corso, data, mysql):
+    cursor = mysql.cursor()
+    query = 'INSERT INTO aperto(CodCorso, CodFiscale, DataApertura) VALUES (%s, %s, %s)'
+    cursor.execute(query, (corso, docente, data))
+    mysql.commit()
+    cursor.close()

@@ -1,16 +1,8 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, url_for
-import pymysql
-import json
-import bcrypt
+from flask import *
 
 from administrator import *
-from classes import Studente
-from classes import CorsoLaurea
 from utenti import *
 
-# python3 -m venv venv
-#
-corsi = {}
 # Create Flask Instance
 app = Flask(__name__)
 # Set debug mode to True
@@ -33,7 +25,6 @@ righe_iniziali = [
     {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
     {"codice_corso": "DEF456", "nome_corso": "Corso B", "data_esame": "2023-07-25", "aula": "Aula 2"},
 ]
-corsi = []
 esami = []
 
 dettagli_corsi_Docenti = [
@@ -121,7 +112,8 @@ def signUp():
 
 
 # localhost:5000/login
-@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
+@app.route('/login', methods=['GET',
+                              'POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
 def login():
     if request.method == 'POST':
         mail = request.form['mail']
@@ -133,16 +125,19 @@ def login():
             return redirect('/menu_docenti')
         elif mail == "admin@administrator.com" and password == "admin":
             return redirect('/menu_amministratore')
-                
+
     return render_template("login.html")
+
 
 @app.route('/menu_studenti')
 def menu_studenti():
     return render_template("menu_studenti.html")
 
+
 @app.route('/menu_docenti')
 def menu_docenti():
     return render_template("menu_docenti.html")
+
 
 @app.route('/menu_amministratore')
 def menu_amminsitratore():
@@ -395,19 +390,6 @@ def add_docente():
         return render_template('Add_docente.html')
 
 
-# Not Complete page
-@app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
-def assegna_Corso_Docente():
-    if (request.method == 'POST'):
-        data = request.get_json()
-        docente = data.get('cod_Docente')
-        corso = data.get('cod_Corso')
-        return jsonify(message=docente + "   " + corso)
-    else:
-        docenti = []
-        return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=lista_corsi)
-
-
 @app.route('/Admin/delete_corso_corsoLaurea', methods=['GET', 'POST'])
 def delete_corso_crosoLaurea():
     if request.method == 'POST':
@@ -424,6 +406,22 @@ def delete_corso_crosoLaurea():
                                corsi_Laurea=corsiLaurea,
                                corsi=json.dumps(cors),
                                deg_course=json.dumps(corsi_corsiLaurea))
+
+
+# Not Complete page
+@app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
+def assegna_Corso_Docente():
+    if request.method == 'POST':
+        data = request.get_json()
+        docente = data.get('cod_Docente')
+        corso = data.get('cod_Corso')
+        #none rappresenta dataApertura
+        assegna_Corso_Docente_aux(docente, corso, None, mysql)
+        return "Operation Complete"
+    else:
+        docenti = get_docenti(mysql)
+        corsi = get_couse(mysql)
+        return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=corsi)
 
 
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
