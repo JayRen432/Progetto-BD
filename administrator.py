@@ -149,22 +149,64 @@ def get_couse_degree_course(mysql):
 
 def delete_corso_crosoLaurea_aux_post(deg_course, course, mysql):
     cursor = mysql.cursor()
-    if (deg_course is not None) and (course is not None):
-        query = 'DELETE FROM appartenenti WHERE CodCorso = %s AND CorsoLaurea = %s'
-        cursor.execute(query, (deg_course, course))
-    elif (deg_course is None) and (course is not None):
-        query = 'DELETE FROM appartenenti WHERE CodCorso = %s'
-        cursor.execute(query, course)
-    elif (deg_course is not None) and (course is None):
-        query = 'DELETE FROM appartenenti WHERE CorsoLaurea = %s'
-        cursor.execute(query, deg_course)
-
+    query = 'DELETE FROM appartenenti WHERE CodCorso = %s AND CorsoLaurea = %s'
+    cursor.execute(query, (deg_course, course))
     mysql.commit()
     cursor.close()
+
 
 def assegna_Corso_Docente_aux(docente, corso, data, mysql):
     cursor = mysql.cursor()
     query = 'INSERT INTO aperto(CodCorso, CodFiscale, DataApertura) VALUES (%s, %s, %s)'
     cursor.execute(query, (corso, docente, data))
+    mysql.commit()
+    cursor.close()
+
+
+def get_temporaryuser(mysql):
+    user = []
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM temporaryuser'
+    cursor.execute(query)
+
+    # Retrieve the results
+    rows = cursor.fetchall()
+    for row in rows:
+        info = {
+            'codiceFiscale': row[0],
+            'nome': row[1],
+            'cognome': row[2],
+            'mail': row[3],
+            'annoNascita': row[4],
+            'matricola': row[5],
+            'password': row[6],
+            'CorsoLaurea': row[7]
+        }
+        user.append(info)
+    mysql.commit()
+    cursor.close()
+    return user
+
+
+def delete_tempuser(cf, mysql):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM temporaryuser WHERE CodiceFiscale = %s '
+    cursor.execute(query, cf)
+    mysql.commit()
+    cursor.close()
+
+
+def add_user(stud, mysql):
+    cursor = mysql.cursor()
+    query = 'INSERT INTO Studenti VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+    cursor.execute(query, (stud['codice_fiscale'],
+                           stud['nome'],
+                           stud['cognome'],
+                           stud['mail'],
+                           stud['annoNascita'],
+                           stud['matricola'],
+                           stud['password'],
+                           stud['corso_laurea']
+                           ))
     mysql.commit()
     cursor.close()

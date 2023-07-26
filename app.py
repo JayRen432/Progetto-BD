@@ -232,59 +232,6 @@ def administrator():
 def delete():
     return render_template('Delete_users.html', users=users)
 
-
-@app.route('/Admin/add_user')
-def add():
-    users_info = {}
-    cursor = mysql.cursor()
-    query = 'SELECT * FROM temporaryuser'
-    cursor.execute(query)
-
-    # Retrieve the results
-    rows = cursor.fetchall()
-    i = 0
-    for row in rows:
-        insertResult(users_info, row, "Studente ", i)
-        i += 1
-    return render_template('Add_users.html', users=users_info)
-
-
-@app.route('/add', methods=['POST'])
-def add_user():
-    cf = request.form['cf']
-    cursor = mysql.cursor()
-    select_query = 'SELECT * FROM studenti where codicefiscale = %s'
-
-    cursor.execute(select_query, (cf))
-    rows = cursor.fetchall()
-
-    if rows:
-        print("Utente presente in studenti")
-        return 'Utente aggiunto in precedenza'
-
-    select_query1 = 'SELECT * FROM temporaryuser WHERE codicefiscale = %s'
-    cursor.execute(select_query1, (cf))
-    user_data = cursor.fetchone()
-    string = ""
-
-    if user_data:
-
-        delete_query = 'DELETE FROM temporaryuser WHERE codicefiscale = %s'
-        cursor.execute(delete_query, (cf))
-        mysql.commit()
-
-        insert_query = 'INSERT INTO studenti (codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) ' \
-                       'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(insert_query, user_data)
-        mysql.commit()
-
-        string = "User data moved from temporaryuser to studenti successfully."
-    else:
-        string = "User not found in temporaryuser."
-
-    return string
-
-
 @app.route('/delete', methods=['POST'])
 def delete_user():
     user_to_delete = request.form['user']
@@ -294,6 +241,26 @@ def delete_user():
 
 
 # Administator
+@app.route('/Admin/add_user', methods=['GET','POST'])
+def add():
+    if request.method == 'POST':
+        data = request.get_json()
+        stud = {
+            'codice_fiscale': data.get('cod_fiscale'),
+            'nome': data.get('nome'),
+            'cognome': data.get('cognome'),
+            'matricola': data.get('matricola'),
+            'mail': data.get('mail'),
+            'annoNascita': data.get('anno_nascita'),
+            'password': data.get('pwd'),
+            'corso_laurea': data.get('corso_di_laurea')
+        }
+        delete_tempuser(stud['codice_fiscale'], mysql)
+        add_user(stud, mysql)
+        return "Operation Complete"
+    else:
+        users_info = get_temporaryuser(mysql)
+        return render_template('Add_users.html', users=users_info)
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
 def add_degree_course():
     if request.method == 'POST':
@@ -434,15 +401,12 @@ def delete_corso_Docente():
         return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
 
 
-@app.route('/Docenti/Assegna_voti')
-def asse():
-    return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
-
-
-@app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['POST'])
+@app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['GET', 'POST'])
 def assegna_voti(codiceEsame):
-    return json.dumps(studenti)
-
+    if request.method == 'POST':
+        return json.dumps(studenti)
+    else:
+        return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
 
 @app.route('/Docenti/ricevi-voti', methods=['POST'])
 def ricevi_dati():

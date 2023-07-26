@@ -24,8 +24,8 @@
         <div class="utenti">
             <h2>Elenco Utenti</h2>
             <ul>
-                {% for user,info in users.items() %}
-                <li value="{{ info[0] }} {{ info[1] }} {{ info[2] }} {{ info[3] }} {{ info[4] }} {{ info[5] }} {{ info[6] }} {{ info[7] }}" onclick="mostraDettagli(this)">{{ user }}</li>
+                {% for user in users %}
+                <li value="{{ user.codiceFiscale }} {{ user.nome }} {{ user.cognome }} {{ user.mail }} {{ user.annoNascita }} {{ user.matricola }} {{ user.password }} {{ user.CorsoLaurea }}" onclick="mostraDettagli(this)">{{ user.nome +" " + user.cognome}}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -38,6 +38,7 @@
         </div>
     </div>
     <script>
+        var dettagliUtente;
         function mostraDettagli(elemento) {
             // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
             var listaUtenti = document.querySelectorAll('.utenti ul li');
@@ -53,51 +54,55 @@
             // codicefiscale, nome, cognome, annoNascita, mail, matricola, password
             var st = elemento.getAttribute('value');
             const stringSplitted = st.split(" ")
-
+            console.log(stringSplitted)
             // In questo esempio, i dettagli sono predefiniti
-            var dettagliUtente = {
-                cf: stringSplitted[0],
+            dettagliUtente = {
+                cod_fiscale: stringSplitted[0],
                 name: stringSplitted[1],
-                srname: stringSplitted[2],
+                surname: stringSplitted[2],
                 mail: stringSplitted[3],
-                byear: stringSplitted[4],
-                matr : stringSplitted[5],
+                birthday: stringSplitted[4],
+                matricola : stringSplitted[5],
                 pwd : stringSplitted[6],
                 corsoLaurea : stringSplitted[7]
             };
-             // Use the split values as needed
-            console.log(dettagliUtente.cf, dettagliUtente.name, dettagliUtente.srname, dettagliUtente.byear);
             // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
             var dettagliElemento = document.getElementById('dettagli-utente');
             dettagliElemento.innerHTML = `
                 <p><strong>Nome :</strong> ${dettagliUtente.name}</p>
-                <p><strong>Cognome :</strong> ${dettagliUtente.srname}</p>
-                <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cf}</p>
-                <p><strong>Anno Nascita :</strong> ${dettagliUtente.byear}</p>
+                <p><strong>Cognome :</strong> ${dettagliUtente.surname}</p>
+                <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cod_fiscale}</p>
+                <p><strong>Anno Nascita :</strong> ${dettagliUtente.birthday}</p>
                 <p><strong>Corso di Laurea :</strong> ${dettagliUtente.corsoLaurea}</p>
                 <input type="text" name="matricola" placeholder="000000"></input>
                 <input type="text" name="mail" placeholder="example@stud.unive.it"></input>
                 </br></br>
-                Pussy Surprise
             `;
         }
 
         function aggiungiUtente() {
-            var utenteSelezionato = document.querySelector('.utente-selezionato');
-            if (utenteSelezionato) {
-                var stringSplitted = (utenteSelezionato.innerHTML).split();
-                // Effettua una richiesta al server per eliminare l'utente
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/add', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        // Ricarica la pagina dopo aver aggiunto l'utente
-                        window.location.reload();
-                    }
-                };
-                xhr.send('cf=' + encodeURIComponent(stringSplitted[0]));
-            }
+            var data = {
+                cod_fiscale : dettagliUtente.cod_fiscale,
+                nome : dettagliUtente.name,
+                cognome : dettagliUtente.surname,
+                matricola : document.querySelector('input[name="matricola"]').value,
+                mail : document.querySelector('input[name="mail"]').value,
+                anno_nascita : dettagliUtente.birthday,
+                pwd : dettagliUtente.pwd,
+                corso_di_laurea : dettagliUtente.corsoLaurea
+            };
+            // Effettua la richiesta al server usando fetch
+            fetch('/Admin/add_user', {
+              method: 'POST', // Metodo HTTP per inviare i dati
+              headers: {
+                'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
+              },
+              body: JSON.stringify(data)
+            })
+            .then(data => {
+                window.location.reload();
+            })
+
         }
     </script>
 </body>
