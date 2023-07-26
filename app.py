@@ -19,7 +19,6 @@ mysql = pymysql.connect(
     db=app.config['MYSQL_DATABASE_DB']
 )
 
-users = ['Utente 1', 'Utente 2', 'Utente 3']
 righe_uniche = []
 righe_iniziali = [
     {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
@@ -123,7 +122,7 @@ def login():
             return redirect('/menu_studenti')
         elif docente is not None and studente is None:
             return redirect('/menu_docenti')
-        elif mail=="admin@administrator.com" and password=="admin":
+        elif mail == "admin@administrator.com" and password == "admin":
             return redirect('/menu_amministratore')
 
     return render_template("login.html")
@@ -217,31 +216,25 @@ def testi():
     return render_template('testi_esami.html', esami=esami, corsiLaurea=corsi)
 
 
-@app.route('/Admin/iscrittiAppelli')
-def iscritti():
-    corsi = {'informatica', 'ingegneria', 'economia'}
-    return render_template('elenco_appelli_studenti.html', corsi)
-
-
 @app.route('/Admin')
 def administrator():
     return render_template('menu_amministatore.html')
 
 
-@app.route('/Admin/delete_user')
+@app.route('/Admin/delete_user', methods=['GET', 'POST'])
 def delete():
-    return render_template('Delete_users.html', users=users)
-
-@app.route('/delete', methods=['POST'])
-def delete_user():
-    user_to_delete = request.form['user']
-    if user_to_delete in users:
-        users.remove(user_to_delete)
-    return 'Utente eliminato con successo'
+    if request.method == 'POST':
+        data = request.get_json()
+        cf = data.get('cod_fiscale')
+        delete_aux(cf, mysql)
+        return 'Utente eliminato con successo'
+    else:
+        users = get_studenti(mysql)
+        return render_template('Delete_users.html', users=users)
 
 
 # Administator
-@app.route('/Admin/add_user', methods=['GET','POST'])
+@app.route('/Admin/add_user', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
         data = request.get_json()
@@ -261,6 +254,8 @@ def add():
     else:
         users_info = get_temporaryuser(mysql)
         return render_template('Add_users.html', users=users_info)
+
+
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
 def add_degree_course():
     if request.method == 'POST':
@@ -375,14 +370,13 @@ def delete_corso_crosoLaurea():
                                deg_course=json.dumps(corsi_corsiLaurea))
 
 
-# Not Complete page
 @app.route('/Admin/associazioneCorso_Docente', methods=['GET', 'POST'])
 def assegna_Corso_Docente():
     if request.method == 'POST':
         data = request.get_json()
         docente = data.get('cod_Docente')
         corso = data.get('cod_Corso')
-        #none rappresenta dataApertura
+        # none rappresenta dataApertura
         assegna_Corso_Docente_aux(docente, corso, None, mysql)
         return "Operation Complete"
     else:
@@ -391,6 +385,7 @@ def assegna_Corso_Docente():
         return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=corsi)
 
 
+# Not Complete page
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
 def delete_corso_Docente():
     if request.method == 'POST':
@@ -407,6 +402,7 @@ def assegna_voti(codiceEsame):
         return json.dumps(studenti)
     else:
         return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
+
 
 @app.route('/Docenti/ricevi-voti', methods=['POST'])
 def ricevi_dati():

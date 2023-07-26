@@ -210,3 +210,36 @@ def add_user(stud, mysql):
                            ))
     mysql.commit()
     cursor.close()
+
+
+def get_studenti(mysql):
+    users = []
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM studenti'
+    cursor.execute(query)
+
+    # Retrieve the results
+    rows = cursor.fetchall()
+    for row in rows:
+        info = {
+            'codiceFiscale': row[0],
+            'nome': row[1],
+            'cognome': row[2],
+            'mail': row[3],
+            'annoNascita': row[4],
+            'matricola': row[5],
+            'password': row[6],
+            'CorsoLaurea': row[7]
+        }
+        users.append(info)
+    mysql.commit()
+    cursor.close()
+    return users
+
+
+def delete_aux(cf, mysql):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM studenti WHERE CodiceFiscale = %s '
+    cursor.execute(query, cf)
+    mysql.commit()
+    cursor.close()

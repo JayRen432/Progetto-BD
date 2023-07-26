@@ -25,7 +25,7 @@
             <h2>Elenco Utenti</h2>
             <ul>
                 {% for user in users %}
-                <li value="{{ user }}" onclick="mostraDettagli(this)">{{ user }}</li>
+                <li value="{{ user.codiceFiscale }} {{ user.nome }} {{ user.cognome }} {{ user.mail }} {{ user.annoNascita }} {{ user.matricola }} {{ user.password }} {{ user.CorsoLaurea }}" onclick="mostraDettagli(this)">{{ user.nome +" " + user.cognome}}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -39,6 +39,7 @@
     </div>
 
     <script>
+        var dettagliUtente;
         function mostraDettagli(elemento) {
             // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
             var listaUtenti = document.querySelectorAll('.utenti ul li');
@@ -50,45 +51,48 @@
             elemento.classList.add('utente-selezionato');
 
             // Ottiene il nome dell'utente selezionato
-            var nomeUtente = elemento.innerHTML;
 
+            // codicefiscale, nome, cognome, annoNascita, mail, matricola, password
+            var st = elemento.getAttribute('value');
+            const stringSplitted = st.split(" ")
+            console.log(stringSplitted)
             // In questo esempio, i dettagli sono predefiniti
-            var dettagliUtente = {
-                nome: nomeUtente,
-                cognome: 'Rossi',
-                annoNascita: 1990,
-                email: 'utente@example.com',
-                ruolo: 'studente'
+            dettagliUtente = {
+                cod_fiscale: stringSplitted[0],
+                name: stringSplitted[1],
+                surname: stringSplitted[2],
+                mail: stringSplitted[3],
+                birthday: stringSplitted[4],
+                matricola : stringSplitted[5],
+                pwd : stringSplitted[6],
+                corsoLaurea : stringSplitted[7]
             };
-
             // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
             var dettagliElemento = document.getElementById('dettagli-utente');
             dettagliElemento.innerHTML = `
-                <p><strong>Nome:</strong> ${dettagliUtente.nome}</p>
-                <p><strong>Cognome:</strong> ${dettagliUtente.cognome}</p>
-                <p><strong>Anno di Nascita:</strong> ${dettagliUtente.annoNascita}</p>
-                <p><strong>Email:</strong> ${dettagliUtente.email}</p>
-                <p><strong>Ruolo:</strong> ${dettagliUtente.ruolo}</p>
+                <p><strong>Nome :</strong> ${dettagliUtente.name}</p>
+                <p><strong>Cognome :</strong> ${dettagliUtente.surname}</p>
+                <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cod_fiscale}</p>
+                <p><strong>Anno Nascita :</strong> ${dettagliUtente.birthday}</p>
+                <p><strong>Corso di Laurea :</strong> ${dettagliUtente.corsoLaurea}</p>
+                <p><strong>Matricola :</strong>${dettagliUtente.matricola}</p>
+                <p><strong>Mail :</strong>${dettagliUtente.mail}</p>
+                </br></br>
             `;
         }
 
         function eliminaUtente() {
-            var utenteSelezionato = document.querySelector('.utente-selezionato');
-            if (utenteSelezionato) {
-                var nomeUtente = utenteSelezionato.innerHTML;
+            fetch('/Admin/delete_user', {
+              method: 'POST', // Metodo HTTP per inviare i dati
+              headers: {
+                'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
+              },
+              body: JSON.stringify(dettagliUtente)
+            })
+            .then(data => {
+                window.location.reload();
+            })
 
-                // Effettua una richiesta al server per eliminare l'utente
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/delete', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        // Ricarica la pagina dopo aver eliminato l'utente
-                        window.location.reload();
-                    }
-                };
-                xhr.send('user=' + encodeURIComponent(nomeUtente));
-            }
         }
     </script>
 </body>
