@@ -141,7 +141,7 @@ def menu_docenti():
 
 @app.route('/menu_amministratore')
 def menu_amminsitratore():
-    return render_template("menu_amministratore.html")
+    return render_template("menu_amministatore.html")
 
 
 # localhost:5000/user/John
