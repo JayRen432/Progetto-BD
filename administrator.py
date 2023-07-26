@@ -243,3 +243,30 @@ def delete_aux(cf, mysql):
     cursor.execute(query, cf)
     mysql.commit()
     cursor.close()
+
+
+def get_couse_docenti(mysql):
+    data = []
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM aperto'
+    cursor.execute(query)
+
+    # Retrieve the results
+    rows = cursor.fetchall()
+    for row in rows:
+        info = {
+            'Corso': row[0],
+            'Docente': row[1]
+        }
+        data.append(info)
+    mysql.commit()
+    cursor.close()
+    return data
+
+
+def delete_corso_Docente_aux(doc_cf, code_course,mysql):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM aperto WHERE CodCorso = %s AND CodFiscale = %s'
+    cursor.execute(query, (code_course, doc_cf))
+    mysql.commit()
+    cursor.close()

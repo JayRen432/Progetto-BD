@@ -26,14 +26,6 @@ righe_iniziali = [
 ]
 esami = []
 
-dettagli_corsi_Docenti = [
-    {"codice_fiscale_docente": "ABC123", "nome_docente": "Mario", "cognome_docente": "Rossi", "codice_corso": "C1",
-     "nome_corso": "Matematica"},
-    {"codice_fiscale_docente": "GHI789", "nome_docente": "Luigi", "cognome_docente": "Bianchi", "codice_corso": "C2",
-     "nome_corso": "Informatica"},
-    {"codice_fiscale_docente": "GHI789", "nome_docente": "Luigi", "cognome_docente": "Bianchi", "codice_corso": "C3",
-     "nome_corso": "Programmazione"}
-]
 lista_corsi = [
     {"codice": "Corso A", "nome": "informatica"},
     {"codice": "Corso B", "nome": "matematica"},
@@ -385,15 +377,21 @@ def assegna_Corso_Docente():
         return render_template('Assegnazione_corso_docente.html', docenti=docenti, corsi=corsi)
 
 
-# Not Complete page
 @app.route('/Admin/delete_corso_Docente', methods=['GET', 'POST'])
 def delete_corso_Docente():
     if request.method == 'POST':
         data = request.get_json().get('dataToSend')
-
-        return jsonify("Tuttok ")
+        doc_cf = data.get('doc_code')
+        code_course = data.get('course_code')
+        delete_corso_Docente_aux(doc_cf, code_course,mysql)
+        return "Operation Complete"
     else:
-        return render_template('Delete_corsi_docenti.html', list=json.dumps(dettagli_corsi_Docenti))
+        docenti = get_docenti(mysql)
+        cors = get_couse(mysql)
+        corsi_docenti = get_couse_docenti(mysql)
+        return render_template('Delete_corsi_docenti.html', docenti=docenti,
+                               corsi=json.dumps(cors),
+                               corsi_doc=json.dumps(corsi_docenti))
 
 
 @app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['GET', 'POST'])
