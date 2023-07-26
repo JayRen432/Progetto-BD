@@ -1,46 +1,26 @@
-{% extends 'base.html' %}
+{% extends 'baseMenu.html' %}
 {% block content %}
-<main class="form-signin">
-    <form method="POST" action="/sign_up">
-        <div>
-            <input type="text" name="Nome" placeholder="Name">
-            <label for="floatingInput">Name</label>
+<div class="form-container">
+    <h2>Sign Up</h2>
+    <p>Inserisci le informazioni richieste:</p>
+    <form  class="signup-form" method="POST" action="/sign_up">
+        <input type="text" name="Nome" placeholder="Name"><br>
+        <input type="text" name="Cognome" placeholder="Surname"><br>
+        <input type="date" name="AnnoNascita" placeholder="00/00/00"><br>
+        <input type="text" name="Codicefiscale" placeholder="Codicefiscale"><br>
+        <input type="email" name="Email" placeholder="name@example.com"><br>
+        <input type="password" name="password" placeholder="Password"><br>
+        <select name="corsoLaurea" id="corso_di_laurea">
+            <option selected disabled hidden>--------------------------</option>
+            {% for codice, info in corsiLaurea.items() %}
+                <option value="{{ codice }}">{{ info }}</option>
+            {% endfor %}
+        </select>
+        <div class="checking">
+            <input type="checkbox" name="remember-me" value="remember-me" id="remember-me">
+            <label for="remember-me">Remember me</label>
         </div>
-        <div>
-            <input type="text" name="Cognome" placeholder="Surname">
-            <label for="floatingInput">Surname</label>
-        </div>
-        <div>
-            <input type="date" name="AnnoNascita" placeholder="00/00/00">
-            <label for="floatingInput">Birthdate</label>
-        </div>
-        <div>
-            <input type="text" name="Codicefiscale" placeholder="Codicefiscale">
-            <label for="floatingInput">Codicefiscale</label>
-        </div>
-        <div>
-            <input type="email" name="Email" placeholder="name@example.com">
-            <label for="floatingInput">Email address</label>
-        </div>
-        <div>
-            <input type="password" name="password" placeholder="Password">
-            <label for="floatingPassword">Password</label>
-        </div>
-        <div>
-            <select name="corsoLaurea" id="corso_di_laurea">
-                <option selected disabled hidden>-----------</option>
-                {% for codice, info in corsiLaurea.items() %}
-                    <option value="{{ codice }}">{{ info }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <input type="checkbox" name="remember-me" value="remember-me">
-        <label>
-            Remember me
-        </label>
-        </div>
-            <button type="submit">Sign up</button>
+        <button type="submit">Sign up</button>
     </form>
-</main>
+</div>
 {% endblock %}

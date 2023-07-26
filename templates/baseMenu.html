@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">   
+        <title>TITOLO</title>
+        <meta name="author" content="Bertocco Marco">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/css/main.css">
+    </head>
+    <body>
+        <div class="navbar">
+            <img src="/static/images/logo.png" alt="logo">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="login">Login</a></li>
+                <li><a href="sign_up">Sign Up</a></li>
+            </ul>
+            <div class="search-bar">
+                <input type="text" placeholder="Search...">
+                <button><img src="/static/images/search.png" alt="SearchIcon"></button>
+            </div>
+        </div>
+        <div class="container">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+        <div class="bottom-bar">
+            <p>telephone: +39 XXX XXX XXXX</p>
+            <p>mail: univeservices@gmail.com</p>
+        </div>
+    </body>
+</html>

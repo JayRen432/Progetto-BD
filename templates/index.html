@@ -1,16 +1,6 @@
-
+{% extends 'baseMenu.html' %}
 {% block content %}
-<head>
-<center>
-    <h1>Università Ca Foscari di Venezia</h1>
-    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" width="200" height="200">
-</center>
-</head> 
-<div style="position: absolute; top: 0; right: 0;">
-    <a href="sign_up">Registrati</a><br></br>
-    <a href="login">Login</a>
-</div>
-<body>
+
     <font size="+2">
     <h2 style="color: green;">Elenco Corsi Scientifici:</h2>
     {% for corso in elenco_corsi_scientifici %}
@@ -30,6 +20,5 @@
     {% endfor %}
 
     <br></br>
-</body>
-    
+
 {% endblock %}

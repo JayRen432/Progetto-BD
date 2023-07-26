@@ -1,20 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'baseMenu.html' %}
 {% block content %}
-<main class="form-login">
-    <form>
-        <div>
-        <input type="email" placeholder="name@example.com">
-        <label for="floatingInput">Email address</label>
-        </div>
-        <div>
-        <input type="password" placeholder="Password">
-        <label for="floatingPassword">Password</label>
-        </div>
-
+<div class="form-container">
+    <h2>Login</h2>
+    <p>Inserisci le tue credenziali:</p>
+    <form class="login-form">
+        <input type="email" placeholder="name@example.com"><br>
+        <input type="password" placeholder="Password"><br>
         <button type="submit">Login</button>
-
     </form>
-    <a href="reset_pwd">Reset Password</a>
-    <a href="sign_up">Sign up</a>
-</main>
+    <br>
+    <ul class="links">
+        <li><a href="reset_pwd">Reset Password</a></li>
+        <li><a href="sign_up">Sign up</a></li>
+    </ul>
+</div>
 {% endblock %}
