@@ -119,11 +119,11 @@ def login():
         mail = request.form['mail']
         password = request.form['password']
         studente, docente = login_aux(mail, password, mysql)
-        if studente:
+        if studente is not None and docente is None:
             return redirect('/menu_studenti')
-        elif docente:
+        elif docente is not None and studente is None:
             return redirect('/menu_docenti')
-        elif mail == "admin@administrator.com" and password == "admin":
+        elif mail=="admin@administrator.com" and password=="admin":
             return redirect('/menu_amministratore')
 
     return render_template("login.html")

@@ -17,7 +17,15 @@ def login_aux(mail, password, mysql):
     cursor.close()
 
     if studente:
-        return True, False
+        info_studente = {'codicefiscale': studente[0],
+                        'nome': studente[1],
+                        'cognome': studente[2],
+                        'annoNascita': studente[3],
+                        'mail': studente[4],
+                        'matricola': studente[5],
+                        'password': studente[6],
+                        'CorsoLaurea': studente[7]}
+        return info_studente, None
     else:
         cursor = mysql.cursor()
         query = 'SELECT * FROM docenti WHERE mail = %s AND password = %s'
@@ -26,9 +34,15 @@ def login_aux(mail, password, mysql):
         cursor.close()
 
         if docente:
-            return False, True 
+            info_docente = {'codicefiscale': docente[0],
+                            'nome': docente[1],
+                            'cognome': docente[2],
+                            'annoNascita': docente[3],
+                            'mail': docente[4],
+                            'password': docente[5]}
+            return None, info_docente
 
-    return False, False
+    return None, None
 
 def insertResult(dictionaryL, rowSQL, string, number=None):
     #codicefiscale, nome, cognome, annoNascita, mail, matricola, password
