@@ -1,19 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Link alle pagine</title>
-</head>
-<body>
-    <h1>Menù principale</h1>
-    <ul>
-        <li><a href=/Docenti/Numeri_di_telefono>Aggiungi - rimuovi numero di telefono</a></li>
+{% extends 'baseUsers.html' %}
+{% block content %}
 
-        <li><a href="/Docenti/Crea_Esame">Crea un esame</a></li>
-        <li><a href="/Docenti/Emilina_Esame">Cancella esame</a></li>
+<h3>Menu Principale Docenti</h3>
+<ul class="links">
+    <li><a href=/Docenti/Numeri_di_telefono>Aggiungi - rimuovi numero di telefono</a></li>
 
-        <li><a href="/Docenti/Elenco_esami">Inserisci voti studenti</a></li>
+    <li><a href="/Docenti/Crea_Esame">Crea un esame</a></li>
+    <li><a href="/Docenti/Emilina_Esame">Cancella esame</a></li>
 
-        <li><a href="/user_data">Info Personali</a></li>
-    </ul>
-</body>
-</html>
+    <li><a href="/Docenti/Elenco_esami">Inserisci voti studenti</a></li>
+
+    <li><a href="/user_data">Info Personali</a></li>
+</ul>
+{% endblock %}
+

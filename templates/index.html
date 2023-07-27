@@ -1,24 +1,21 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
-
-    <font size="+2">
-    <h2 style="color: green;">Elenco Corsi Scientifici:</h2>
+<div class="index-container">
+    <h3 style="color: green;">Elenco Corsi Scientifici:</h3>
     {% for corso in elenco_corsi_scientifici %}
-        <a href="{{ corso }}">{{ corso }}</a></a><br/>
+        <a href="{{ corso }}">{{ corso }}</a><br/>
     {% endfor %}
-    <h2 style="color: red;">Elenco Corsi Umanistici:</h2>
+    <h3 style="color: red;">Elenco Corsi Umanistici:</h3>
     {% for corso in elenco_corsi_umanistici %}
-        <a href="{{ corso }}">{{ corso }}</a></a><br/>
+        <a href="{{ corso }}">{{ corso }}</a><br/>
     {% endfor %}
-    <h2 style="color: orange;">Elenco Corsi Economia:</h2>
+    <h3 style="color: orange;">Elenco Corsi Economia:</h3>
     {% for corso in elenco_corsi_economici %}
-        <a href="{{ corso }}">{{ corso }}</a></a><br/>
+        <a href="{{ corso }}">{{ corso }}</a><br/>
     {% endfor %}
-    <h2 style="color: blue;">Elenco Corsi Lingua:</h2>
+    <h3 style="color: blue;">Elenco Corsi Lingua:</h3>
     {% for corso in elenco_corsi_lingua %}
-        <a href="{{ corso }}">{{ corso }}</a></a><br/>
+        <a href="{{ corso }}">{{ corso }}</a><br/>
     {% endfor %}
-
-    <br></br>
-
+</div>
 {% endblock %}
