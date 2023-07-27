@@ -71,7 +71,6 @@ CREATE TABLE Numeri_Telefono (
 CREATE TABLE Insegna (
     CodCorso VARCHAR(50),
     CodFiscale VARCHAR(16),
-    DataApertura DATE,
     PRIMARY KEY (CodCorso, CodFiscale),
     FOREIGN KEY (CodCorso) REFERENCES Corsi(CodiceCorso),
     FOREIGN KEY (CodFiscale) REFERENCES Docenti(CodiceFiscale)
