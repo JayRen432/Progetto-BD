@@ -1,0 +1,134 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #34495e;
+    overflow-x: hidden;
+}
+
+p {
+    text-align: center;
+    font-size: 25px;
+    color: #a8aeb4;
+}
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #a8aeb4;
+}
+
+h2 {
+    text-align: center;
+    font-size: 40px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #a8aeb4;
+}
+
+h3 {
+    text-align: center;
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #a8aeb4;
+}
+
+img {
+    width: 25%;
+    height: 25%;
+}
+
+a{
+    text-align: center;
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #2d6dae;
+}
+
+/* SIDEBAR */
+.sidebar {
+    height: 100%;
+    width: 200px;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    right: -200px;
+    transition: right 0.3s ease;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 20px;
+}
+
+.sidebar li {
+    margin-bottom: 10px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+}
+
+.sidebar img{
+    width: 90px; 
+    height: 90px; 
+    vertical-align: middle; 
+    margin-left: 20px;
+}
+
+.toggle-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1; 
+}
+
+
+.sidebar.open {
+    right: 0;
+}
+
+.sidebar.open + .toggle-button {
+display: none;
+}
+
+
+/* CONTAINER */
+.container {
+    padding: 20px;
+}
+
+
+/* LINKS */
+.links {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+  
+.links li {
+    margin-bottom: 5px;
+}
+  
+.links li a {
+    text-decoration: none;
+    color: #007bff;
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    font-size: small;
+}
+  
+.links li a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
