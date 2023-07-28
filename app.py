@@ -103,37 +103,47 @@ def signUp():
 
 
 # localhost:5000/login
-@app.route('/login', methods=['GET',
-                              'POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
+@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
 def login():
     if request.method == 'POST':
         mail = request.form['mail']
         password = request.form['password']
         studente, docente = login_aux(mail, password, mysql)
         if studente is not None and docente is None:
+            session['codicefiscale']=studente['codicefiscale']
+            session['nome']=studente['nome']    
+            session['cognome']=studente['cognome']
+            session['annoNascita']=studente['annoNascita']
+            session['mail']=studente['mail']
+            session['ruolo']='Studente'
             return redirect('/menu_studenti')
         elif docente is not None and studente is None:
+            session['codicefiscale']=docente['codicefiscale']
+            session['nome']=docente['nome']
+            session['cognome']=docente['cognome']
+            session['annoNascita']=docente['annoNascita']
+            session['mail']=docente['mail']
+            session['ruolo']='Docente'
+            #return redirect(f'/user_data?ruolo=Docente')
             return redirect('/menu_docenti')
-        elif mail == "admin@administrator.com" and password == "admin":
+        elif mail=="admin@administrator.com" and password=="admin":
             return redirect('/menu_amministratore')
-
+                
     return render_template("login.html")
-
 
 @app.route('/menu_studenti')
 def menu_studenti():
-    return render_template("menu_studenti.html")
-
+    ruolo = 'Studente'
+    return render_template("menu_studenti.html", ruolo=ruolo)
 
 @app.route('/menu_docenti')
 def menu_docenti():
-    return render_template("menu_docenti.html")
-
+    ruolo = 'Docente'
+    return render_template("menu_docenti.html", ruolo=ruolo)
 
 @app.route('/menu_amministratore')
 def menu_amminsitratore():
-    return render_template("menu_amministatore.html")
-
+    return render_template("menu_amministratore.html")
 
 # localhost:5000/user/John
 @app.route('/user/<name>')
@@ -399,6 +409,7 @@ def assegna_voti(codiceEsame):
     if request.method == 'POST':
         return json.dumps(studenti)
     else:
+        studenti = assegna_voto_aux(mysql,codiceEsame)
         return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
 
 
@@ -410,29 +421,51 @@ def ricevi_dati():
     return jsonify(mat)
 
 
-@app.route('/Docenti/Elenco_esami')
+@app.route('/Docenti/Elenco_esami', methods=['GET', 'POST'])
 def table_esami():
-    return render_template('Tabella_esami.html', esami=json.dumps(data_esami))
+    if request.method=='GET':
+        esami = tabella_esami(mysql)
+        return render_template('Tabella_esami.html', esami=json.dumps(esami))
 
 
 # Endpoint per la gestione della richiesta del pulsante "Assegna voti"
+def exam_get_datas():
+    cursor = mysql.cursor()
+    query = 'SELECT * FROM esami'
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    cursor.close()
+    return rows
+
 
 @app.route('/Docenti/Crea_Esame', methods=['GET', 'POST'])
 def crea_esame():
+    cf_docente = session.get('codicefiscale')
+    lista_corsi = []
     if (request.method == 'POST'):
         corso = request.form['corso']
         nome_esame = request.form['nome_esame']
+        codice_esame = request.form['codice_esame']
         data = request.form['data']
         tipo = request.form['tipo']
         valore = request.form['valore']
+        crea_esame_inserisci(mysql,corso, nome_esame, codice_esame, data, tipo, valore, cf_docente)
 
+    lista_corsi = crea_esame_docenti(mysql,cf_docente)
+    print(lista_corsi)
+    if request.method=='POST':
         return render_template('Crea_esame.html', corsi=lista_corsi)
     else:
         return render_template('Crea_esame.html', corsi=lista_corsi)
 
 
-@app.route('/Docenti/Emilina_Esame')
+@app.route('/Docenti/Elimina_Esame', methods=['GET', 'POST'])
 def elimina_Esame():
+    cf_docente = session.get('codicefiscale')
+    if request.method == 'POST':
+        esame = request.form['esame']
+        elimina_esame_post(mysql,esame,cf_docente)
+    lista_esami =elimina_esame_get(mysql,cf_docente)
     return render_template('Delete_esame.html', esami=lista_esami)
 
 
@@ -445,25 +478,36 @@ def delete_esame(esame_id):
 
 @app.route('/Docenti/Numeri_di_telefono')
 def phone_number():
+    cf_docente = session.get('codicefiscale')
+    phone_numbers = session.get('phone_numbers', [])
+    phone_numbers = phone_number_aux(mysql,cf_docente)
     return render_template('Numeri_telefono.html', phone_numbers=phone_numbers)
+
 
 
 @app.route('/add_phone', methods=['POST'])
 def add_phone_number():
+    cf_docente = session.get('codicefiscale')
     data = request.get_json()
     number_to_add = data.get('number')
-    if number_to_add not in phone_numbers:
-        phone_numbers.append(number_to_add)
-    return jsonify(message=number_to_add)
+    try:
+        add_number_aux(mysql, number_to_add, cf_docente)
+        return jsonify(message="Numero di telefono aggiunto correttamente.")
+    except Exception as e:
+        return jsonify(message="Errore durante l'aggiunta del numero di telefono. Dettagli: " + str(e))
+
 
 
 @app.route('/delete_phone', methods=['POST'])
 def delete_phone_number():
+    cf_docente = session.get('codicefiscale')
     data = request.get_json()
-    number_to_delete = data.get('number')
-    if number_to_delete in phone_numbers:
-        phone_numbers.remove(number_to_delete)
-    return jsonify(message=number_to_delete)
+    numero_telefono = data.get('number')
+    try:
+        delete_number_aux(mysql,numero_telefono, cf_docente)
+        return jsonify(message="Numero di telefono eliminato correttamente.")
+    except Exception as e:
+        return jsonify(message="Errore durante l'eliminazione del numero di telefono. Dettagli: " + str(e))
 
 
 # Invalid URL
