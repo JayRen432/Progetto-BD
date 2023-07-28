@@ -35,22 +35,21 @@
       `;
       return row;
     }
-
     // Funzione per aggiungere le righe alla tabella
     function populateTable(data) {
       const tableBody = document.querySelector("tbody");
       data.forEach(entry => {
-        const { codiceEsame, corso, data, tipo } = entry;
-        const row = createRow(codiceEsame, corso, data, tipo);
+        const { CodEsame, Corso, Data, Tipo } = entry;
+        const row = createRow(CodEsame, Corso, Data, Tipo);
         tableBody.appendChild(row);
       });
     }
-
+    
     // Funzione per cambiare pagina
     function assegnaVoti(codiceEsame) {
         window.location.href = '/Docenti/' + codiceEsame + '/Assegna_voti';
     }
-
+    
     // Esempio di dati della tabella
     const data = JSON.parse('{{ esami | safe }}');
     // Popola la tabella con i dati
