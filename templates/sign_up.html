@@ -1,9 +1,9 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
-<div class="form-container">
+<div class="form_container">
     <h2>Sign Up</h2>
     <p>Inserisci le informazioni richieste:</p>
-    <form  class="signup-form" method="POST" action="/sign_up">
+    <form class="signup-form" method="POST" action="/sign_up">
         <input type="text" name="Nome" placeholder="Name"><br>
         <input type="text" name="Cognome" placeholder="Surname"><br>
         <input type="date" name="AnnoNascita" placeholder="00/00/00"><br>
@@ -13,7 +13,7 @@
         <select name="corsoLaurea" id="corso_di_laurea">
             <option selected disabled hidden>--------------------------</option>
             {% for codice, info in corsiLaurea.items() %}
-                <option value="{{ codice }}">{{ info }}</option>
+            <option value="{{ codice }}">{{ info }}</option>
             {% endfor %}
         </select>
         <div class="checking">

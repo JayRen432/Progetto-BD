@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Form per dati corso di laurea</title>
-</head>
-<body>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="add_c">
+    <h2>Aggiungi Corso</h2>
+    <p>Inserisci le informazioni richieste:</p>
+    </br>
     <form action="/Admin/aggiungi_corso" method="post">
-        <label for="codice_corso">Codice Corso:</label>
-        <input type="text" id="codice_corso" name="codice_corso"><br>
-
-        <label for="nome_corso">Nome Corso:</label>
-        <input type="text" id="nome_corso" name="nome_corso"><br>
-
-        <input type="submit" value="Invia">
+        <input type="text" id="codice_corso" name="codice_corso" placeholder="Codice Corso"><br>
+        <input type="text" id="nome_corso" name="nome_corso" placeholder="Nome Corso"><br>
+        <button type="submit" value="Invia">Invia al server</button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

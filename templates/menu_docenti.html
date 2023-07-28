@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Link alle pagine</title>
-</head>
-<body>
-    <h1>Menù principale</h1>
-    <ul>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="users_container">
+    <h3>Menu Principale Docenti</h3>
+    <ul class="links">
         <li><a href=/Docenti/Numeri_di_telefono>Aggiungi - rimuovi numero di telefono</a></li>
 
         <li><a href="/Docenti/Crea_Esame">Crea un esame</a></li>
@@ -15,5 +12,5 @@
 
         <li><a href="/user_data">Info Personali</a></li>
     </ul>
-</body>
-</html>
+</div>
+{% endblock %}

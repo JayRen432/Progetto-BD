@@ -24,7 +24,6 @@
             {% endfor %}
         </select>
         </br>
-        <label for="data"></label>
     </div>
     <button onclick="inviaDati()">Associa</button>
 
@@ -34,20 +33,27 @@
             let selettore_corso = document.getElementById("Corso");
             let docente = selettore_docente.value;
             let corso = selettore_corso.value;
-           fetch('/Admin/associazioneCorso_Docente', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
-            },
-                body: JSON.stringify({
-                    cod_Docente : docente,
-                    cod_Corso : corso
+            alert(docente + "   " + corso);
+            if (docente === '-----------' || corso === '-----------'){
+                alert("Seleziona dei dati validi");
+            }
+            else{
+               fetch('/Admin/associazioneCorso_Docente', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
+                },
+                    body: JSON.stringify({
+                        cod_Docente : docente,
+                        cod_Corso : corso
+                    })
                 })
-            })
-            .then(data => {
-                window.location.reload();
-            })
-
+                .then(data => {
+                    alert(data);
+                    // Puoi gestire qui la risposta del server se necessario
+                })
+                location.reload();
+            }
         }
 
     </script>

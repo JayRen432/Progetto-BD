@@ -1,110 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Elenco Utenti</title>
-    <style>
-        .container {
-            display: flex;
-        }
-        .utenti {
-            flex: 1;
-            padding: 20px;
-        }
-        .dettagli {
-            flex: 1;
-            padding: 20px;
-        }
-        .utente-selezionato {
-            background-color: lightgray;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="utenti">
-            <h2>Elenco Utenti</h2>
-            <ul id="user-list"></ul>
-        </div>
-        <div class="dettagli">
-            <h2>Dettagli Docente</h2>
-            <div id="dettagli-utente">
-                Seleziona un docente per visualizzare i dettagli.
-            </div>
-            <button onclick="eliminaUtente()">Elimina Utente</button>
-        </div>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="add_container">
+    <div class="add_u">
+        <h2>Elenco Utenti</h2>
+        <ul id="user-list"></ul>
     </div>
+    <div class="dett_u">
+        <h2>Dettagli Docente</h2>
+        <div id="dettagli-utente">
+            <p>Seleziona un docente per visualizzare i dettagli.</p>
+        </div>
+        <button onclick="eliminaUtente()">Elimina Utente</button>
+    </div>
+</div>
 
-    <script>
-        // Array di oggetti utente
-        var users = JSON.parse('{{ users|safe }}');
-        popolaListaUtenti();
+<script>
+    // Array di oggetti utente
+    var users = JSON.parse('{{ users|safe }}');
+    popolaListaUtenti();
 
-        // Funzione per generare la lista degli utenti nella pagina HTML
-        function popolaListaUtenti() {
-            var userlistElement = document.getElementById("user-list");
+    // Funzione per generare la lista degli utenti nella pagina HTML
+    function popolaListaUtenti() {
+        var userlistElement = document.getElementById("user-list");
 
-            users.forEach(function (user) {
-                var listItem = document.createElement("li");
-                listItem.textContent = user.nome + " " + user.cognome;
-                listItem.setAttribute("data-user", JSON.stringify(user)); // Memorizza l'oggetto utente come attributo dati
-                listItem.onclick = function () {
-                    mostraDettagli(this);
-                };
-                userlistElement.appendChild(listItem);
-            });
-        }
+        users.forEach(function (user) {
+            var listItem = document.createElement("li");
+            listItem.textContent = user.nome + " " + user.cognome;
+            listItem.setAttribute("data-user", JSON.stringify(user)); // Memorizza l'oggetto utente come attributo dati
+            listItem.onclick = function () {
+                mostraDettagli(this);
+            };
+            userlistElement.appendChild(listItem);
+        });
+    }
 
-        function mostraDettagli(elemento) {
-            // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
-            var listaUtenti = document.querySelectorAll('.utenti ul li');
-            listaUtenti.forEach(function (utente) {
-                utente.classList.remove('utente-selezionato');
-            });
+    function mostraDettagli(elemento) {
+        // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
+        var listaUtenti = document.querySelectorAll('.utenti ul li');
+        listaUtenti.forEach(function (utente) {
+            utente.classList.remove('utente-selezionato');
+        });
 
-            // Aggiunge la classe "utente-selezionato" all'elemento selezionato
-            elemento.classList.add('utente-selezionato');
+        // Aggiunge la classe "utente-selezionato" all'elemento selezionato
+        elemento.classList.add('utente-selezionato');
 
-            // Ottiene i dettagli dell'utente selezionato dall'attributo dati
-            var dettagliUtente = JSON.parse(elemento.getAttribute("data-user"));
+        // Ottiene i dettagli dell'utente selezionato dall'attributo dati
+        var dettagliUtente = JSON.parse(elemento.getAttribute("data-user"));
 
-            // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
-            var dettagliElemento = document.getElementById('dettagli-utente');
-            dettagliElemento.innerHTML = `
+        // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
+        var dettagliElemento = document.getElementById('dettagli-utente');
+        dettagliElemento.innerHTML = `
                 <p><strong>Nome:</strong> ${dettagliUtente.nome}</p>
                 <p><strong>Cognome:</strong> ${dettagliUtente.cognome}</p>
                 <p><strong>Anno di Nascita:</strong> ${dettagliUtente.anno_di_nascita}</p>
                 <p><strong>Email:</strong> ${dettagliUtente.mail}</p>
             `;
-        }
+    }
 
-        function eliminaUtente() {
-            var utenteSelezionato = document.querySelector('.utente-selezionato');
-            if (utenteSelezionato) {
-                var codiceFiscaleUtente = JSON.parse(utenteSelezionato.getAttribute("data-user")).codice_fiscale;
-                // Effettua una richiesta al server per eliminare l'utente
-                fetch('/Admin/delete_docente', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({codice_fiscale: codiceFiscaleUtente})
+    function eliminaUtente() {
+        var utenteSelezionato = document.querySelector('.utente-selezionato');
+        if (utenteSelezionato) {
+            var codiceFiscaleUtente = JSON.parse(utenteSelezionato.getAttribute("data-user")).codice_fiscale;
+            // Effettua una richiesta al server per eliminare l'utente
+            fetch('/Admin/delete_docente', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ codice_fiscale: codiceFiscaleUtente })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // La risposta dal server è arrivata
+                    // Puoi aggiornare la pagina o gestire la risposta a tuo piacimento
+                    alert(data);
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        // La risposta dal server è arrivata
-                        // Puoi aggiornare la pagina o gestire la risposta a tuo piacimento
-                        alert(data);
-                    })
-                    .catch(error => {
-                        // Gestione dell'errore
-                        console.error('Errore durante la richiesta al server:', error);
-                    });
-            }
-            window.location.reload();
+                .catch(error => {
+                    // Gestione dell'errore
+                    console.error('Errore durante la richiesta al server:', error);
+                });
         }
+        window.location.reload();
+    }
 
         // Chiama la funzione per popolare la lista degli utenti
 
-    </script>
-</body>
-</html>
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Elenco Testi Esami per Corso di Laurea</title>
+</head>
+<script type="text/javascript">
+  function check(){
+    if ((document.form1.corso_di_laurea.value)!="-----------"){
+	  return true;
+	}
+	else if ((document.form1.anno_corsi.value)!="-----------"){
+	  return true;
+	}
+	else{
+	  alert ("All the fields are empty!");
+	  return false;
+	}
+  }
+  function showStudent(){
+    var csLaurea=document.getElementById("corso_di_laurea").value;
+    var yearCs=document.getElementById("appello").value;
+
+    var dettagliElemento = document.getElementById("studente");
+    dettagliElemento.innerHTML = "{% for anno, elenco_esami in esami.items() %} <ul> {% if anno == "+yearCs+"%}{% for esame in elenco_esami %}<li>{{ esame }}</li>{% endfor %}{% endif %}</ul>{% endfor %}";
+  
+    $.ajax({url: "/path/to/python/script.py",type: "GET",
+    success:function(response) {
+        // La lista Python è contenuta nella risposta (response)
+        var pythonList = JSON.parse(response)
+    }});
+  }
+</script>
+<body>
+  {% extends 'base.html' %}
+  {% block content %}
+  <h1>Seleziona Testi Esami</h1>
+    <form name="form1" action="/testiEsami">
+      <select id="corso_di_laurea">
+        <option selected disabled hidden>-----------</option>
+        {% for corso in corsiLaurea %}
+          <option value={{corso}}>{{corso}}</option>
+        {% endfor %}
+      </select>
+      
+      <select id="appello">
+        <option selected disabled hidden>-----------</option>
+          <option value="Primo Appello">Primo Appello</option>
+          <option value="Secondo Appello">Secondo Appello</option>
+          <option value="Terzo Appello">Terzo Appello</option>
+          <option value="Quarto Appello">Quarto Appello</option>
+      </select>
+
+      <button onclick="check() && showStudent()">Vedi studenti</button>
+    </form>
+
+    <div class="elenco-studenti">
+        <h2>Studenti</h2>
+        <div id="studente">
+            Seleziona un corso e appello per visualizzare gli studenti iscritti.
+        </div>
+    </div>
+    {% endblock %}
+    
+</body>
+</html>

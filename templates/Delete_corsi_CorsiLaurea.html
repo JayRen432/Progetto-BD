@@ -1,62 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Menù a tendina e tabella</title>
-</head>
-<body>
-    <h2>Menù a tendina</h2>
-    <form>
-        <select id="corsoLaureaSelect" name="corsoLaurea">
-            {% for corso in corsi_Laurea %}
-                <option value="{{ corso.codice }}">{{ corso.nome }}</option>
-            {% endfor %}
-        </select>
-        <button type="button" onclick="showTable()">Mostra Tabella</button>
-    </form>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<h2>Menù a tendina</h2>
+<form>
+    <select id="corsoLaureaSelect" name="corsoLaurea">
+        {% for corso in corsi_Laurea %}
+        <option value="{{ corso.codice }}">{{ corso.nome }}</option>
+        {% endfor %}
+    </select>
+    <button type="button" onclick="showTable()">Mostra Tabella</button>
+</form>
 
-    <div id="tableContainer" style="display: none;">
-        <h2>Tabella</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Codice Corso Laurea</th>
-                    <th>Nome Corso Laurea</th>
-                    <th>Codice Corso</th>
-                    <th>Nome Corso</th>
-                    <th>Azione</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- La tabella verrà popolata tramite JavaScript -->
-            </tbody>
-        </table>
-    </div>
+<div id="tableContainer" style="display: none;">
+    <h2>Tabella</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Codice Corso Laurea</th>
+                <th>Nome Corso Laurea</th>
+                <th>Codice Corso</th>
+                <th>Nome Corso</th>
+                <th>Azione</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- La tabella verrà popolata tramite JavaScript -->
+        </tbody>
+    </table>
+</div>
 
-    <script>
-        function showTable() {
-            var corsoLaureaSelect = document.getElementById("corsoLaureaSelect");
-            var selectedCodice = corsoLaureaSelect.value;
-            var selectedNome = corsoLaureaSelect.options[corsoLaureaSelect.selectedIndex].text;
+<script>
+    function showTable() {
+        var corsoLaureaSelect = document.getElementById("corsoLaureaSelect");
+        var selectedCodice = corsoLaureaSelect.value;
+        var selectedNome = corsoLaureaSelect.options[corsoLaureaSelect.selectedIndex].text;
 
-            var degCourseData = JSON.parse('{{ deg_course|safe }}');
-            var corsiData = JSON.parse('{{ corsi|safe }}');
+        var degCourseData = JSON.parse('{{ deg_course|safe }}');
+        var corsiData = JSON.parse('{{ corsi|safe }}');
 
-            populateTable(selectedCodice, selectedNome, degCourseData, corsiData);
-        }
+        populateTable(selectedCodice, selectedNome, degCourseData, corsiData);
+    }
 
-        function sendFormData_aux(codiceCorsoLaurea, codiceDegCourse) {
-            const data = {
-                codiceCorsoLaurea: codiceCorsoLaurea,
-                codiceCourse: codiceDegCourse
-            };
+    function sendFormData_aux(codiceCorsoLaurea, codiceDegCourse) {
+        const data = {
+            codiceCorsoLaurea: codiceCorsoLaurea,
+            codiceCourse: codiceDegCourse
+        };
 
-            fetch('/Admin/delete_corso_corsoLaurea', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
+        fetch('/Admin/delete_corso_corsoLaurea', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -65,55 +61,54 @@
                 // ...
                 alert('Dati inviati con successo al server!');
             })
-        }
+    }
 
-        function populateTable(selectedCodice, selectedNome, degCourseData, corsiData) {
-            var tableBody = document.getElementById("tableBody");
-            tableBody.innerHTML = '';
+    function populateTable(selectedCodice, selectedNome, degCourseData, corsiData) {
+        var tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = '';
 
-            for (let item of degCourseData) {
-                if (item.CorsoLaurea === selectedCodice) {
-                    var row = document.createElement("tr");
+        for (let item of degCourseData) {
+            if (item.CorsoLaurea === selectedCodice) {
+                var row = document.createElement("tr");
 
-                    var codiceCorsoLaureaCell = document.createElement("td");
-                    codiceCorsoLaureaCell.innerText = item.CorsoLaurea;
-                    row.appendChild(codiceCorsoLaureaCell);
+                var codiceCorsoLaureaCell = document.createElement("td");
+                codiceCorsoLaureaCell.innerText = item.CorsoLaurea;
+                row.appendChild(codiceCorsoLaureaCell);
 
-                    var nomeCorsoLaureaCell = document.createElement("td");
-                    nomeCorsoLaureaCell.innerText = selectedNome;
-                    row.appendChild(nomeCorsoLaureaCell);
+                var nomeCorsoLaureaCell = document.createElement("td");
+                nomeCorsoLaureaCell.innerText = selectedNome;
+                row.appendChild(nomeCorsoLaureaCell);
 
-                    var codiceDegCourseCell = document.createElement("td");
-                    codiceDegCourseCell.innerText = item.CodCorso;
-                    row.appendChild(codiceDegCourseCell);
+                var codiceDegCourseCell = document.createElement("td");
+                codiceDegCourseCell.innerText = item.CodCorso;
+                row.appendChild(codiceDegCourseCell);
 
-                    var nomeCorsoCell = document.createElement("td");
-                    var matchingCorso = corsiData.find(corso => corso.codice === item.CodCorso);
-                    nomeCorsoCell.innerText = matchingCorso ? matchingCorso.nome : '';
-                    row.appendChild(nomeCorsoCell);
+                var nomeCorsoCell = document.createElement("td");
+                var matchingCorso = corsiData.find(corso => corso.codice === item.CodCorso);
+                nomeCorsoCell.innerText = matchingCorso ? matchingCorso.nome : '';
+                row.appendChild(nomeCorsoCell);
 
-                    var buttonCell = document.createElement("td");
-                    var sendButton = document.createElement("button");
-                    sendButton.innerText = "Invia";
-                    sendButton.onclick = sendFormData.bind(null, row);
-                    buttonCell.appendChild(sendButton);
-                    row.appendChild(buttonCell);
+                var buttonCell = document.createElement("td");
+                var sendButton = document.createElement("button");
+                sendButton.innerText = "Invia";
+                sendButton.onclick = sendFormData.bind(null, row);
+                buttonCell.appendChild(sendButton);
+                row.appendChild(buttonCell);
 
 
-                    tableBody.appendChild(row);
-                }
+                tableBody.appendChild(row);
             }
-
-            var tableContainer = document.getElementById("tableContainer");
-            tableContainer.style.display = "block";
         }
-        function sendFormData(row) {
+
+        var tableContainer = document.getElementById("tableContainer");
+        tableContainer.style.display = "block";
+    }
+    function sendFormData(row) {
         var cells = row.getElementsByTagName("td");
         var codiceCorsoLaurea = cells[0].innerText;
         var codiceDegCourse = cells[2].innerText;
-        sendFormData_aux(codiceCorsoLaurea,codiceDegCourse)
+        sendFormData_aux(codiceCorsoLaurea, codiceDegCourse)
 
     }
-    </script>
-</body>
-</html>
+</script>
+{% endblock %}

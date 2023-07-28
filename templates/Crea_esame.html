@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inserimento dati</title>
-</head>
-<body>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="add_e">
     <h1>Inserisci i dati:</h1>
     <form action="/Docenti/Crea_Esame" method="POST">
         <label for="corso">Corso:</label>
@@ -21,7 +16,7 @@
         <label for="codice_esame">Codice esame:</label>
         <input type="text" name="codice_esame" required>
 
-        
+
         <br>
 
         <label for="nome_esame">Nome esame:</label>
@@ -56,5 +51,5 @@
 
         <button type="submit">Invia dati</button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

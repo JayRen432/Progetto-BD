@@ -1,99 +1,88 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Elenco Utenti</title>
-    <style>
-        .container {
-            display: flex;
-        }
-        .utenti {
-            flex: 1;
-            padding: 20px;
-        }
-        .dettagli {
-            flex: 1;
-            padding: 20px;
-        }
-        .utente-selezionato {
-            background-color: lightgray;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="utenti">
-            <h2>Elenco Utenti</h2>
-            <ul>
-                {% for user in users %}
-                <li value="{{ user.codiceFiscale }} {{ user.nome }} {{ user.cognome }} {{ user.mail }} {{ user.annoNascita }} {{ user.matricola }} {{ user.password }} {{ user.CorsoLaurea }}" onclick="mostraDettagli(this)">{{ user.nome +" " + user.cognome}}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="dettagli">
-            <h2>Dettagli Utente</h2>
-            <div id="dettagli-utente">
-                Seleziona un utente per visualizzare i dettagli.
-            </div>
-            <button onclick="eliminaUtente()">Elimina Utente</button>
-        </div>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="delete_container">
+    <div class="del_u">
+        <h2>Elenco Utenti</h2>
+        <ul class="links">
+            {% for user in users %}
+            <li value="{{ user.codiceFiscale }} {{ user.nome }} {{ user.cognome }} {{ user.mail }} {{ user.annoNascita }} {{ user.matricola }} {{ user.password }} {{ user.CorsoLaurea }}" onclick="mostraDettagli(this)">{{ user.nome +" " + user.cognome}}</li>
+            {% endfor %}
+        </ul>
     </div>
+    <div class="dett_u">
+        <h2>Dettagli Utente</h2>
+        <div id="dettagli-utente">
+            <p>Seleziona un utente per visualizzare i dettagli.</p>
+        </div>
+        <button onclick="eliminaUtente()">Elimina Utente</button>
+    </div>
+</div>
 
-    <script>
-        var dettagliUtente;
-        function mostraDettagli(elemento) {
-            // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
-            var listaUtenti = document.querySelectorAll('.utenti ul li');
-            listaUtenti.forEach(function (utente) {
-                utente.classList.remove('utente-selezionato');
-            });
+<script>
+    var dettagliUtente;
+    function mostraDettagli(elemento) {
+        // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
+        var listaUtenti = document.querySelectorAll('.utenti ul li');
+        listaUtenti.forEach(function (utente) {
+            utente.classList.remove('utente-selezionato');
+        });
 
-            // Aggiunge la classe "utente-selezionato" all'elemento selezionato
-            elemento.classList.add('utente-selezionato');
+        // Aggiunge la classe "utente-selezionato" all'elemento selezionato
+        elemento.classList.add('utente-selezionato');
 
-            // Ottiene il nome dell'utente selezionato
 
-            // codicefiscale, nome, cognome, annoNascita, mail, matricola, password
-            var st = elemento.getAttribute('value');
-            const stringSplitted = st.split(" ")
-            console.log(stringSplitted)
-            // In questo esempio, i dettagli sono predefiniti
-            dettagliUtente = {
-                cod_fiscale: stringSplitted[0],
-                name: stringSplitted[1],
-                surname: stringSplitted[2],
-                mail: stringSplitted[3],
-                birthday: stringSplitted[4],
-                matricola : stringSplitted[5],
-                pwd : stringSplitted[6],
-                corsoLaurea : stringSplitted[7]
+        var st = elemento.getAttribute('value');
+        const stringSplitted = st.split(" ")
+        console.log(stringSplitted)
+        dettagliUtente = {
+            cod_fiscale: stringSplitted[0],
+            name: stringSplitted[1],
+            surname: stringSplitted[2],
+            mail: stringSplitted[3],
+            birthday: stringSplitted[4],
+            matricola: stringSplitted[5],
+            pwd: stringSplitted[6],
+            corsoLaurea: stringSplitted[7]
+        };
+        // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
+        var dettagliElemento = document.getElementById('dettagli-utente');
+        dettagliElemento.innerHTML = `
+            <p><strong>Nome :</strong> ${dettagliUtente.name}</p>
+            <p><strong>Cognome :</strong> ${dettagliUtente.surname}</p>
+            <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cod_fiscale}</p>
+            <p><strong>Anno Nascita :</strong> ${dettagliUtente.birthday}</p>
+            <p><strong>Corso di Laurea :</strong> ${dettagliUtente.corsoLaurea}</p>
+            <p><strong>Mail :</strong> ${dettagliUtente.mail}</p>
+            <p><strong>Matricola :</strong> ${dettagliUtente.matricola}</p>
+            </br></br>
+        `;
+    }
+
+    function eliminaUtente() {
+        if (dettagliUtente) {
+            var data = {
+                cod_fiscale: dettagliUtente.cod_fiscale,
+                nome: dettagliUtente.name,
+                cognome: dettagliUtente.surname,
+                matricola: dettagliUtente.matricola,
+                mail: dettagliUtente.mail,
+                anno_nascita: dettagliUtente.birthday,
+                pwd: dettagliUtente.pwd,
+                corso_di_laurea: dettagliUtente.corsoLaurea
             };
-            // Aggiorna la sezione dei dettagli con i dati dell'utente selezionato
-            var dettagliElemento = document.getElementById('dettagli-utente');
-            dettagliElemento.innerHTML = `
-                <p><strong>Nome :</strong> ${dettagliUtente.name}</p>
-                <p><strong>Cognome :</strong> ${dettagliUtente.surname}</p>
-                <p><strong>Codice Fiscale :</strong> ${dettagliUtente.cod_fiscale}</p>
-                <p><strong>Anno Nascita :</strong> ${dettagliUtente.birthday}</p>
-                <p><strong>Corso di Laurea :</strong> ${dettagliUtente.corsoLaurea}</p>
-                <p><strong>Matricola :</strong>${dettagliUtente.matricola}</p>
-                <p><strong>Mail :</strong>${dettagliUtente.mail}</p>
-                </br></br>
-            `;
-        }
-
-        function eliminaUtente() {
+            // Effettua la richiesta al server usando fetch
             fetch('/Admin/delete_user', {
-              method: 'POST', // Metodo HTTP per inviare i dati
-              headers: {
-                'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
-              },
-              body: JSON.stringify(dettagliUtente)
+                method: 'POST', // Metodo HTTP per inviare i dati
+                headers: {
+                    'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
+                },
+                body: JSON.stringify(data)
             })
-            .then(data => {
-                window.location.reload();
-            })
-
+                .then(data => {
+                    window.location.reload();
+                })
         }
-    </script>
-</body>
-</html>
+
+    }
+</script>
+{% endblock %}

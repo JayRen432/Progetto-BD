@@ -28,16 +28,6 @@
             <label id="nomeCorsoLabel2"></label>
         </div>
         </br></br>
-        <div>
-            <label for="anno">Seleziona anno</label>
-            <select id="anno" onchange="updateLabel('corsoDiLaurea2', 'nomeCorsoLabel2')">
-                <option selected disabled hidden>-----------</option>
-                <option value="Primo anno">Primo anno</option>
-                <option value="Secondo anno">Secondo anno</option>
-                <option value="Terzo anno">Terzo anno</option>
-            </select>
-        </div>
-        </br></br>
         <button onclick="inviaDati()">Invia al server</button>
     
         <script>
@@ -93,31 +83,30 @@
             function inviaDati() {
                 const selectedCodice1 = document.getElementById("nomeCorsoLabel").textContent;
                 const selectedCodice2 = document.getElementById("nomeCorsoLabel2").textContent;
-                const selectedAnno = document.getElementById("anno").value;
     
     
                 // Esegui qui la logica per inviare i dati al server (AJAX o altro)
                 // Ad esempio, puoi utilizzare fetch per inviare una richiesta POST al server
     
                 // Esempio di utilizzo di fetch per inviare i dati al server Flask
-                    fetch('/Admin/assegnaCorso_CorsoLaurea', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            corso1: selectedCodice1,
-                            corso2: selectedCodice2,
-                            anno: selectedAnno
-                        })
+                fetch('/associazioneCorso_CorsoLaurea', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        corso1: selectedCodice1,
+                        corso2: selectedCodice2
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            window.location.reload();
-                        })
-                        .catch(error => {
-                            console.error('Errore durante l\'invio dei dati al server:', error);
-                        });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(selectedCodice1 + "  " + selectedCodice2);
+                    // Puoi gestire qui la risposta del server se necessario
+                })
+                .catch(error => {
+                    console.error('Errore durante l\'invio dei dati al server:', error);
+                });
             }
     
             // Popolare i menu a tendina all'avvio della pagina

@@ -1,103 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Menù a tendina e tabella</title>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title></title>
 </head>
 <body>
-    <h2>Menù a tendina</h2>
-    <form>
-        <label for="DocenteSelect">Seleziona Docente</label>
-        <select id="DocenteSelect" name="DocenteSelect">
-            {% for docente in docenti %}
-                <option value="{{ docente.codice_fiscale }}">{{ docente.nome + " " + docente.cognome }}</option>
-            {% endfor %}
-        </select>
-        <button type="button" onclick="showTable()">Mostra Tabella</button>
-    </form>
+    <h1>Menù a Tendina Dinamico</h1>
+    <label for="dropdown">Docente: </label>
+    <select id="dropdown">
+        <option selected disabled hidden>-----------</option>
+    </select>
+    <button onclick="showTable()">Visualizza Tabella</button>
 
     <div id="tableContainer" style="display: none;">
-        <h2>Tabella</h2>
-        <table border="1">
-            <thead>
+        <form>
+            <table border="1">
                 <tr>
-                    <th>Codice fiscale Docente</th>
-                    <th>Nome docente</th>
+                    <th>Codice Docente</th>
+                    <th>Nome Docente</th>
                     <th>Codice Corso</th>
                     <th>Nome Corso</th>
                     <th>Azione</th>
                 </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- La tabella verrà popolata tramite JavaScript -->
-            </tbody>
-        </table>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </form>
     </div>
 
     <script>
+        // Lista di test
+        var test_list = JSON.parse('{{ list | safe }}');
+        populateDropdown();
 
-        function showTable() {
-            var DocenteSelect = document.getElementById("DocenteSelect");
-            var selectedDocente_cf = DocenteSelect.value;
-            var selectedDocenteNome = DocenteSelect.options[DocenteSelect.selectedIndex].text;
-            var course = JSON.parse('{{ corsi | safe }}')
-            var corsi_docenti = JSON.parse('{{ corsi_doc | safe }}')
+        function populateDropdown() {
+            var dropdown = document.getElementById('dropdown');
+            var addedCodiciFiscali = {}; // Oggetto per tenere traccia dei codici fiscali già aggiunti
 
-            populateTable(selectedDocente_cf, selectedDocenteNome, corsi_docenti, course);
-        }
-
-        function populateTable(docente_CF, docente_Nome, corsi_docenti, course) {
-            var tableBody = document.getElementById('tableBody');
-
-            // Clean the table body before populating the data
-            tableBody.innerHTML = '';
-            // Loop through the corsi_docenti list to find matching elements
-            for (let i = 0; i < corsi_docenti.length; i++) {
-                    const corso_docente = corsi_docenti[i];
-
-                    // Check if the Docente matches docente_CF
-                    if (corso_docente.Docente === docente_CF) {
-                        // Find the corresponding course name from the "course" list
-                        const corso = course.find(course => course.codice === corso_docente.Corso);
-
-                        if (corso) {
-                            // Create a new row for the table
-                            const newRow = document.createElement('tr');
-
-                            // Populate the columns with data
-                            const cfCell = document.createElement('td');
-                            cfCell.textContent = docente_CF;
-                            newRow.appendChild(cfCell);
-
-                            const nomeDocenteCell = document.createElement('td');
-                            nomeDocenteCell.textContent = docente_Nome;
-                            newRow.appendChild(nomeDocenteCell);
-
-                            const codiceCorsoCell = document.createElement('td');
-                            codiceCorsoCell.textContent = corso_docente.Corso;
-                            newRow.appendChild(codiceCorsoCell);
-
-                            const nomeCorsoCell = document.createElement('td');
-                            nomeCorsoCell.textContent = corso ? corso.nome : 'Course Not Found';
-                            newRow.appendChild(nomeCorsoCell);
-
-                            const actionCell = document.createElement('td');
-                            const button = document.createElement('button');
-                            button.textContent = 'Send Data';
-                            button.addEventListener('click', () => {
-                                sendData(i);
-                            });
-                            actionCell.appendChild(button);
-                            newRow.appendChild(actionCell);
-
-                            // Add the row to the table body
-                            tableBody.appendChild(newRow);
-                        }
-                    }
+            for (var i = 0; i < test_list.length; i++) {
+                var codiceFiscale = test_list[i].codice_fiscale_docente;
+                // Verifica se il codice fiscale è già stato aggiunto, se sì, passa al prossimo elemento
+                if (addedCodiciFiscali[codiceFiscale]) {
+                    continue;
                 }
-            var tableContainer = document.getElementById("tableContainer");
-            tableContainer.style.display = "block";
+
+                var option = document.createElement('option');
+                option.value = codiceFiscale;
+                option.textContent = test_list[i].nome_docente + " " + test_list[i].cognome_docente;
+                dropdown.appendChild(option);
+
+                // Segna il codice fiscale come aggiunto nell'oggetto addedCodiciFiscali
+                addedCodiciFiscali[codiceFiscale] = true;
+            }
+        }
+        function showTable() {
+            var selectedOption = document.getElementById('dropdown').value;
+            if (selectedOption === "") {
+                alert('Seleziona un\'opzione dalla lista.');
+                return;
+            }
+            var filteredData = filterData(selectedOption);
+            var tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            for (var i = 0; i < filteredData.length; i++) {
+                var row = tableBody.insertRow();
+                var rowData = filteredData[i];
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+
+                cell1.innerHTML = rowData.codice_fiscale_docente;
+                cell2.innerHTML = rowData.nome_docente + " " + rowData.cognome_docente;
+                cell3.innerHTML = rowData.codice_corso;
+                cell4.innerHTML = rowData.nome_corso;
+                cell5.innerHTML = '<button onclick="sendData(' + i + ')">Invia</button>';
+            }
+            document.getElementById('tableContainer').style.display = 'block';
         }
 
+        function filterData(selectedOption) {
+            return test_list.filter(function (item) {
+                return item.codice_fiscale_docente === selectedOption;
+            });
+        }
 
         function sendData(rowIndex) {
             var table = document.getElementById('tableBody');
@@ -105,7 +93,9 @@
 
             var dataToSend = {
                 'doc_code': rowData[0].innerHTML,
+                'doc_name+surname': rowData[1].innerHTML,
                 'course_code': rowData[2].innerHTML,
+                'course_name': rowData[3].innerHTML
             };
 
             // Invia i dati al server (implementazione a tua discrezione)
@@ -120,6 +110,7 @@
              })
              .then(response => response.json())
              .then(data => {
+                 alert(data)
 
              })
              .catch(error => console.error('Errore:', error));

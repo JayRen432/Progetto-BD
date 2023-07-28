@@ -1,11 +1,11 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
-<div class="form-container">
+<div class="form_container">
     <h2>Login</h2>
     <p>Inserisci le tue credenziali:</p>
-    <form class="login-form">
-        <input type="email" placeholder="name@example.com"><br>
-        <input type="password" placeholder="Password"><br>
+    <form class="login-form" method="POST" action="/login">
+        <input type="email" name="mail" placeholder="name@example.com"><br>
+        <input type="password" name="password" placeholder="Password"><br>
         <button type="submit">Login</button>
     </form>
     <br>
