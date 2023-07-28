@@ -1,12 +1,11 @@
 from flask import *
-
+from flask.sessions import SessionMixin
 from administrator import *
 from utenti import *
 
 # Create Flask Instance
 app = Flask(__name__)
 # Set debug mode to True
-app.debug = True
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'Sf35dkn@!'
@@ -23,28 +22,6 @@ righe_uniche = []
 righe_iniziali = [
     {"codice_corso": "ABC123", "nome_corso": "Corso A", "data_esame": "2023-07-20", "aula": "Aula 1"},
     {"codice_corso": "DEF456", "nome_corso": "Corso B", "data_esame": "2023-07-25", "aula": "Aula 2"},
-]
-esami = []
-
-lista_corsi = [
-    {"codice": "Corso A", "nome": "informatica"},
-    {"codice": "Corso B", "nome": "matematica"},
-]
-lista_esami = [
-    {"id": 1, "corso": "Corso A", "nome_esame": "Esame 1", "data": "2023-07-19", "tipo": "Scritto", "valore": "6"},
-    {"id": 2, "corso": "Corso B", "nome_esame": "Esame 2", "data": "2023-07-20", "tipo": "Orale", "valore": "3"},
-    {"id": 3, "corso": "Corso C", "nome_esame": "Esame 3", "data": "2023-07-21", "tipo": "Progetto", "valore": "12"},
-]
-phone_numbers = ['1234567890', '9876543210', '5555555555']
-data_esami = [
-    {'codiceEsame': "E001", 'corso': "Matematica", 'data': "2023-07-25", 'tipo': "Scritto"},
-    {'codiceEsame': "E002", 'corso': "Fisica", 'data': "2023-08-10", 'tipo': "Orale"},
-    {'codiceEsame': "E003", 'corso': "Informatica", 'data': "2023-08-15", 'tipo': "Pratico"}
-]
-studenti = [
-    {'matricola': 'ABC123', 'nome': 'Mario', 'cognome': 'Rossi'},
-    {'matricola': 'DEF456', 'nome': 'Paola', 'cognome': 'Verdi'},
-    {'matricola': 'GHI789', 'nome': 'Luigi', 'cognome': 'Bianchi'}
 ]
 
 
@@ -73,7 +50,7 @@ def resetpwd():
         email = request.form["email"]
         if password == confirm_password:
             hash_password = hashlib.sha256(confirm_password.encode('utf-8'))
-            hash_value=hash_password.hexdigest()
+            hash_value = hash_password.hexdigest()
             cursor = mysql.cursor()
             query = "UPDATE temporaryuser SET password = %s WHERE mail = %s"
             cursor.execute(query, (hash_value, email))
@@ -101,7 +78,7 @@ def signUp():
             corsolaurea = request.form["corsoLaurea"]
 
             if sign_up_control(
-                codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
+                    codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
             ):
                 number = sign_up_aux(
                     codicefiscale,
@@ -120,47 +97,53 @@ def signUp():
 
 
 # localhost:5000/login
-@app.route('/login', methods=['GET', 'POST'])#se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore 
+@app.route('/login', methods=['GET',
+                              'POST'])  # se number è 1 accedo a menù studente, se è 2 a menù docente, se la mail e la password corrispondono alle credenziali dell'amministratore entro nel menù amministratore
 def login():
     if request.method == 'POST':
         mail = request.form['mail']
         password = request.form['password']
         studente, docente = login_aux(mail, password, mysql)
         if studente is not None and docente is None:
-            session['codicefiscale']=studente['codicefiscale']
-            session['nome']=studente['nome']    
-            session['cognome']=studente['cognome']
-            session['annoNascita']=studente['annoNascita']
-            session['mail']=studente['mail']
-            session['ruolo']='Studente'
+
+            session['codicefiscale'] = studente['codicefiscale']
+            session['nome'] = studente['nome']
+            session['cognome'] = studente['cognome']
+            session['annoNascita'] = studente['annoNascita']
+            session['mail'] = studente['mail']
+            session['ruolo'] = 'Studente'
             return redirect('/menu_studenti')
         elif docente is not None and studente is None:
-            session['codicefiscale']=docente['codicefiscale']
-            session['nome']=docente['nome']
-            session['cognome']=docente['cognome']
-            session['annoNascita']=docente['annoNascita']
-            session['mail']=docente['mail']
-            session['ruolo']='Docente'
-            #return redirect(f'/user_data?ruolo=Docente')
+            session['codicefiscale'] = docente['codicefiscale']
+            session['nome'] = docente['nome']
+            session['cognome'] = docente['cognome']
+            session['annoNascita'] = docente['annoNascita']
+            session['mail'] = docente['mail']
+            session['ruolo'] = 'Docente'
+            # return redirect(f'/user_data?ruolo=Docente')
             return redirect('/menu_docenti')
-        elif mail=="admin@administrator.com" and password=="admin":
+        elif mail == "admin@administrator.com" and password == "admin":
             return redirect('/menu_amministratore')
-                
+
     return render_template("login.html")
+
 
 @app.route('/menu_studenti')
 def menu_studenti():
     ruolo = 'Studente'
     return render_template("menu_studenti.html", ruolo=ruolo)
 
+
 @app.route('/menu_docenti')
 def menu_docenti():
     ruolo = 'Docente'
     return render_template("menu_docenti.html", ruolo=ruolo)
 
+
 @app.route('/menu_amministratore')
 def menu_amminsitratore():
     return render_template("menu_amministratore.html")
+
 
 # localhost:5000/user/John
 @app.route('/user/<name>')
@@ -171,7 +154,7 @@ def user(name):
 @app.route('/user_data')
 def home():
     # Dati utente di esempio
-    cf= session.get('codicefiscale')
+    cf = session.get('codicefiscale')
     nome = session.get('nome')
     cognome = session.get('cognome')
     anno_nascita = session.get('annoNascita')
@@ -179,6 +162,7 @@ def home():
     ruolo = session.get('ruolo')
     return render_template('info_utente.html', codice_fiscale=cf, nome=nome, cognome=cognome, mail=email,
                            anno_nascita=anno_nascita, ruolo=ruolo)
+
 
 @app.route('/esami', methods=['GET', 'POST'])
 def esami():
@@ -211,7 +195,7 @@ def esami():
 
 @app.route('/Admin')
 def administrator():
-    return render_template('menu_amministatore.html')
+    return render_template('menu_amministratore.html')
 
 
 @app.route('/Admin/delete_user', methods=['GET', 'POST'])
@@ -384,7 +368,7 @@ def delete_corso_Docente():
         data = request.get_json().get('dataToSend')
         doc_cf = data.get('doc_code')
         code_course = data.get('course_code')
-        delete_corso_Docente_aux(doc_cf, code_course,mysql)
+        delete_corso_Docente_aux(doc_cf, code_course, mysql)
         return "Operation Complete"
     else:
         docenti = get_docenti(mysql)
@@ -398,9 +382,9 @@ def delete_corso_Docente():
 @app.route('/Docenti/<codiceEsame>/Assegna_voti', methods=['GET', 'POST'])
 def assegna_voti(codiceEsame):
     if request.method == 'POST':
-        return json.dumps(studenti)
+        return "ok"
     else:
-        studenti = assegna_voto_aux(mysql,codiceEsame)
+        studenti = assegna_voto_aux(mysql, codiceEsame)
         return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
 
 
@@ -414,7 +398,7 @@ def ricevi_dati():
 
 @app.route('/Docenti/Elenco_esami', methods=['GET', 'POST'])
 def table_esami():
-    if request.method=='GET':
+    if request.method == 'GET':
         esami = tabella_esami(mysql)
         return render_template('Tabella_esami.html', esami=json.dumps(esami))
 
@@ -440,11 +424,11 @@ def crea_esame():
         data = request.form['data']
         tipo = request.form['tipo']
         valore = request.form['valore']
-        crea_esame_inserisci(mysql,corso, nome_esame, codice_esame, data, tipo, valore, cf_docente)
+        crea_esame_inserisci(mysql, corso, nome_esame, codice_esame, data, tipo, valore, cf_docente)
 
-    lista_corsi = crea_esame_docenti(mysql,cf_docente)
+    lista_corsi = crea_esame_docenti(mysql, cf_docente)
     print(lista_corsi)
-    if request.method=='POST':
+    if request.method == 'POST':
         return render_template('Crea_esame.html', corsi=lista_corsi)
     else:
         return render_template('Crea_esame.html', corsi=lista_corsi)
@@ -455,8 +439,8 @@ def elimina_Esame():
     cf_docente = session.get('codicefiscale')
     if request.method == 'POST':
         esame = request.form['esame']
-        elimina_esame_post(mysql,esame,cf_docente)
-    lista_esami =elimina_esame_get(mysql,cf_docente)
+        elimina_esame_post(mysql, esame, cf_docente)
+    lista_esami = elimina_esame_get(mysql, cf_docente)
     return render_template('Delete_esame.html', esami=lista_esami)
 
 
@@ -471,9 +455,8 @@ def delete_esame(esame_id):
 def phone_number():
     cf_docente = session.get('codicefiscale')
     phone_numbers = session.get('phone_numbers', [])
-    phone_numbers = phone_number_aux(mysql,cf_docente)
+    phone_numbers = phone_number_aux(mysql, cf_docente)
     return render_template('Numeri_telefono.html', phone_numbers=phone_numbers)
-
 
 
 @app.route('/add_phone', methods=['POST'])
@@ -488,14 +471,13 @@ def add_phone_number():
         return jsonify(message="Errore durante l'aggiunta del numero di telefono. Dettagli: " + str(e))
 
 
-
 @app.route('/delete_phone', methods=['POST'])
 def delete_phone_number():
     cf_docente = session.get('codicefiscale')
     data = request.get_json()
     numero_telefono = data.get('number')
     try:
-        delete_number_aux(mysql,numero_telefono, cf_docente)
+        delete_number_aux(mysql, numero_telefono, cf_docente)
         return jsonify(message="Numero di telefono eliminato correttamente.")
     except Exception as e:
         return jsonify(message="Errore durante l'eliminazione del numero di telefono. Dettagli: " + str(e))
@@ -531,7 +513,7 @@ def index_docenti():
 
 @app.route('/Admin')
 def index_admin():
-    return render_template('menu_amministatore.html')
+    return render_template('menu_amministratore.html')
 
 
 @app.route('/stud/lista_esami_utente')
@@ -618,4 +600,5 @@ def exam_details():
 
 
 if __name__ == '__main__':
+    app.secret_key = 'Dokkeabi'
     app.run()
