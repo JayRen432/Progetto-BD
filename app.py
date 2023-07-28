@@ -209,30 +209,6 @@ def esami():
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami={})
 
 
-@app.route('/testiEsami')
-def testi():
-    # Dati degli esami di esempio
-    corsi = {'informatica', 'ingegneria', 'economia'}
-    esami = {
-        'informatica': {
-            'Primo anno': ['Matematica', 'Programmazione e laboratorio', 'Architettura dei calcolatori'],
-            'Secondo anno': ['Algoritmi e strutture dati', 'Basi di dati', 'Reti di calcolatori'],
-            'Terzo anno': ['Intelligenza artificiale', 'Sistemi distribuiti', 'Sicurezza informatica']
-        },
-        'ingegneria': {
-            'Primo anno': ['Matematica', 'Fisica', 'Chimica'],
-            'Secondo anno': ['Meccanica', 'Elettrotecnica', 'Materiali'],
-            'Terzo anno': ['Termodinamica', 'Ingegneria dei trasporti', 'Ingegneria ambientale']
-        },
-        'economia': {
-            'Primo anno': ['Microeconomia', 'Macroeconomia', 'Statistica'],
-            'Secondo anno': ['Economia aziendale', 'Finanza', 'Marketing'],
-            'Terzo anno': ['Economia internazionale', 'Economia del lavoro', 'Economia dello sviluppo']
-        }
-    }
-    return render_template('testi_esami.html', esami=esami, corsiLaurea=corsi)
-
-
 @app.route('/Admin')
 def administrator():
     return render_template('menu_amministatore.html')
@@ -535,6 +511,12 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html"), 500
+
+
+# Permission
+@app.errorhandler(403)
+def page_not_found(e):
+    return render_template("403.html"), 403
 
 
 @app.route('/stud')
