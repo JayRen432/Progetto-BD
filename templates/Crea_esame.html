@@ -12,10 +12,16 @@
         <select name="corso" id="corso">
             <option selected disabled hidden>-----------</option>
             {% for corso in corsi %}
-                <option value={{corso}}>{{corso}}</option>
+            <option value="{{ corso.CodiceCorso }}">{{ corso.CodiceCorso }}</option>
             {% endfor %}
         </select>
 
+        <br>
+
+        <label for="codice_esame">Codice esame:</label>
+        <input type="text" name="codice_esame" required>
+
+        
         <br>
 
         <label for="nome_esame">Nome esame:</label>
@@ -40,7 +46,7 @@
 
         <label for="valore">Valore:</label>
         <select name="valore" id="valore">
-            <option value="0">0 crediti</option>
+            <option value="0">IDONEITÀ</option>
             <option value="3">3 crediti</option>
             <option value="6">6 crediti</option>
             <option value="12">12 crediti</option>
