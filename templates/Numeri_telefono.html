@@ -6,16 +6,16 @@
 </head>
 <br>
     <h1>Tabella numeri di telefono</h1>
-    <table>
+    <table id="table">
         <tr>
             <th>Numero di telefono</th>
-            <th>Azione</th>
+            <th>Elimina</th>
         </tr>
         {% for numero in phone_numbers %}
         <tr>
             <td>{{ numero }}</td>
             <td>
-                <button onclick="invia_numero('/delete_phone' ,'{{ numero }}')">Invia</button>
+                <button onclick="deletenumber(this)">Elimina</button>
             </td>
         </tr>
         {% endfor %}
@@ -43,7 +43,7 @@
                 },
                 body: JSON.stringify({ number: numeroTelefono })
             })
-            location.reload();
+            .then(data => { window.location.reload();})
         }
         function mostraForm() {
             var formContainer = document.getElementById('formContainer');
@@ -52,6 +52,13 @@
         function invia() {
              var numeroTelefono = document.getElementById('telefono').value;
              invia_numero('/add_phone', numeroTelefono);
+        }
+        function deletenumber(button) {
+            var row = button.closest('tr');
+            var numeroElement = row.querySelector('td:first-child');
+            var numeroTelefono = numeroElement.textContent;
+            invia_numero('/delete_phone', numeroTelefono);
+           
         }
     </script>
 </body>
