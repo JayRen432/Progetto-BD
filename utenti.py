@@ -78,4 +78,86 @@ def sign_up_corsolaurea(corsi, mysql):
         insertResult(corsi, row[0], row[1])
         i += 1
 
+def crea_esame_inserisci(mysql,corso, cf_docente, nome_esame, codice_esame, data, tipo, valore):
+    cursor = mysql.cursor()
+    query = 'INSERT INTO esami (CodEsame, Docente, Corso, NomeEsame, Data, Tipo, Valore) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    cursor.execute(query,(codice_esame, cf_docente, corso, nome_esame, data, tipo, valore))
+    mysql.commit()
+    cursor.close()
 
+def crea_esame_docenti(mysql,cf_docente):
+    cursor = mysql.cursor()
+    query = 'SELECT c.CodiceCorso  FROM corsi c JOIN esami e ON c.CodiceCorso = e.Corso WHERE e.Docente = %s'
+    cursor.execute(query,(cf_docente,))
+    course_data = cursor.fetchall()
+    cursor.close()
+    lista_corsi = [{'CodiceCorso': row[0]} for row in course_data]
+    return lista_corsi
+
+def assegna_voto_aux(mysql, codiceEsame):
+    cursor = mysql.cursor()
+    query = 'SELECT s.matricola, s.Nome, s.Cognome FROM iscrizioni_appelli ia JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE ia.Esame = %s'
+    cursor.execute(query,(codiceEsame,))
+    student_data = cursor.fetchall()
+    cursor.close()
+    studenti = [{'matricola': row[0], 'Nome': row[1], 'Cognome' : row[2]} for row in student_data]
+    return studenti
+
+def tabella_esami(mysql):
+    cf_docente = session.get('codicefiscale')
+    cursor = mysql.cursor()
+    query = 'SELECT e.CodEsame, e.Corso, e.Data, e.Tipo FROM esami e WHERE e.Docente = %s'
+    cursor.execute(query,(cf_docente,))
+    esami = []
+    for row in cursor.fetchall():
+        esame = {
+            "CodEsame": row[0],
+            "Corso": row[1],
+            "Data": str(row[2]), 
+            "Tipo": row[3]
+        }
+        esami.append(esame)
+    cursor.close()
+    return esami
+
+def elimina_esame_post(mysql, esame, cf_docente):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM esami WHERE CodEsame = %s AND Docente = %s'
+    cursor.execute(query, (esame, cf_docente,))
+    mysql.commit()
+    cursor.close()
+
+def elimina_esame_get(mysql, cf_docente):
+    cursor = mysql.cursor()
+    query = 'SELECT e.CodEsame, e.Corso, e.Data, e.Tipo, e.Valore FROM esami e WHERE e.Docente = %s'
+    cursor.execute(query, (cf_docente,))
+    exam_data = cursor.fetchall()
+    cursor.close()
+    lista_esami = [{'CodEsame': row[0], 'Corso': row[1], 'Data': row[2], 'Tipo': row[3], 'Valore': row[4]} for row in exam_data]
+    return lista_esami
+
+def phone_number_aux(mysql, cf_docente):
+    phone_numbers = []
+    cursor = mysql.cursor()
+    query = 'SELECT NumTelefono FROM numeri_telefono WHERE CodFiscale = %s'
+    cursor.execute(query, (cf_docente,))
+    numbers_data = cursor.fetchall()
+    cursor.close()
+    phone_numbers = [row[0] for row in numbers_data]
+    session['phone_numbers'] = phone_numbers 
+    return phone_numbers 
+
+def add_number_aux(mysql, number_to_add, cf_docente):
+    cursor = mysql.cursor()
+    query = 'INSERT INTO numeri_telefono(NumTelefono, CodFiscale) VALUES (%s, %s)'
+    cursor.execute(query, (number_to_add, cf_docente))
+    mysql.commit()
+    cursor.close()
+
+def delete_number_aux(mysql, numero_telefono, cf_docente):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM numeri_telefono WHERE NumTelefono = %s AND CodFiscale = %s'
+    print(cf_docente)
+    cursor.execute(query, (numero_telefono, cf_docente))
+    mysql.commit()
+    cursor.close() 
