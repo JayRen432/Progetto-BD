@@ -65,39 +65,56 @@ def index():
                            elenco_corsi_lingua=elenco_corsi_lingua)
 
 
-@app.route('/reset_pwd', methods=['GET', 'POST'])
+@app.route("/reset_pwd", methods=["GET", "POST"])
 def resetpwd():
-    if request.method == 'POST':
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-        email = request.form['email']
+    if request.method == "POST":
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        email = request.form["email"]
         if password == confirm_password:
-            hash_password = bcrypt.hashpw(confirm_password.encode('utf-8'), bcrypt.gensalt())
+            hash_password = hashlib.sha256(confirm_password.encode('utf-8'))
+            hash_value=hash_password.hexdigest()
             cursor = mysql.cursor()
-            query = 'UPDATE temporaryuser SET password = %s WHERE mail = %s'
-            cursor.execute(query, (hash_password, email))
+            query = "UPDATE temporaryuser SET password = %s WHERE mail = %s"
+            cursor.execute(query, (hash_value, email))
             mysql.commit()
             cursor.close()
-            return redirect('/login')
+            return redirect("/login")
     return render_template("reset_pwd.html")
 
 
 # localhost:5000/sign_up
-@app.route('/sign_up', methods=['GET',
-                                'POST'])  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
+@app.route(
+    "/sign_up", methods=["GET", "POST"]
+)  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
 def signUp():
     corsi = {}
-    if request.method == 'POST':
-        codicefiscale = request.form['Codicefiscale']
-        name = request.form['Nome']
-        surname = request.form['Cognome']
-        dateofbirth = request.form['AnnoNascita']
-        email = request.form['Email']
-        password = request.form['password']
-        corsolaurea = request.form['corsoLaurea']
-        number = sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea, mysql)
-        if number == 1:
-            return redirect('/login')
+    if request.method == "POST":
+        num_items = len(request.form)
+        if num_items > 6:
+            codicefiscale = request.form["Codicefiscale"]
+            name = request.form["Nome"]
+            surname = request.form["Cognome"]
+            dateofbirth = request.form["AnnoNascita"]
+            email = request.form["Email"]
+            password = request.form["password"]
+            corsolaurea = request.form["corsoLaurea"]
+
+            if sign_up_control(
+                codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
+            ):
+                number = sign_up_aux(
+                    codicefiscale,
+                    name,
+                    surname,
+                    dateofbirth,
+                    email,
+                    password,
+                    corsolaurea,
+                    mysql,
+                )
+                if number == 1:
+                    return redirect("/login")
     sign_up_corsolaurea(corsi, mysql)
     return render_template("sign_up.html", corsiLaurea=corsi)
 
@@ -154,16 +171,14 @@ def user(name):
 @app.route('/user_data')
 def home():
     # Dati utente di esempio
-    codice_fiscale = 'ABC123'
-    nome = 'Mario'
-    cognome = 'Rossi'
-    email = 'mario@example.com'
-    anno_nascita = '1990'
-    ruolo = 'Studente'
-
-    return render_template('info_utente.html', codice_fiscale=codice_fiscale, nome=nome, cognome=cognome, mail=email,
+    cf= session.get('codicefiscale')
+    nome = session.get('nome')
+    cognome = session.get('cognome')
+    anno_nascita = session.get('annoNascita')
+    email = session.get('mail')
+    ruolo = session.get('ruolo')
+    return render_template('info_utente.html', codice_fiscale=cf, nome=nome, cognome=cognome, mail=email,
                            anno_nascita=anno_nascita, ruolo=ruolo)
-
 
 @app.route('/esami', methods=['GET', 'POST'])
 def esami():

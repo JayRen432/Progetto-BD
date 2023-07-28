@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 import pymysql
 import json
-import bcrypt
+import hashlib
 from classes import Studente
 
 app = Flask(__name__)
@@ -10,9 +10,11 @@ app.debug = True
 
 
 def login_aux(mail, password, mysql):
+    hash_password = hashlib.sha256(password.encode('utf-8'))
+    hash_value=hash_password.hexdigest()
     cursor = mysql.cursor()
     query = 'SELECT * FROM studenti WHERE mail = %s AND password = %s'
-    cursor.execute(query, (mail, password)) 
+    cursor.execute(query, (mail, hash_value)) 
     studente = cursor.fetchone()
     cursor.close()
 
@@ -29,7 +31,7 @@ def login_aux(mail, password, mysql):
     else:
         cursor = mysql.cursor()
         query = 'SELECT * FROM docenti WHERE mail = %s AND password = %s'
-        cursor.execute(query, (mail, password)) 
+        cursor.execute(query, (mail, hash_value)) 
         docente = cursor.fetchone()
         cursor.close()
 
@@ -57,12 +59,23 @@ def insertResult(dictionaryL, rowSQL, string, number=None):
 
 
 def sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, corsolaurea, mysql):#inserisce uno studente nella tabella temporaryuser e ritorna 1
-    hash_password = bcrypt.hashpw(
-            password.encode('utf-8'), bcrypt.gensalt())
+    hash_password = hashlib.sha256(password.encode('utf-8'))
+    hash_value=hash_password.hexdigest()
     cursor = mysql.cursor()
-    query = 'INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
-    cursor.execute(query, (codicefiscale, name, surname,
-                       dateofbirth, email, "000000", hash_password, corsolaurea))
+    query = "INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    cursor.execute(
+        query,
+        (
+            codicefiscale,
+            name,
+            surname,
+            dateofbirth,
+            email,
+            "000000",
+            hash_value,
+            corsolaurea,
+        ),
+    )
     mysql.commit()
     cursor.close()
     return 1
@@ -161,3 +174,13 @@ def delete_number_aux(mysql, numero_telefono, cf_docente):
     cursor.execute(query, (numero_telefono, cf_docente))
     mysql.commit()
     cursor.close() 
+    
+def sign_up_control(
+    codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
+):
+    if not all(
+        (codicefiscale, name, surname, dateofbirth, email, password, corsolaurea)
+    ):
+        return False
+    else:
+        return True

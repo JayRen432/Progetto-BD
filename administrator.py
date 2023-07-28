@@ -1,6 +1,6 @@
 import pymysql
 import json
-import bcrypt
+import hashlib
 
 
 def add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo, mysql):
@@ -91,11 +91,12 @@ def assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql):
 
 def add_docente_aux(doc, mysql):
     pwd = doc['password']
-    hash_password = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
+    hash_password = hashlib.sha256(pwd.encode('utf-8'))
+    hash_value=hash_password.hexdigest()
     cursor = mysql.cursor()
     query = 'INSERT INTO docenti(CodiceFiscale, Nome, Cognome, mail, annoNascita, password) VALUES (%s, %s, %s, %s, %s, %s)'
     cursor.execute(query, (doc['codice_fiscale'], doc['nome'],
-                           doc['cognome'], doc['mail'], doc['anno_nascita'], hash_password))
+                           doc['cognome'], doc['mail'], doc['anno_nascita'], hash_value))
     mysql.commit()
     cursor.close()
 
