@@ -33,16 +33,35 @@ h3 {
     color: #a8aeb4;
 }
 
+button {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+}
+
 img {
     width: 25%;
     height: 25%;
 }
 
-a{
+a {
     text-align: center;
     font-size: 30px;
     font-family: 'Courier New', Courier, monospace;
     color: #2d6dae;
+}
+
+input {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small;
+}
+
+/* MAIN CONTAINER */
+.container {
+    margin: 3% auto;
+    padding: 20px;
+    justify-content: left;
+    align-items: center;
+    transition: margin-right 0.3s ease;
 }
 
 /* SIDEBAR */
@@ -71,11 +90,24 @@ a{
     font-size: 18px;
 }
 
-.sidebar img{
-    width: 90px; 
-    height: 90px; 
-    vertical-align: middle; 
+.sidebar img {
+    width: 90px;
+    height: 90px;
+    vertical-align: middle;
     margin-left: 20px;
+}
+
+.sidebar.open {
+    right: 0;
+}
+
+.sidebar.open+.toggle-button {
+    display: none;
+}
+
+.sidebar.open~.container {
+    margin-right: 200px;
+    /* Same width as the sidebar */
 }
 
 .toggle-button {
@@ -88,22 +120,18 @@ a{
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    z-index: 1; 
+    z-index: 1;
 }
 
 
-.sidebar.open {
-    right: 0;
-}
-
-.sidebar.open + .toggle-button {
-display: none;
-}
-
-
-/* CONTAINER */
-.container {
-    padding: 20px;
+/* USER LINK CONTAINERS  */
+.users_container {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 5px;
 }
 
 
@@ -113,11 +141,11 @@ display: none;
     padding: 0;
     margin: 10px 0;
 }
-  
+
 .links li {
     margin-bottom: 5px;
 }
-  
+
 .links li a {
     text-decoration: none;
     color: #007bff;
@@ -127,8 +155,87 @@ display: none;
     border-radius: 5px;
     font-size: small;
 }
-  
+
 .links li a:hover {
     background-color: #007bff;
     color: #fff;
+}
+
+/* ADD,DELETE UTENTI */
+.add_container,
+.delete_container {
+    display: flex;
+    gap: 20px;
+}
+
+.add_u,
+.dett_u,
+.del_u,
+.add_cl,
+.add_c,
+.add_e,
+.add_d {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+}
+
+.add_u,
+.dett_u,
+.del_u {
+    flex: 1;
+}
+
+.dett_u {
+    background-color: #f0f0f0;
+}
+
+.add_u,
+.del_u,
+.add_cl,
+.add_c,
+.add_e,
+.add_d {
+    background-color: #e0e0e0;
+}
+
+.dett_u button,
+.add_cl button,
+.add_c button,
+.add_e button,
+.add_d button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dett_u button:hover,
+.add_cl button:hover,
+.add_c button:hover,
+.add_e button:hover,
+.add_d button:hover {
+    background-color: #0056b3;
+    white-space: nowrap;
+}
+
+.dett_u input,
+.add_cl input,
+.add_c input,
+.add_e input,
+.add_d input {
+    display: block;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+
+.utente-selezionato {
+    background-color: rgb(191, 191, 191);
 }

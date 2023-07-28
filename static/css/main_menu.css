@@ -46,10 +46,12 @@ a{
 
 input {
     font-family: 'Courier New', Courier, monospace;
+    font-size: small;
 }
 
 button {
     font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
 }
 
 
@@ -187,12 +189,11 @@ button {
     display: flex;
     justify-content: left;
     align-items: center;
-
 }
 
 
 /* FORM LOGIN */
-.form-container {
+.form_container {
     background-color: #fff;
     border: 1px solid #ccc;
     padding: 30px;
@@ -201,18 +202,18 @@ button {
     margin: 5px;
 }   
 
-.form-container h2 {
+.form_container h2 {
     margin-top: 0;
 }
 
-.form-container input {
+.form_container input {
     display: block;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
 }
 
-.form-container button {
+.form_container button {
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -222,12 +223,12 @@ button {
     white-space: nowrap;
 }
 
-.form-container button:hover {
+.form_container button:hover {
     background-color: #0056b3;
     white-space: nowrap;
 }
 
-.form-container select{
+.form_container select{
     display: block;
     padding: 10px;
     border: 1px solid #ccc;
