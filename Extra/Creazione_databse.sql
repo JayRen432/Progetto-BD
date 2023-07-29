@@ -45,7 +45,7 @@ CREATE TABLE temporaryuser (
     Cognome VARCHAR(100),
     mail VARCHAR(100),
     annoNascita VARCHAR(20),
-	matricola VARCHAR(6) DEFAULT '000000',
+    matricola VARCHAR(6) DEFAULT '000000',
     password VARCHAR(520),
     CorsoLaurea VARCHAR(30),
 	FOREIGN KEY (CorsoLaurea) REFERENCES Corsi_di_Laurea(CodCorsoLaurea)
@@ -67,7 +67,7 @@ CREATE TABLE Numeri_Telefono (
     FOREIGN KEY (CodFiscale) REFERENCES Docenti(CodiceFiscale)
 );
 
--- Creazione della tabella Apero
+-- Creazione della tabella Insegna
 CREATE TABLE Insegna (
     CodCorso VARCHAR(50),
     CodFiscale VARCHAR(16),
