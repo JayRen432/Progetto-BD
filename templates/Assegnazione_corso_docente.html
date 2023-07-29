@@ -33,7 +33,6 @@
             let selettore_corso = document.getElementById("Corso");
             let docente = selettore_docente.value;
             let corso = selettore_corso.value;
-            alert(docente + "   " + corso);
             if (docente === '-----------' || corso === '-----------'){
                 alert("Seleziona dei dati validi");
             }
@@ -48,11 +47,7 @@
                         cod_Corso : corso
                     })
                 })
-                .then(data => {
-                    alert(data);
-                    // Puoi gestire qui la risposta del server se necessario
-                })
-                location.reload();
+                window.location.assign("/Admin");
             }
         }
 

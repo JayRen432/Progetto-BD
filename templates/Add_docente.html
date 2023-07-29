@@ -54,14 +54,10 @@
                     password: pwd
                 })
             })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Risposta dal server:', data);
-                    window.location.reload();
-                })
-                .catch(error => {
-                    console.error('Errore durante l\'invio dei dati al server:', error);
-                });
+            .catch(error => {
+                console.error('Errore durante l\'invio dei dati al server:', error);
+            });
+            window.location.assign("/Admin");
         }
         else {
             alert("Please fill in all the required fields.");

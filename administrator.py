@@ -18,18 +18,19 @@ def get_degree_course(mysql):
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    for row in rows:
-        codice = row[0]
-        nome = row[1]
-        specializzazione = row[2]
-        indirizzo = row[3]
-        corso_info = {
-            'codice': codice,
-            'nome': nome,
-            'specializzazione': specializzazione,
-            'indirizzo': indirizzo
-        }
-        corsi.append(corso_info)
+    if rows:
+        for row in rows:
+            codice = row[0]
+            nome = row[1]
+            specializzazione = row[2]
+            indirizzo = row[3]
+            corso_info = {
+                'codice': codice,
+                'nome': nome,
+                'specializzazione': specializzazione,
+                'indirizzo': indirizzo
+            }
+            corsi.append(corso_info)
     mysql.commit()
     cursor.close()
     return corsi
@@ -68,14 +69,15 @@ def get_couse(mysql):
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    for row in rows:
-        codice = row[0]
-        nome = row[1]
-        corso_info = {
-            'codice': codice,
-            'nome': nome,
-        }
-        corsi.append(corso_info)
+    if rows:
+        for row in rows:
+            codice = row[0]
+            nome = row[1]
+            corso_info = {
+                'codice': codice,
+                'nome': nome,
+            }
+            corsi.append(corso_info)
     mysql.commit()
     cursor.close()
     return corsi
@@ -116,15 +118,16 @@ def get_docenti(mysql):
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    for row in rows:
-        doc_info = {
-            'codice_fiscale': row[0],
-            'nome': row[1],
-            'cognome': row[2],
-            'mail': row[3],
-            'anno_di_nascita': row[4]
-        }
-        docenti.append(doc_info)
+    if rows:
+        for row in rows:
+            doc_info = {
+                'codice_fiscale': row[0],
+                'nome': row[1],
+                'cognome': row[2],
+                'mail': row[3],
+                'anno_di_nascita': row[4]
+            }
+            docenti.append(doc_info)
     mysql.commit()
     cursor.close()
     return docenti
@@ -137,12 +140,13 @@ def get_couse_degree_course(mysql):
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    for row in rows:
-        info = {
-            'CorsoLaurea': row[0],
-            'CodCorso': row[1],
-        }
-        dettagli.append(info)
+    if rows:
+        for row in rows:
+            info = {
+                'CorsoLaurea': row[0],
+                'CodCorso': row[1],
+            }
+            dettagli.append(info)
     mysql.commit()
     cursor.close()
     return dettagli
@@ -156,10 +160,10 @@ def delete_corso_crosoLaurea_aux_post(deg_course, course, mysql):
     cursor.close()
 
 
-def assegna_Corso_Docente_aux(docente, corso, data, mysql):
+def assegna_Corso_Docente_aux(docente, corso, mysql):
     cursor = mysql.cursor()
-    query = 'INSERT INTO aperto(CodCorso, CodFiscale, DataApertura) VALUES (%s, %s, %s)'
-    cursor.execute(query, (corso, docente, data))
+    query = 'INSERT INTO insegna(CodCorso, CodFiscale) VALUES (%s, %s)'
+    cursor.execute(query, (corso, docente))
     mysql.commit()
     cursor.close()
 
@@ -172,18 +176,19 @@ def get_temporaryuser(mysql):
 
     # Retrieve the results
     rows = cursor.fetchall()
-    for row in rows:
-        info = {
-            'codiceFiscale': row[0],
-            'nome': row[1],
-            'cognome': row[2],
-            'mail': row[3],
-            'annoNascita': row[4],
-            'matricola': row[5],
-            'password': row[6],
-            'CorsoLaurea': row[7]
-        }
-        user.append(info)
+    if rows:
+        for row in rows:
+            info = {
+                'codiceFiscale': row[0],
+                'nome': row[1],
+                'cognome': row[2],
+                'mail': row[3],
+                'annoNascita': row[4],
+                'matricola': row[5],
+                'password': row[6],
+                'CorsoLaurea': row[7]
+            }
+            user.append(info)
     mysql.commit()
     cursor.close()
     return user
@@ -221,18 +226,19 @@ def get_studenti(mysql):
 
     # Retrieve the results
     rows = cursor.fetchall()
-    for row in rows:
-        info = {
-            'codiceFiscale': row[0],
-            'nome': row[1],
-            'cognome': row[2],
-            'mail': row[3],
-            'annoNascita': row[4],
-            'matricola': row[5],
-            'password': row[6],
-            'CorsoLaurea': row[7]
-        }
-        users.append(info)
+    if rows:
+        for row in rows:
+            info = {
+                'codiceFiscale': row[0],
+                'nome': row[1],
+                'cognome': row[2],
+                'mail': row[3],
+                'annoNascita': row[4],
+                'matricola': row[5],
+                'password': row[6],
+                'CorsoLaurea': row[7]
+            }
+            users.append(info)
     mysql.commit()
     cursor.close()
     return users
@@ -249,17 +255,18 @@ def delete_aux(cf, mysql):
 def get_couse_docenti(mysql):
     data = []
     cursor = mysql.cursor()
-    query = 'SELECT * FROM aperto'
+    query = 'SELECT * FROM insegna'
     cursor.execute(query)
 
     # Retrieve the results
     rows = cursor.fetchall()
-    for row in rows:
-        info = {
-            'Corso': row[0],
-            'Docente': row[1]
-        }
-        data.append(info)
+    if rows:
+        for row in rows:
+            info = {
+                'Corso': row[0],
+                'Docente': row[1]
+            }
+            data.append(info)
     mysql.commit()
     cursor.close()
     return data
@@ -267,7 +274,7 @@ def get_couse_docenti(mysql):
 
 def delete_corso_Docente_aux(doc_cf, code_course,mysql):
     cursor = mysql.cursor()
-    query = 'DELETE FROM aperto WHERE CodCorso = %s AND CodFiscale = %s'
+    query = 'DELETE FROM insegna WHERE CodCorso = %s AND CodFiscale = %s'
     cursor.execute(query, (code_course, doc_cf))
     mysql.commit()
     cursor.close()

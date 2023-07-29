@@ -4,10 +4,43 @@
     <h2>Aggiungi Corso</h2>
     <p>Inserisci le informazioni richieste:</p>
     </br>
-    <form action="/Admin/aggiungi_corso" method="post">
+    <form >
         <input type="text" id="codice_corso" name="codice_corso" placeholder="Codice Corso"><br>
         <input type="text" id="nome_corso" name="nome_corso" placeholder="Nome Corso"><br>
-        <button type="submit" value="Invia">Invia al server</button>
+        <button type="submit" value="Invia" onclick="inviaDati()">Invia al server</button>
     </form>
 </div>
+    <script>
+    function notNull(cc, n) {
+    if (cc === null || cc.trim() === '' ||
+        n === null || n.trim() === '') return false;
+    return true; // All fields are not null
+    }
+    function inviaDati() {
+        const codiceCorso = document.getElementById("codice_corso").value;
+        const nome = document.getElementById("nome_corso").value;
+
+
+        if (notNull(codiceCorso, nome)) {
+            // Esempio di utilizzo di fetch per inviare i dati al server Flask
+            fetch('/Admin/aggiungi_corso', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    codiceCorso: codiceCorso,
+                    nome: nome,
+                })
+            })
+            .catch(error => {
+                console.error('Errore durante l\'invio dei dati al server:', error);
+            });
+            window.location.assign("/Admin");
+        }
+        else {
+            alert("Please fill in all the required fields.");
+        }
+    }
+</script>
 {% endblock %}

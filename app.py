@@ -91,7 +91,7 @@ def signUp():
                     mysql,
                 )
                 if number == 1:
-                    return redirect("/login")
+                    return redirect("/")
     sign_up_corsolaurea(corsi, mysql)
     return render_template("sign_up.html", corsiLaurea=corsi)
 
@@ -193,7 +193,7 @@ def esami():
         return render_template('elenco_esami.html', corso_di_laurea=corso_di_laurea, esami={})
 
 
-@app.route('/Admin')
+@app.route('/admin')
 def administrator():
     return render_template('menu_amministratore.html')
 
@@ -236,12 +236,13 @@ def add():
 @app.route('/Admin/aggiungi_corso_laurea', methods=['GET', 'POST'])
 def add_degree_course():
     if request.method == 'POST':
-        cod_corso = request.form['codice_corso']
-        nome_corso = request.form['nome_corso']
-        spec = request.form['specializzazione']
-        indirizzo = request.form['indirizzo']
-
+        data = request.get_json()
+        cod_corso = data.get('codiceCorso')
+        nome_corso = data.get('nome')
+        spec = data.get('specializzazione')
+        indirizzo = data.get('indirizzo')
         add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo, mysql)
+        return "Operation complete"
     else:
         return render_template('Crea_corso_di_laurea.html')
 
@@ -260,12 +261,11 @@ def delete_degree_course():
 @app.route('/Admin/aggiungi_corso', methods=['GET', 'POST'])
 def add_course():
     if request.method == 'POST':
-        codice = request.form['codice_corso']
-        nome = request.form['nome_corso']
+        data = request.get_json()
+        cod_corso = data.get('codiceCorso')
+        nome_corso = data.get('nome')
 
-        add_course_aux(codice, nome, mysql)
-
-        return redirect(url_for('add_course'))
+        add_course_aux(cod_corso, nome_corso, mysql)
     else:
         return render_template('Crea_corso.html')
 
@@ -276,7 +276,7 @@ def delete_course():
         codice_corso = request.form['codice_corso']
         delete_course_aux_post(codice_corso, mysql)
 
-        return redirect(url_for('delete_course'))
+        return redirect(url_for('index_admin'))
     else:
         corsi = get_couse(mysql)
         return render_template('Elimina_corso.html', corsi=corsi)
@@ -289,6 +289,7 @@ def assegnaCorsoCorsoLaurea():
         corso_laurea = data.get('corso1')
         corso = data.get('corso2')
         anno = data.get('anno')
+
         assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql)
         return "Operation Complete"
     else:
@@ -354,7 +355,7 @@ def assegna_Corso_Docente():
         docente = data.get('cod_Docente')
         corso = data.get('cod_Corso')
         # none rappresenta dataApertura
-        assegna_Corso_Docente_aux(docente, corso, None, mysql)
+        assegna_Corso_Docente_aux(docente, corso, mysql)
         return "Operation Complete"
     else:
         docenti = get_docenti(mysql)

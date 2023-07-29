@@ -26,6 +26,14 @@
             </br>
             <label >Codice corso selezionato: </label>
             <label id="nomeCorsoLabel2"></label>
+            </br></br>
+            <label for="Anno">Seleziona anno di insegnamento</label>
+            <select id="Anno">
+                <option selected disabled hidden>-----------</option>
+                <option >Primo anno</option>
+                <option >Secondo anno</option>
+                <option >Terzo anno</option>
+            </select>
         </div>
         </br></br>
         <button onclick="inviaDati()">Invia al server</button>
@@ -83,30 +91,29 @@
             function inviaDati() {
                 const selectedCodice1 = document.getElementById("nomeCorsoLabel").textContent;
                 const selectedCodice2 = document.getElementById("nomeCorsoLabel2").textContent;
+                const selectedyear = document.getElementById("Anno").value
     
     
                 // Esegui qui la logica per inviare i dati al server (AJAX o altro)
                 // Ad esempio, puoi utilizzare fetch per inviare una richiesta POST al server
     
                 // Esempio di utilizzo di fetch per inviare i dati al server Flask
-                fetch('/associazioneCorso_CorsoLaurea', {
+                fetch('/Admin/assegnaCorso_CorsoLaurea', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         corso1: selectedCodice1,
-                        corso2: selectedCodice2
+                        corso2: selectedCodice2,
+                        anno : selectedyear
                     })
                 })
                 .then(response => response.json())
-                .then(data => {
-                    alert(selectedCodice1 + "  " + selectedCodice2);
-                    // Puoi gestire qui la risposta del server se necessario
-                })
                 .catch(error => {
                     console.error('Errore durante l\'invio dei dati al server:', error);
                 });
+                window.location.assign("/Admin");
             }
     
             // Popolare i menu a tendina all'avvio della pagina

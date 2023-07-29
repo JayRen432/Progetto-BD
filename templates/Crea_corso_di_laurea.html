@@ -3,12 +3,51 @@
 <div class="add_cl">
     <h2>Aggiungi Corso Laurea</h2>
     <p>Inserisci le informazioni richieste:</p>
-    <form class="addCorsi-form" action="/Admin/aggiungi_corso_laurea" method="POST">
-        <input type="text" id="codice_corso" name="codice_corso" placeholder="Codice Corso di laurea"><br>
-        <input type="text" id="nome_corso" name="nome_corso" placeholder="Nome corso di laurea"><br>
-        <input type="text" id="specializzazione" name="specializzazione" placeholder="Specializzazione"><br>
-        <input type="text" id="indirizzo" name="indirizzo" placeholder="Indirizzo"><br>
-        <button type="submit" value="Invia">Aggiungi</button>
+    <form class="addCorsi-form">
+        <input type="text" id="codice_corso" name="codice_corso" placeholder="Codice Corso di laurea"></br>
+        <input type="text" id="nome_corso" name="nome_corso" placeholder="Nome corso di laurea"></br>
+        <input type="text" id="specializzazione" name="specializzazione" placeholder="Specializzazione"></br>
+        <input type="text" id="indirizzo" name="indirizzo" placeholder="Indirizzo"></br>
+        <button type="submit" value="Invia" onclick="inviaDati()">Aggiungi</button>
     </form>
 </div>
+<script>
+    function notNull(cc, n, s, i) {
+    if (cc === null || cc.trim() === '' ||
+        n === null || n.trim() === '' ||
+        s === null || s.trim() === '' ||
+        i === null || i.trim() === '') return false;
+    return true; // All fields are not null
+    }
+    function inviaDati() {
+        const codiceCorso = document.getElementById("codice_corso").value;
+        const nome = document.getElementById("nome_corso").value;
+        const specializzazione = document.getElementById("specializzazione").value;
+        const indirizzo = document.getElementById("indirizzo").value;
+
+        if (notNull(codiceCorso, nome, specializzazione, indirizzo)) {
+            // Esempio di utilizzo di fetch per inviare i dati al server Flask
+            fetch('/Admin/aggiungi_corso_laurea', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    codiceCorso: codiceCorso,
+                    nome: nome,
+                    specializzazione: specializzazione,
+                    indirizzo: indirizzo,
+
+                })
+            })
+            .catch(error => {
+                console.error('Errore durante l\'invio dei dati al server:', error);
+            });
+             window.location.assign("/Admin");
+        }
+        else {
+            alert("Please fill in all the required fields.");
+        }
+    }
+</script>
 {% endblock %}
