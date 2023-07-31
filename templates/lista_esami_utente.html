@@ -15,15 +15,15 @@
         </tr>
         {% for corso in corsi %}
             <tr>
-                <td>{{ corso.codice }}</td>
-                <td>{{ corso.nome }}</td>
-                <td>{{ corso.data_esame }}</td>
+                <td>{{ corso.CodiceCorso }}</td>
+                <td>{{ corso.NomeCorso }}</td>
+                <td>{{ corso.Data }}</td>
                 {% if corso.voto is none %}
                     <td></td> <!-- Mostra la cella vuota -->
                 {% else %}
-                    <td>{{ corso.voto }}</td>
+                    <td>{{ corso.Voto }}</td>
                 {% endif %}
-                <td>{{ corso.crediti }}</td>
+                <td>{{ corso.Valore }}</td>
             </tr>
         {% endfor %}
     </table>
