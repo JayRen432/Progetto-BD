@@ -12,7 +12,7 @@
                 <th>Codice corso</th>
                 <th>Nome corso</th>
                 <th>Data esame</th>
-                <th>Aula</th>
+                <th>Codice esame</th>
                 <th>Prenotati</th>
             </tr>
         </thead>
@@ -20,10 +20,10 @@
             <!-- Ciclo per costruire le righe della tabella -->
             {% for riga in righe %}
             <tr>
-                <td>{{ riga["codice_corso"] }}</td>
-                <td>{{ riga["nome_corso"] }}</td>
-                <td>{{ riga["data_esame"] }}</td>
-                <td>{{ riga["aula"] }}</td>
+                <td>{{ riga["CodiceCorso"] }}</td>
+                <td>{{ riga["NomeCorso"] }}</td>
+                <td>{{ riga["Data"] }}</td>
+                <td>{{ riga["CodEsame"] }}</td>
                 <td><button onclick="aggiungiRiga(this)">Prenota</button></td>
             </tr>
             {% endfor %}
@@ -35,10 +35,10 @@
             var riga = button.parentElement.parentElement;
 
             var rigaDati = {
-                "codice_corso": riga.cells[0].innerText,
-                "nome_corso": riga.cells[1].innerText,
-                "data_esame": riga.cells[2].innerText,
-                "aula": riga.cells[3].innerText
+                "CodiceCorso": riga.cells[0].innerText,
+                "NomeCorso": riga.cells[1].innerText,
+                "Data": riga.cells[2].innerText,
+                "CodEsame": riga.cells[3].innerText
             };
 
             // Invia i dati della riga al server Python
@@ -47,9 +47,10 @@
             .then(data => {
                 alert(data.message); })// Messaggio di conferma dal server
             .catch(error => console.error('Errore:', error));
-            location.reload();
+            //location.reload();
         }
     </script>
 </body>
 
 </html>
+
