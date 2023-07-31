@@ -33,8 +33,9 @@
 
                 var matricolaCell = document.createElement("td");
                 matricolaCell.textContent = dati[i].matricola;
+                //matricolaCell.setAttribute("value", dati[i].codicefiscale);
                 riga.appendChild(matricolaCell);
-
+                
                 var nomeCell = document.createElement("td");
                 nomeCell.textContent = dati[i].Nome;
                 riga.appendChild(nomeCell);
@@ -72,7 +73,8 @@
             for (var i = 0; i < tableRows.length; i++) {
                 var cells = tableRows[i].getElementsByTagName('td');
                 var rowData = {
-                    matricola: cells[0].textContent,
+                    //codicefiscale : cells[0].getAttribute("value"),
+                    matricola : cells[0].textContent,
                     nome: cells[1].textContent,
                     cognome: cells[2].textContent,
                     voto: cells[3].getElementsByTagName('select')[0].value
@@ -81,6 +83,7 @@
                     tableData.push(rowData);
                 }
             }
+            
 
             // Invio dei dati al server tramite fetch o una richiesta HTTP
             console.log(tableData);
@@ -93,7 +96,7 @@
              })
              .then(response => response.json())
              .then(data => {
-                 alert(data)
+                alert(data)
              })
              .catch(error => console.error('Errore:', error));
         }
