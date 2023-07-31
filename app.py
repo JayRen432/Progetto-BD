@@ -27,6 +27,7 @@ righe_iniziali = [
 
 @app.route('/')
 def index():
+    session.clear()
     session['ruolo'] = None
     elenco_corsi_scientifici = ["Informatica", "Scienze Ambientali", "Chimica e tecnologie sostenibili",
                                 "Ingegneria Fisica", "Scienze e tecnologie per i beni culturali"]
@@ -129,8 +130,7 @@ def login():
 @app.route('/stud')
 def index_studenti():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        ruolo = 'Studente'
-        return render_template('menu_studenti.html', ruolo=ruolo)
+        return render_template('menu_studenti.html')
     else:
         abort(403)
 
@@ -138,15 +138,9 @@ def index_studenti():
 @app.route('/Docenti')
 def index_docenti():
     if 'ruolo' in session and session['ruolo'] == 'Docente':
-        ruolo = 'Docente'
-        return render_template('menu_docenti.html', ruolo=ruolo)
+        return render_template('menu_docenti.html')
     else:
         abort(403)
-
-
-@app.route('/Admin')
-def index_admin():
-    return render_template('menu_amministratore.html')
 
 @app.route('/stud/user_data')
 def home_stud():
@@ -669,15 +663,43 @@ def exam_details():
         cursor.close()
         exam_list = [{'codice_corso': row[0], 'nome_corso': row[1], 'voto': row[2], 'data_esame': row[3]} for row in risultatiesami_data]
     # Raggruppa gli elementi con lo stesso codice corso
-    grouped_exam_list = {}
-    for exam in exam_list:
-        codice_corso = exam['codice_corso']
-        if codice_corso not in grouped_exam_list:
-            grouped_exam_list[codice_corso] = []
-        grouped_exam_list[codice_corso].append(exam)
+        grouped_exam_list = {}
+        for exam in exam_list:
+            codice_corso = exam['codice_corso']
+            if codice_corso not in grouped_exam_list:
+                grouped_exam_list[codice_corso] = []
+                grouped_exam_list[codice_corso].append(exam)
         return render_template('Bacheca_esiti.html', grouped_exam_list=grouped_exam_list)
     else:
         abort(403)
+
+
+@app.route('/home')
+def home():
+    if 'ruolo' in session:
+        if session['ruolo'] == 'Studente':
+            return redirect(url_for('index_studenti'))
+        elif session['ruolo'] == 'Docente':
+            return redirect(url_for('index_docenti'))
+        else:
+            return redirect(url_for('administrator'))
+    else:
+        abort(404)
+
+
+@app.route('/log_out')
+def log_out():
+    session.clear()
+    session['ruolo'] = None
+    return redirect(url_for('index'))
+
+
+@app.route('/reset')
+def reset():
+    session.clear()
+    session['ruolo'] = None
+    return redirect(url_for('resetpwd'))
+
 
 if __name__ == '__main__':
     app.secret_key = 'Dokkeabi'
