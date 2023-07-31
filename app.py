@@ -110,6 +110,7 @@ def login():
             session['cognome'] = studente['cognome']
             session['annoNascita'] = studente['annoNascita']
             session['mail'] = studente['mail']
+            session['corsoLaurea'] = studente['CorsoLaurea']
             session['ruolo'] = 'Studente'
             return redirect("/stud")
         elif docente is not None and studente is None:
@@ -125,9 +126,42 @@ def login():
             return redirect("/Admin")
     return render_template("login.html")
 
+@app.route('/stud')
+def index_studenti():
+    if 'ruolo' in session and session['ruolo'] == 'Studente':
+        ruolo = 'Studente'
+        return render_template('menu_studenti.html', ruolo=ruolo)
+    else:
+        abort(403)
 
-@app.route('/user_data')
-def home():
+
+@app.route('/Docenti')
+def index_docenti():
+    if 'ruolo' in session and session['ruolo'] == 'Docente':
+        ruolo = 'Docente'
+        return render_template('menu_docenti.html', ruolo=ruolo)
+    else:
+        abort(403)
+
+
+@app.route('/Admin')
+def index_admin():
+    return render_template('menu_amministratore.html')
+
+@app.route('/stud/user_data')
+def home_stud():
+    # Dati utente di esempio
+    cf = session.get('codicefiscale')
+    nome = session.get('nome')
+    cognome = session.get('cognome')
+    anno_nascita = session.get('annoNascita')
+    email = session.get('mail')
+    ruolo = session.get('ruolo')
+    return render_template('info_utente.html', codice_fiscale=cf, nome=nome, cognome=cognome, mail=email,
+                           anno_nascita=anno_nascita, ruolo=ruolo)
+
+@app.route('/Docenti/user_data')
+def home_docenti():
     # Dati utente di esempio
     cf = session.get('codicefiscale')
     nome = session.get('nome')
@@ -400,6 +434,7 @@ def assegna_voti(codiceEsame):
             return "ok"
         else:
             studenti = assegna_voto_aux(mysql, codiceEsame)
+            session['CodiceEsame'] = codiceEsame
             return render_template('Inserimento_voti.html', studenti=json.dumps(studenti))
     else:
         abort(403)
@@ -410,6 +445,14 @@ def ricevi_dati():
     dati = request.get_json()
     tableData = dati.get('tableData', [])
     mat = tableData[0]['matricola']
+    voto = tableData[0]['voto']
+    codiceEsame = session.get('CodiceEsame')
+    cf = take_cf(mysql, mat)
+    cursor = mysql.cursor()
+    query = 'INSERT INTO sostenuti(Esame, Studente, voto) VALUES(%s, %s, %s)'
+    cursor.execute(query,(codiceEsame, cf, voto))
+    mysql.commit()
+    cursor.close()
     return jsonify(mat)
 
 
@@ -448,7 +491,6 @@ def crea_esame():
             crea_esame_inserisci(mysql, corso, nome_esame, codice_esame, data, tipo, valore, cf_docente)
 
         lista_corsi = crea_esame_docenti(mysql, cf_docente)
-        print(lista_corsi)
         if request.method == 'POST':
             return render_template('Crea_esame.html', corsi=lista_corsi)
         else:
@@ -530,56 +572,19 @@ def page_not_found(e):
     return render_template("403.html"), 403
 
 
-@app.route('/stud')
-def index_studenti():
-    if 'ruolo' in session and session['ruolo'] == 'Studente':
-        return render_template('menu_studenti.html')
-    else:
-        abort(403)
-
-
-@app.route('/Docenti')
-def index_docenti():
-    if 'ruolo' in session and session['ruolo'] == 'Docente':
-        return render_template('menu_docenti.html')
-    else:
-        abort(403)
-
-
 @app.route('/stud/lista_esami_utente')
 def show_list_exam():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        corsi = [
-            {
-                'codice': 'C001',
-                'nome': 'Matematica',
-                'data_esame': '2023-07-01',
-                'voto': 28,
-                'crediti': 6
-            },
-            {
-                'codice': 'C002',
-                'nome': 'Informatica',
-                'data_esame': '2023-07-10',
-                'voto': 30,
-                'crediti': 9
-            },
-            {
-                'codice': 'C003',
-                'nome': 'Fisica',
-                'data_esame': '2023-07-15',
-                'voto': None,
-                'crediti': 6
-            },
-            {
-                'codice': 'C004',
-                'nome': 'Programmazione',
-                'data_esame': '2023-07-15',
+        cf = session.get('codicefiscale')
+        print(cf)
+        cursor = mysql.cursor()
+        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, s.Voto, e.Valore FROM sostenuti s JOIN esami e ON s.Esame = e.CodEsame JOIN Corsi c ON e.Corso = c.CodiceCorso  WHERE s.Studente = %s'
+        cursor.execute(query,(cf))
+        exam_data = cursor.fetchall()
+        cursor.close()
+        corsi = [{'CodiceCorso' : row[0], 'NomeCorso' : row[1], 'Data' : row[2],'Voto': row[3], 'Valore': row[4]} for row in exam_data]
 
-                'crediti': 6
-            }
-        ]
-        # Nel caso il voto sia None, oppure assente la cella corrispondente nella tabella html risulterà essere vuota
+    # Nel caso il voto sia None, oppure assente la cella corrispondente nella tabella html risulterà essere vuota
         return render_template('lista_esami_utente.html', corsi=corsi)
     else:
         abort(403)
@@ -588,6 +593,17 @@ def show_list_exam():
 @app.route('/stud/prenotazioni_appelli')
 def prenotazioni_appelli():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
+        corsolaurea = session.get('corsoLaurea')
+        print(corsolaurea)
+        cursor = mysql.cursor()
+        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, e.CodEsame  FROM studenti s JOIN corsi_di_laurea cl ON s.CorsoLaurea = cl.CodCorsoLaurea JOIN appartenenti a ON cl.CodCorsoLaurea = a.CorsoLaurea JOIN corsi c ON a.CodCorso = c.CodiceCorso JOIN esami e ON c.CodiceCorso = e.Corso WHERE s.CorsoLaurea = %s'
+        cursor.execute(query,(corsolaurea))
+        prenotazioni_data = cursor.fetchall()
+        print(prenotazioni_data)
+        cursor.close()
+        righe_iniziali = [{'CodiceCorso': row[0], 'NomeCorso': row[1], 'Data': row[2], 'CodEsame': row[3]} for row in prenotazioni_data]
+        session['Esame'] = righe_iniziali[0]['CodEsame']
+        print(session['Esame'])
         return render_template('prenotazioni_appelli.html', righe=righe_iniziali)
     else:
         abort(403)
@@ -596,6 +612,14 @@ def prenotazioni_appelli():
 @app.route('/stud/bacheca_prenotazione_appelli')
 def bacheca_appelli():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
+        cursor = mysql.cursor()
+        cf = session.get('codicefiscale')
+        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, e.CodEsame FROM iscrizione_appelli ia JOIN esami e ON ia.Esame = e.CodEsame JOIN corsi c ON e.Corso = c.CodiceCorso JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE s.CodiceFiscale = %s'
+        cursor.execute(query, (cf))
+        effettuate_data = cursor.fetchall()
+        print(effettuate_data)
+        cursor.close()
+        righe_uniche = [{'CodiceCorso': row[0], 'NomeCorso': row[1], 'Data': row[2], 'CodEsame': row[3]} for row in effettuate_data]
         return render_template('bacheca_prenotazione_appelli.html', righe=righe_uniche)
     else:
         abort(403)
@@ -606,12 +630,29 @@ def aggiungi_riga():
     riga = request.get_json()
     if riga not in righe_uniche:
         righe_uniche.append(riga)
+    esame = riga.get('CodEsame')
+    cf = session.get('codicefiscale')
+    print(esame)
+    if request.method == 'POST':
+        cursor = mysql.cursor()
+        query = 'INSERT INTO iscrizione_appelli(Studente, Esame) VALUES (%s, %s)'
+        cursor.execute(query, (cf, esame))
+        mysql.commit()
+        cursor.close()
     return jsonify({"message": "Riga aggiunta con successo"})
 
 
 @app.route('/delete_appello', methods=['POST'])
 def delete_appello():
     riga = request.get_json()
+    esame = riga.get('CodEsame')
+    if request.method == 'POST':
+        cursor = mysql.cursor()
+        query = 'DELETE FROM iscrizione_appelli WHERE Esame = %s'
+        cursor.execute(query, (esame))
+        print(query)
+        mysql.commit()
+        cursor.close()
     if riga in righe_uniche:
         righe_uniche.remove(riga)
     return jsonify({"message": "Riga rimossa con successo"})
@@ -620,26 +661,23 @@ def delete_appello():
 @app.route('/stud/bacheca_esiti')
 def exam_details():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        # Esempio di lista di dettagli delle prove d'esame
-        exam_list = [
-            {'codice_corso': 'C001', 'nome_corso': 'Matematica', 'voto': 'insufficente', 'data_esame': '2023-07-15'},
-            {'codice_corso': 'C002', 'nome_corso': 'Fisica', 'voto': 25, 'data_esame': '2023-07-14'},
-            {'codice_corso': 'C001', 'nome_corso': 'Matematica', 'voto': 30, 'data_esame': '2023-07-10'},
-            {'codice_corso': 'C003', 'nome_corso': 'Informatica', 'voto': 24, 'data_esame': '2023-07-12'}
-        ]
-
-        # Raggruppa gli elementi con lo stesso codice corso
-        grouped_exam_list = {}
-        for exam in exam_list:
-            codice_corso = exam['codice_corso']
-            if codice_corso not in grouped_exam_list:
-                grouped_exam_list[codice_corso] = []
-            grouped_exam_list[codice_corso].append(exam)
-
+        cursor = mysql.cursor()
+        cf = session.get('codicefiscale')
+        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, so.voto FROM Studenti s JOIN Sostenuti so ON s.CodiceFiscale = so.Studente JOIN Esami e ON so.Esame = e.CodEsame JOIN Corsi c ON e.Corso = c.CodiceCorso WHERE s.CodiceFiscale = %s'
+        cursor.execute(query, (cf))
+        risultatiesami_data = cursor.fetchall()
+        cursor.close()
+        exam_list = [{'codice_corso': row[0], 'nome_corso': row[1], 'voto': row[2], 'data_esame': row[3]} for row in risultatiesami_data]
+    # Raggruppa gli elementi con lo stesso codice corso
+    grouped_exam_list = {}
+    for exam in exam_list:
+        codice_corso = exam['codice_corso']
+        if codice_corso not in grouped_exam_list:
+            grouped_exam_list[codice_corso] = []
+        grouped_exam_list[codice_corso].append(exam)
         return render_template('Bacheca_esiti.html', grouped_exam_list=grouped_exam_list)
     else:
         abort(403)
-
 
 if __name__ == '__main__':
     app.secret_key = 'Dokkeabi'
