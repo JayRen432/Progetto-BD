@@ -31,7 +31,7 @@ def login_aux(mail, password, mysql):
     else:
         cursor = mysql.cursor()
         query = 'SELECT * FROM docenti WHERE mail = %s AND password = %s'
-        cursor.execute(query, (mail, hash_value)) 
+        cursor.execute(query, (mail, password)) 
         docente = cursor.fetchone()
         cursor.close()
 
@@ -91,7 +91,7 @@ def sign_up_corsolaurea(corsi, mysql):
         insertResult(corsi, row[0], row[1])
         i += 1
 
-def crea_esame_inserisci(mysql,corso, cf_docente, nome_esame, codice_esame, data, tipo, valore):
+def crea_esame_inserisci(mysql, corso, nome_esame, codice_esame, data, tipo, valore, cf_docente):
     cursor = mysql.cursor()
     query = 'INSERT INTO esami (CodEsame, Docente, Corso, NomeEsame, Data, Tipo, Valore) VALUES (%s, %s, %s, %s, %s, %s, %s)'
     cursor.execute(query,(codice_esame, cf_docente, corso, nome_esame, data, tipo, valore))
@@ -100,20 +100,30 @@ def crea_esame_inserisci(mysql,corso, cf_docente, nome_esame, codice_esame, data
 
 def crea_esame_docenti(mysql,cf_docente):
     cursor = mysql.cursor()
-    query = 'SELECT c.CodiceCorso  FROM corsi c JOIN esami e ON c.CodiceCorso = e.Corso WHERE e.Docente = %s'
+    query = 'SELECT c.CodiceCorso  FROM corsi c JOIN insegna i ON c.CodiceCorso = i.CodCorso WHERE i.CodFiscale = %s'
     cursor.execute(query,(cf_docente,))
     course_data = cursor.fetchall()
     cursor.close()
     lista_corsi = [{'CodiceCorso': row[0]} for row in course_data]
     return lista_corsi
 
+def take_cf(mysql, matr):
+    cursor = mysql.cursor()
+    query = 'SELECT CodiceFiscale FROM studenti WHERE matricola = %s'
+    cursor.execute(query,(matr,))
+    student = cursor.fetchone()
+    cursor.close()
+    return student
+    
+    
 def assegna_voto_aux(mysql, codiceEsame):
     cursor = mysql.cursor()
-    query = 'SELECT s.matricola, s.Nome, s.Cognome FROM iscrizioni_appelli ia JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE ia.Esame = %s'
+    query = 'SELECT s.matricola, s.Nome, s.Cognome, s.CodiceFiscale FROM iscrizione_appelli ia JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE ia.Esame = %s'
     cursor.execute(query,(codiceEsame,))
     student_data = cursor.fetchall()
     cursor.close()
     studenti = [{'matricola': row[0], 'Nome': row[1], 'Cognome' : row[2]} for row in student_data]
+    session['matricola'] = studenti[0]['matricola']
     return studenti
 
 def tabella_esami(mysql):
@@ -170,7 +180,6 @@ def add_number_aux(mysql, number_to_add, cf_docente):
 def delete_number_aux(mysql, numero_telefono, cf_docente):
     cursor = mysql.cursor()
     query = 'DELETE FROM numeri_telefono WHERE NumTelefono = %s AND CodFiscale = %s'
-    print(cf_docente)
     cursor.execute(query, (numero_telefono, cf_docente))
     mysql.commit()
     cursor.close() 
@@ -184,3 +193,4 @@ def sign_up_control(
         return False
     else:
         return True
+
