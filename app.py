@@ -584,36 +584,25 @@ def show_list_exam():
         abort(403)
 
 
-@app.route('/stud/prenotazioni_appelli')
+@app.route('/stud/prenotazioni_appelli', methods=['GET'])
 def prenotazioni_appelli():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        corsolaurea = session.get('corsoLaurea')
-        print(corsolaurea)
-        cursor = mysql.cursor()
-        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, e.CodEsame  FROM studenti s JOIN corsi_di_laurea cl ON s.CorsoLaurea = cl.CodCorsoLaurea JOIN appartenenti a ON cl.CodCorsoLaurea = a.CorsoLaurea JOIN corsi c ON a.CodCorso = c.CodiceCorso JOIN esami e ON c.CodiceCorso = e.Corso WHERE s.CorsoLaurea = %s'
-        cursor.execute(query,(corsolaurea))
-        prenotazioni_data = cursor.fetchall()
-        print(prenotazioni_data)
-        cursor.close()
-        righe_iniziali = [{'CodiceCorso': row[0], 'NomeCorso': row[1], 'Data': row[2], 'CodEsame': row[3]} for row in prenotazioni_data]
-        session['Esame'] = righe_iniziali[0]['CodEsame']
-        print(session['Esame'])
+        if request.method == 'GET':
+            righe_iniziali = prenotazioni_aux(mysql)
+        if righe_iniziali.__len__() != 0:
+            session['Esame'] = righe_iniziali[0]['CodEsame']
+        else:
+            return render_template('prenotazioni_appelli.html', righe=righe_iniziali)
         return render_template('prenotazioni_appelli.html', righe=righe_iniziali)
     else:
         abort(403)
 
 
-@app.route('/stud/bacheca_prenotazione_appelli')
+@app.route('/stud/bacheca_prenotazione_appelli', methods=['GET'])
 def bacheca_appelli():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        cursor = mysql.cursor()
-        cf = session.get('codicefiscale')
-        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, e.CodEsame FROM iscrizione_appelli ia JOIN esami e ON ia.Esame = e.CodEsame JOIN corsi c ON e.Corso = c.CodiceCorso JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE s.CodiceFiscale = %s'
-        cursor.execute(query, (cf))
-        effettuate_data = cursor.fetchall()
-        print(effettuate_data)
-        cursor.close()
-        righe_uniche = [{'CodiceCorso': row[0], 'NomeCorso': row[1], 'Data': row[2], 'CodEsame': row[3]} for row in effettuate_data]
+        if request.method == 'GET':
+            righe_uniche =  bacheca_aux(mysql)
         return render_template('bacheca_prenotazione_appelli.html', righe=righe_uniche)
     else:
         abort(403)
@@ -626,13 +615,7 @@ def aggiungi_riga():
         righe_uniche.append(riga)
     esame = riga.get('CodEsame')
     cf = session.get('codicefiscale')
-    print(esame)
-    if request.method == 'POST':
-        cursor = mysql.cursor()
-        query = 'INSERT INTO iscrizione_appelli(Studente, Esame) VALUES (%s, %s)'
-        cursor.execute(query, (cf, esame))
-        mysql.commit()
-        cursor.close()
+    add_row_aux(mysql, esame, cf)
     return jsonify({"message": "Riga aggiunta con successo"})
 
 
@@ -640,39 +623,26 @@ def aggiungi_riga():
 def delete_appello():
     riga = request.get_json()
     esame = riga.get('CodEsame')
-    if request.method == 'POST':
-        cursor = mysql.cursor()
-        query = 'DELETE FROM iscrizione_appelli WHERE Esame = %s'
-        cursor.execute(query, (esame))
-        print(query)
-        mysql.commit()
-        cursor.close()
+    delete_appello_aux(mysql, esame)
     if riga in righe_uniche:
         righe_uniche.remove(riga)
     return jsonify({"message": "Riga rimossa con successo"})
 
 
-@app.route('/stud/bacheca_esiti')
+@app.route('/stud/bacheca_esiti', methods=['GET'])
 def exam_details():
     if 'ruolo' in session and session['ruolo'] == 'Studente':
-        cursor = mysql.cursor()
-        cf = session.get('codicefiscale')
-        query = 'SELECT c.CodiceCorso, c.NomeCorso, e.Data, so.voto FROM Studenti s JOIN Sostenuti so ON s.CodiceFiscale = so.Studente JOIN Esami e ON so.Esame = e.CodEsame JOIN Corsi c ON e.Corso = c.CodiceCorso WHERE s.CodiceFiscale = %s'
-        cursor.execute(query, (cf))
-        risultatiesami_data = cursor.fetchall()
-        cursor.close()
-        exam_list = [{'codice_corso': row[0], 'nome_corso': row[1], 'voto': row[2], 'data_esame': row[3]} for row in risultatiesami_data]
-    # Raggruppa gli elementi con lo stesso codice corso
+        if request.method == 'GET':
+            exam_list = exam_details_aux(mysql)
         grouped_exam_list = {}
-        for exam in exam_list:
-            codice_corso = exam['codice_corso']
-            if codice_corso not in grouped_exam_list:
-                grouped_exam_list[codice_corso] = []
-                grouped_exam_list[codice_corso].append(exam)
+    for exam in exam_list:
+        codice_corso = exam['codice_corso']
+        if codice_corso not in grouped_exam_list:
+            grouped_exam_list[codice_corso] = []
+        grouped_exam_list[codice_corso].append(exam)
         return render_template('Bacheca_esiti.html', grouped_exam_list=grouped_exam_list)
     else:
         abort(403)
-
 
 @app.route('/home')
 def home():
