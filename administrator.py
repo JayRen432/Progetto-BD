@@ -102,13 +102,37 @@ def add_docente_aux(doc, mysql):
     mysql.commit()
     cursor.close()
 
-
-def delete_docenti_aux(codice_fiscale, mysql):
+def is_cf_present_in_studenti(cf_docente, mysql):
     cursor = mysql.cursor()
-    query = 'DELETE FROM docenti WHERE CodiceFiscale = %s'
-    cursor.execute(query, codice_fiscale)
+    query = "SELECT COUNT(*) FROM Studenti WHERE CodiceFiscale = %s"
+    cursor.execute(query, (cf_docente,))
+    count = cursor.fetchone()[0]
+    cursor.close()
+    return count > 0
+
+def add_docente_aux(doc, mysql):
+    pwd = doc['password']
+    hash_password = hashlib.sha256(pwd.encode('utf-8'))
+    hash_value=hash_password.hexdigest()
+    cursor = mysql.cursor()
+    codicefiscale = doc['codice_fiscale']
+    if not doc['mail'].lower().endswith("@unive.it"):
+        cursor.close()
+        raise ValueError("L'email del docente deve terminare con '@unive.it'.")
+
+    if is_cf_present_in_studenti(codicefiscale, mysql):
+        cursor.close()
+        raise ValueError("Codice fiscale già presente tra gli studenti")
+
+    if not is_valid_codicefiscale(codicefiscale) or len(codicefiscale) != 16:
+        raise ValueError("Il Codice Fiscale non è del formato giusto.")
+
+    query = 'INSERT INTO docenti(CodiceFiscale, Nome, Cognome, mail, annoNascita, password) VALUES (%s, %s, %s, %s, %s, %s)'
+    cursor.execute(query, (doc['codice_fiscale'], doc['nome'],
+                           doc['cognome'], doc['mail'], doc['anno_nascita'], hash_value))
     mysql.commit()
     cursor.close()
+
 
 
 def get_docenti(mysql):
@@ -204,19 +228,38 @@ def delete_tempuser(cf, mysql):
 
 def add_user(stud, mysql):
     cursor = mysql.cursor()
+    if not is_valid_mail(stud['matricola'], stud['mail']):
+        cursor.close()
+        raise Exception("Mail non valida")
+
+    matricola = stud['matricola']
+    if not matricola.isdigit() or len(matricola) != 6:
+        cursor.close()
+        raise ValueError("La matricola deve contenere esattamente 6 cifre.")
+    
+    last_matricola_query = 'SELECT matricola FROM Studenti ORDER BY matricola DESC LIMIT 1'
+    cursor.execute(last_matricola_query)
+    last_matricola_row = cursor.fetchone()
+    if last_matricola_row:
+        last_matricola = last_matricola_row[0]
+        current_matricola = stud['matricola']
+        if current_matricola != last_matricola+str(1):
+            cursor.close()
+            raise ValueError("La matricola non è inserita in ordine. Assicurarsi che la matricola sia maggiore dell'ultima matricola inserita.")
+
+    cursor = mysql.cursor()
     query = 'INSERT INTO Studenti VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
     cursor.execute(query, (stud['codice_fiscale'],
-                           stud['nome'],
-                           stud['cognome'],
-                           stud['mail'],
-                           stud['annoNascita'],
-                           stud['matricola'],
-                           stud['password'],
-                           stud['corso_laurea']
-                           ))
+                        stud['nome'],
+                        stud['cognome'],
+                        stud['mail'],
+                        stud['annoNascita'],
+                        stud['matricola'],
+                        stud['password'],
+                        stud['corso_laurea']
+                        ))
     mysql.commit()
     cursor.close()
-
 
 def get_studenti(mysql):
     users = []
