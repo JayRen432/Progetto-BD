@@ -157,6 +157,11 @@ def get_docenti(mysql):
     return docenti
 
 
+def is_valid_mail(matricola, mail):
+    valid_mail = matricola + "@stud.unive.it"
+    return mail == valid_mail
+
+
 def get_couse_degree_course(mysql):
     dettagli = []
     cursor = mysql.cursor()
