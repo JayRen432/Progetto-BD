@@ -133,6 +133,12 @@ def add_docente_aux(doc, mysql):
     mysql.commit()
     cursor.close()
 
+def delete_docenti_aux(codice_fiscale, mysql):
+    cursor = mysql.cursor()
+    query = 'DELETE FROM docenti WHERE CodiceFiscale = %s'
+    cursor.execute(query, codice_fiscale)
+    mysql.commit()
+    cursor.close()
 
 
 def get_docenti(mysql):
