@@ -252,11 +252,12 @@ def add_user(stud, mysql):
     cursor.execute(last_matricola_query)
     last_matricola_row = cursor.fetchone()
     if last_matricola_row:
-        last_matricola = last_matricola_row[0]
-        current_matricola = stud['matricola']
-        if current_matricola != last_matricola+str(1):
+        last_matricola = int(last_matricola_row[0])
+        current_matricola = int(stud['matricola'])
+        print(last_matricola, current_matricola)
+        if current_matricola != last_matricola+1:
             cursor.close()
-            raise ValueError("La matricola non è inserita in ordine. Assicurarsi che la matricola sia maggiore dell'ultima matricola inserita.")
+            raise ValueError("La matricola non è inserita in ordine. Assicurarsi che la matricola sia in ordine rispetto all'ultima inserita.")
 
     cursor = mysql.cursor()
     query = 'INSERT INTO Studenti VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
