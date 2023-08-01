@@ -1,7 +1,7 @@
 import pymysql
 import json
 import hashlib
-
+from utenti import *
 
 def add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo, mysql):
     cursor = mysql.cursor()
@@ -37,7 +37,7 @@ def get_degree_course(mysql):
 
 
 def delete_degree_course_aux_post(codice_corso, mysql):
-    delete_corso_crosoLaurea_aux_post(codice_corso, None, mysql)
+    delete_corso_corsoLaurea_aux_post(codice_corso, None, mysql)
     cursor = mysql.cursor()
     query = 'DELETE FROM Corsi_di_laurea WHERE CodCorsoLaurea = %s'
     cursor.execute(query, (codice_corso,))
@@ -54,7 +54,7 @@ def add_course_aux(codice, nome, mysql):
 
 
 def delete_course_aux_post(codice_corso, mysql):
-    delete_corso_crosoLaurea_aux_post(None, codice_corso, mysql)
+    delete_corso_corsoLaurea_aux_post(None, codice_corso, mysql)
     cursor = mysql.cursor()
     query = 'DELETE FROM corsi WHERE CodiceCorso = %s'
     cursor.execute(query, (codice_corso,))
@@ -90,17 +90,6 @@ def assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql):
     mysql.commit()
     cursor.close()
 
-
-def add_docente_aux(doc, mysql):
-    pwd = doc['password']
-    hash_password = hashlib.sha256(pwd.encode('utf-8'))
-    hash_value=hash_password.hexdigest()
-    cursor = mysql.cursor()
-    query = 'INSERT INTO docenti(CodiceFiscale, Nome, Cognome, mail, annoNascita, password) VALUES (%s, %s, %s, %s, %s, %s)'
-    cursor.execute(query, (doc['codice_fiscale'], doc['nome'],
-                           doc['cognome'], doc['mail'], doc['anno_nascita'], hash_value))
-    mysql.commit()
-    cursor.close()
 
 def is_cf_present_in_studenti(cf_docente, mysql):
     cursor = mysql.cursor()
@@ -140,7 +129,6 @@ def delete_docenti_aux(codice_fiscale, mysql):
     mysql.commit()
     cursor.close()
 
-
 def get_docenti(mysql):
     docenti = []
     cursor = mysql.cursor()
@@ -167,7 +155,6 @@ def is_valid_mail(matricola, mail):
     valid_mail = matricola + "@stud.unive.it"
     return mail == valid_mail
 
-
 def get_couse_degree_course(mysql):
     dettagli = []
     cursor = mysql.cursor()
@@ -187,9 +174,9 @@ def get_couse_degree_course(mysql):
     return dettagli
 
 
-def delete_corso_crosoLaurea_aux_post(deg_course, course, mysql):
+def delete_corso_corsoLaurea_aux_post(deg_course, course, mysql):
     cursor = mysql.cursor()
-    query = 'DELETE FROM appartenenti WHERE CodCorso = %s AND CorsoLaurea = %s'
+    query = 'DELETE FROM appartenenti WHERE CorsoLaurea = %s AND CodCorso = %s'
     cursor.execute(query, (deg_course, course))
     mysql.commit()
     cursor.close()
