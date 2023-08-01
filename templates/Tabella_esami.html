@@ -1,59 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tabella Esami</title>
-</head>
-<body>
-  <h1>Tabella Esami</h1>
-  <table id="esamiTable">
-    <thead>
-      <tr>
-        <th>Codice Esame</th>
-        <th>Corso</th>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Assegna voti</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Qui verranno aggiunte le righe dinamicamente -->
-    </tbody>
-  </table>
-    <p>E' necessario </p>
-  <script>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="as_v">
+    <h2>Tabella Esami</h2>
+    <table id="esamiTable" class="tableC">
+        <thead>
+            <tr>
+                <th>Codice Esame</th>
+                <th>Corso</th>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Assegna voti</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Qui verranno aggiunte le righe dinamicamente -->
+        </tbody>
+    </table>
+</div>
+<script>
     // Funzione per creare una riga della tabella
     function createRow(codiceEsame, corso, data, tipo) {
-      const row = document.createElement("tr");
-      row.innerHTML = `
+        const row = document.createElement("tr");
+        row.innerHTML = `
         <td>${codiceEsame}</td>
         <td>${corso}</td>
         <td>${data}</td>
         <td>${tipo}</td>
         <td><button onclick="assegnaVoti('${codiceEsame}')">Assegna</button></td>
       `;
-      return row;
+        return row;
     }
     // Funzione per aggiungere le righe alla tabella
     function populateTable(data) {
-      const tableBody = document.querySelector("tbody");
-      data.forEach(entry => {
-        const { CodEsame, Corso, Data, Tipo } = entry;
-        const row = createRow(CodEsame, Corso, Data, Tipo);
-        tableBody.appendChild(row);
-      });
+        const tableBody = document.querySelector("tbody");
+        data.forEach(entry => {
+            const { CodEsame, Corso, Data, Tipo } = entry;
+            const row = createRow(CodEsame, Corso, Data, Tipo);
+            tableBody.appendChild(row);
+        });
     }
-    
+
     // Funzione per cambiare pagina
     function assegnaVoti(codiceEsame) {
         window.location.href = '/Docenti/' + codiceEsame + '/Assegna_voti';
     }
-    
+
     // Esempio di dati della tabella
     const data = JSON.parse('{{ esami | safe }}');
     // Popola la tabella con i dati
     populateTable(data);
-  </script>
-</body>
-</html>
+</script>
+{% endblock %}

@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Tabella dinamica</title>
-</head>
-
-<body>
-    <table id="tabella" border="1">
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="st_bp">
+    <h2>Tabella Prenotazioni agli Appelli</h2>
+    <table id="tabella" border="1" class="tableC">
         <thead>
             <tr>
                 <th>Codice corso</th>
@@ -29,7 +25,7 @@
             {% endfor %}
         </tbody>
     </table>
-
+</div>
     <script>
         function delete_appello(button) {
             var riga = button.parentElement.parentElement;
@@ -46,10 +42,8 @@
             .then(response => response.json())
             .then(data => { alert(data.message);  })// Messaggio di conferma dal server
             .catch(error => console.error('Errore:', error));
-            window.location.assign('/delete_appello');
+            window.location.assign('/stud');
         }
 
     </script>
-</body>
-
-</html>
+{% endblock %}

@@ -1,57 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h2>Associa il docente al corso:</h2>
-    <div>
+{% extends 'baseUsers.html' %}
+{% block content %}
 
-        <label for="Docente">Selezione docente</label>
+<div class="asg_cd">
+    <h2>Associa Docente a Corso:</h2>
+
+    <p>Selezione docente:
         <select id="Docente">
             <option selected disabled hidden>-----------</option>
             {% for docente in docenti %}
-                <option value="{{ docente.codice_fiscale }}">{{ docente.nome + " " + docente.cognome }}</option>
+            <option value="{{ docente.codice_fiscale }}">{{ docente.nome + " " + docente.cognome }}</option>
             {% endfor %}
         </select>
-        </br>
-        <label for="Corso">Seleziona corso d'insegnamento</label>
+    </p>
+    <p>Seleziona corso d'insegnamento:
         <select id="Corso">
             <option selected disabled hidden>-----------</option>
             {% for corso in corsi %}
-                <option value="{{ corso.codice }}">{{ corso.nome }}</option>
+            <option value="{{ corso.codice }}">{{ corso.nome }}</option>
             {% endfor %}
         </select>
-        </br>
-    </div>
+    </p>
     <button onclick="inviaDati()">Associa</button>
+</div>
 
-    <script>
-        function inviaDati(){
-            let selettore_docente = document.getElementById("Docente");
-            let selettore_corso = document.getElementById("Corso");
-            let docente = selettore_docente.value;
-            let corso = selettore_corso.value;
-            if (docente === '-----------' || corso === '-----------'){
-                alert("Seleziona dei dati validi");
-            }
-            else{
-               fetch('/Admin/associazioneCorso_Docente', {
+<script>
+    function inviaDati() {
+        let selettore_docente = document.getElementById("Docente");
+        let selettore_corso = document.getElementById("Corso");
+        let docente = selettore_docente.value;
+        let corso = selettore_corso.value;
+        if (docente === '-----------' || corso === '-----------') {
+            alert("Seleziona dei dati validi");
+        }
+        else {
+            fetch('/Admin/associazioneCorso_Docente', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
                 },
-                    body: JSON.stringify({
-                        cod_Docente : docente,
-                        cod_Corso : corso
-                    })
+                body: JSON.stringify({
+                    cod_Docente: docente,
+                    cod_Corso: corso
                 })
-                window.location.assign("/Admin");
-            }
+            })
+            window.location.assign("/Admin");
         }
+    }
 
-    </script>
-
-</body>
-</html>
+</script>
+{% endblock %}

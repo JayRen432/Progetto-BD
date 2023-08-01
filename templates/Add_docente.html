@@ -1,24 +1,26 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
-<div class="add_d">
-    <h2>Aggiungi un docente</h2>
-    <p>Inserisci le informazioni richieste:</p>
-    </br>
-    <form class="login-form">
-        <input type="text" id="codiceFiscale" placeholder="Codice Fiscale">
+<div class="add_container">
+    <div class="add_d">
+        <h2>Aggiungi un docente</h2>
+        <p>Inserisci le informazioni richieste:</p>
         </br>
-        <input type="text" id="nome" placeholder="Nome">
-        </br>
-        <input type="text" id="cognome" placeholder="Cognome">
-        </br>
-        <input type="text" id="mail" placeholder="username@example.com">
-        </br>
-        <input type="date" id="annoNascita">
-        </br>
-        <input type="password" id="password" placeholder="Password">
-        </br>
-        <button onclick="inviaDati()">Invia al server</button>
-    </form>
+        <form class="login-form">
+            <input type="text" id="codiceFiscale" placeholder="Codice Fiscale">
+            </br>
+            <input type="text" id="nome" placeholder="Nome">
+            </br>
+            <input type="text" id="cognome" placeholder="Cognome">
+            </br>
+            <input type="text" id="mail" placeholder="username@example.com">
+            </br>
+            <input type="date" id="annoNascita">
+            </br>
+            <input type="password" id="password" placeholder="Password">
+            </br>
+            <button onclick="inviaDati()">Invia al server</button>
+        </form>
+    </div>
 </div>
 <script>
     function notNull(cf, n, c, m, a, p) {
@@ -54,9 +56,9 @@
                     password: pwd
                 })
             })
-            .catch(error => {
-                console.error('Errore durante l\'invio dei dati al server:', error);
-            });
+                .catch(error => {
+                    console.error('Errore durante l\'invio dei dati al server:', error);
+                });
             window.location.assign("/Admin");
         }
         else {

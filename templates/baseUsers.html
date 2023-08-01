@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Bertocco Marco">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/main_users.css">
+    <link rel="icon" type="image/x-icon" href="/static/images/logod.ico">
     <title>TITOLO</title>
 </head>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const sidebar = document.getElementById('sidebar');
         const toggleButton = document.querySelector('.toggle-button');
 
@@ -19,7 +21,7 @@
         }
 
         // Close the sidebar when clicking outside the menu
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             if (sidebar) {
                 const targetElement = event.target;
                 if (!sidebar.contains(targetElement) && !targetElement.classList.contains('toggle-button')) {
@@ -33,6 +35,7 @@
         }
     });
 </script>
+
 <body>
     <!-- Button to toggle the navigation bar -->
     <button class="toggle-button">☰</button>
@@ -41,9 +44,9 @@
     <div class="sidebar" id="sidebar">
         <img src="/static/images/logo.png" alt="logo">
         <ul>
-        <li><a href="/home">Home</a></li>
-        <li><a href="/log_out">Log Out</a></li>
-        <li><a href="/reset">Reset Password</a></li>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/log_out">Log Out</a></li>
+            <li><a href="/reset">Reset Password</a></li>
         </ul>
     </div>
 
@@ -54,4 +57,5 @@
         {% endblock %}
     </div>
 </body>
+
 </html>

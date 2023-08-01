@@ -1,123 +1,108 @@
-<!DOCTYPE html>
-<html lang="it">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Menu a tendina dinamico</title>
-    </head>
-    <body>
-        <div>
-            <label for="corsoDiLaurea">Seleziona il corso di laurea:</label>
-            <select id="corsoDiLaurea" onchange="updateLabel('corsoDiLaurea', 'nomeCorsoLabel')">
-                <option selected disabled hidden>-----------</option>
-                <!-- Gli elementi del primo menu verranno inseriti dinamicamente qui -->
-            </select>
-            </br>
-            <label>Codice corso di Laurea selezionato: </label>
-            <label id="nomeCorsoLabel"></label>
-        </div>
-        </br></br>
-        <div>
-            <label for="corsoDiLaurea2" >Seleziona il secondo corso di laurea:</label>
-            <select id="corsoDiLaurea2" onchange="updateLabel('corsoDiLaurea2', 'nomeCorsoLabel2')">
-                <option selected disabled hidden>-----------</option>
-                <!-- Gli elementi del secondo menu verranno inseriti dinamicamente qui -->
-            </select>
-            </br>
-            <label >Codice corso selezionato: </label>
-            <label id="nomeCorsoLabel2"></label>
-            </br></br>
-            <label for="Anno">Seleziona anno di insegnamento</label>
-            <select id="Anno">
-                <option selected disabled hidden>-----------</option>
-                <option >Primo anno</option>
-                <option >Secondo anno</option>
-                <option >Terzo anno</option>
-            </select>
-        </div>
-        </br></br>
-        <button onclick="inviaDati()">Invia al server</button>
-    
-        <script>
-            // Le due liste di corsi di laurea da passare come input
-            const listaCorsi1 = [
+{% extends 'baseUsers.html' %}
+{% block content %}
+
+<div class="asg_cc">
+    <h2>Associa Corso con Corso Laurea</h2>
+    <p>Seleziona il corso di laurea:
+        <select id="corsoDiLaurea" onchange="updateSpan('corsoDiLaurea', 'nomCorsoSpan')">
+            <option selected disabled hidden>-----------</option>
+            <!-- Gli elementi del primo menu verranno inseriti dinamicamente qui -->
+        </select>
+    </p>
+    <p>Codice corso di Laurea selezionato: <span id="nomCorsoSpan"></span></p>
+    <p>Seleziona il secondo corso di laurea:
+        <select id="corsoDiLaurea2" onchange="updateSpan('corsoDiLaurea2', 'nomCorsoSpan2')">
+            <option selected disabled hidden>-----------</option>
+            <!-- Gli elementi del secondo menu verranno inseriti dinamicamente qui -->
+        </select>
+    </p>
+    <p>Codice corso selezionato: <span id="nomCorsoSpan2"></span></p>
+    <p>Seleziona anno di insegnamento:
+        <select id="Anno">
+            <option selected disabled hidden>-----------</option>
+            <option>Primo anno</option>
+            <option>Secondo anno</option>
+            <option>Terzo anno</option>
+        </select>
+    </p>
+    <button onclick="inviaDati()">Invia</button>
+</div>
+
+<script>
+    // Le due liste di corsi di laurea da passare come input
+    const listaCorsi1 = [
                 {% for corso in lista_corsi_laurea %}
                     { codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" },
                 {% endfor %}
             ];
-            const listaCorsi2 = [
-                {% for corso in lista_corsi %}
-                    { codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" },
-                {% endfor %}
-            ];
-    
-            // Funzione per popolare il menu a tendina
-            function populateDropdown() {
-                const dropdown1 = document.getElementById("corsoDiLaurea");
-                const dropdown2 = document.getElementById("corsoDiLaurea2");
-    
-                listaCorsi1.forEach(corso => {
-                    const option = document.createElement("option");
-                    option.value = corso.nome;
-                    option.text = corso.nome;
-                    dropdown1.appendChild(option);
-                });
-    
-                listaCorsi2.forEach(corso => {
-                    const option = document.createElement("option");
-                    option.value = corso.nome;
-                    option.text = corso.nome;
-                    dropdown2.appendChild(option);
-                });
-            }
-    
-            // Funzione per aggiornare la label affianco al menu a tendina
-            function updateLabel(dropdownId, labelId) {
-                const dropdown = document.getElementById(dropdownId);
-                const selectedCodice = dropdown.value;
-                const label = document.getElementById(labelId);
-                // Trova il corso di laurea selezionato dalla lista corretta
-                let corsoSelezionato;
-                if (dropdownId === 'corsoDiLaurea') {
-                    corsoSelezionato = listaCorsi1.find(corso => corso.nome === selectedCodice);
-                    label.textContent = ""+corsoSelezionato.codice;
-                } else if (dropdownId === 'corsoDiLaurea2') {
-                    corsoSelezionato = listaCorsi2.find(corso => corso.nome === selectedCodice);
-                    label.textContent = "" + corsoSelezionato.codice;
-                }
-            }
-    
-            // Funzione per inviare i dati al server utilizzando AJAX
-            function inviaDati() {
-                const selectedCodice1 = document.getElementById("nomeCorsoLabel").textContent;
-                const selectedCodice2 = document.getElementById("nomeCorsoLabel2").textContent;
-                const selectedyear = document.getElementById("Anno").value
-    
-    
-                // Esegui qui la logica per inviare i dati al server (AJAX o altro)
-                // Ad esempio, puoi utilizzare fetch per inviare una richiesta POST al server
-    
-                // Esempio di utilizzo di fetch per inviare i dati al server Flask
-                fetch('/Admin/assegnaCorso_CorsoLaurea', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        corso1: selectedCodice1,
-                        corso2: selectedCodice2,
-                        anno : selectedyear
-                    })
-                })
-                .then(response => response.json())
-                .catch(error => {
-                    console.error('Errore durante l\'invio dei dati al server:', error);
-                });
-                window.location.assign("/Admin");
-            }
-    
-            // Popolare i menu a tendina all'avvio della pagina
-            populateDropdown();
-        </script>
-    </body>
-</html>
+    const listaCorsi2 = [{% for corso in lista_corsi %}{ codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" }, {% endfor %}];
+
+    // Funzione per popolare il menu a tendina
+    function populateDropdown() {
+        const dropdown1 = document.getElementById("corsoDiLaurea");
+        const dropdown2 = document.getElementById("corsoDiLaurea2");
+
+        listaCorsi1.forEach(corso => {
+            const option = document.createElement("option");
+            option.value = corso.nome;
+            option.text = corso.nome;
+            dropdown1.appendChild(option);
+        });
+
+        listaCorsi2.forEach(corso => {
+            const option = document.createElement("option");
+            option.value = corso.nome;
+            option.text = corso.nome;
+            dropdown2.appendChild(option);
+        });
+    }
+
+    // Funzione per aggiornare la label affianco al menu a tendina
+    function updateSpan(dropdownId, labelId) {
+        const dropdown = document.getElementById(dropdownId);
+        const selectedCodice = dropdown.value;
+        const label = document.getElementById(labelId);
+        // Trova il corso di laurea selezionato dalla lista corretta
+        let corsoSelezionato;
+        if (dropdownId === 'corsoDiLaurea') {
+            corsoSelezionato = listaCorsi1.find(corso => corso.nome === selectedCodice);
+            label.textContent = "" + corsoSelezionato.codice;
+        } else if (dropdownId === 'corsoDiLaurea2') {
+            corsoSelezionato = listaCorsi2.find(corso => corso.nome === selectedCodice);
+            label.textContent = "" + corsoSelezionato.codice;
+        }
+    }
+
+    // Funzione per inviare i dati al server utilizzando AJAX
+    function inviaDati() {
+        const selectedCodice1 = document.getElementById("nomCorsoSpan").textContent;
+        const selectedCodice2 = document.getElementById("nomCorsoSpan2").textContent;
+        const selectedyear = document.getElementById("Anno").value
+
+
+        // Esegui qui la logica per inviare i dati al server (AJAX o altro)
+        // Ad esempio, puoi utilizzare fetch per inviare una richiesta POST al server
+
+        // Esempio di utilizzo di fetch per inviare i dati al server Flask
+        fetch('/Admin/assegnaCorso_CorsoLaurea', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                corso1: selectedCodice1,
+                corso2: selectedCodice2,
+                anno: selectedyear
+            })
+        })
+            .then(response => response.json())
+            .catch(error => {
+                console.error('Errore durante l\'invio dei dati al server:', error);
+            });
+        window.location.assign("/Admin");
+    }
+
+    // Popolare i menu a tendina all'avvio della pagina
+    populateDropdown();
+</script>
+{% endblock %}

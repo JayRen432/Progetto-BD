@@ -1,31 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tabella Esami</title>
-</head>
-<body>
-    <h1>Tabella Esami</h1>
-    <table border="1">
-        <tr>
-            <th>Codice del corso</th>
-            <th>Nome del corso</th>
-            <th>Sostenuto in data</th>
-            <th>Voto ottenuto</th>
-            <th>Peso in crediti</th>
-        </tr>
-        {% for corso in corsi %}
-            <tr>
-                <td>{{ corso.CodiceCorso }}</td>
-                <td>{{ corso.NomeCorso }}</td>
-                <td>{{ corso.Data }}</td>
-                {% if corso.voto is none %}
-                    <td></td> <!-- Mostra la cella vuota -->
-                {% else %}
-                    <td>{{ corso.Voto }}</td>
-                {% endif %}
-                <td>{{ corso.Valore }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-</body>
-</html>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<h1>Tabella Esami</h1>
+<table border="1" class="tableC">
+    <tr>
+        <th>Codice del corso</th>
+        <th>Nome del corso</th>
+        <th>Sostenuto in data</th>
+        <th>Voto ottenuto</th>
+        <th>Peso in crediti</th>
+    </tr>
+    {% for corso in corsi %}
+    <tr>
+        <td>{{ corso.CodiceCorso }}</td>
+        <td>{{ corso.NomeCorso }}</td>
+        <td>{{ corso.Data }}</td>
+        {% if corso.voto is none %}
+        <td></td> <!-- Mostra la cella vuota -->
+        {% else %}
+        <td>{{ corso.Voto }}</td>
+        {% endif %}
+        <td>{{ corso.Valore }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

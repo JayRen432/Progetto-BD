@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tabella Corsi di Laurea</title>
-</head>
-<body>
-    <table>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="del_u">
+    <h2>Elimina Corso Laurea</h2>
+    <table class="tableC" border="1">
         <thead>
             <tr>
                 <th>Codice Corso</th>
@@ -27,5 +25,5 @@
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
-<div class="add_container">
+<div class="delete_container">
     <div class="add_u">
         <h2>Elenco Utenti</h2>
-        <ul id="user-list"></ul>
+        <ul id="user-list" class="links"></ul>
     </div>
     <div class="dett_u">
         <h2>Dettagli Docente</h2>
@@ -33,7 +33,7 @@
             userlistElement.appendChild(listItem);
         });
     }
-
+    var previousSelectedItem = null;
     function mostraDettagli(elemento) {
         // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
         var listaUtenti = document.querySelectorAll('.utenti ul li');
@@ -41,8 +41,16 @@
             utente.classList.remove('utente-selezionato');
         });
 
+        // Remove the class "utente-selezionato" from the previously selected item
+        if (previousSelectedItem) {
+            previousSelectedItem.classList.remove('utente-selezionato');
+        }
         // Aggiunge la classe "utente-selezionato" all'elemento selezionato
         elemento.classList.add('utente-selezionato');
+
+        // Store the reference to the currently selected item as the new previously selected item
+        previousSelectedItem = elemento;
+
 
         // Ottiene i dettagli dell'utente selezionato dall'attributo dati
         var dettagliUtente = JSON.parse(elemento.getAttribute("data-user"));

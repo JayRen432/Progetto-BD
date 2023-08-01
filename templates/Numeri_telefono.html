@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tabella numeri di telefono</title>
-</head>
-<br>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="numT">
     <h1>Tabella numeri di telefono</h1>
-    <table id="table">
+    <table id="table" class="tableC">
         <tr>
             <th>Numero di telefono</th>
             <th>Elimina</th>
@@ -23,43 +19,42 @@
     </br>
     <button id="mostraFormButton" onclick="mostraForm()">Aggiungi Nuovo numero di telefono</button>
 
+    
     <div id="formContainer" style="display: none;">
         <form id="numeroForm">
-            <label for="telefono">Inserisci il numero di telefono:  </label>
+            </br>
+            <p style="text-align: left;">Inserisci il numero di telefono: 
             <input type="text" id="telefono" name="telefono" required>
             <button type="submit" onclick="invia()">Invia</button>
+            </p>
         </form>
     </div>
+</div>
+<script>
+    function invia_numero(method, numeroTelefono) {
+        fetch(method, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
+            },
+            body: JSON.stringify({ number: numeroTelefono })
+        })
+            .then(data => { window.location.reload(); })
+    }
+    function mostraForm() {
+        var formContainer = document.getElementById('formContainer');
+        formContainer.style.display = 'block';
+    }
+    function invia() {
+        var numeroTelefono = document.getElementById('telefono').value;
+        invia_numero('/add_phone', numeroTelefono);
+    }
+    function deletenumber(button) {
+        var row = button.closest('tr');
+        var numeroElement = row.querySelector('td:first-child');
+        var numeroTelefono = numeroElement.textContent;
+        invia_numero('/delete_phone', numeroTelefono);
 
-
-
-
-    <script>
-        function invia_numero(method, numeroTelefono) {
-            fetch(method, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json' // Cambiato il Content-Type a "application/json"
-                },
-                body: JSON.stringify({ number: numeroTelefono })
-            })
-            .then(data => { window.location.reload();})
-        }
-        function mostraForm() {
-            var formContainer = document.getElementById('formContainer');
-            formContainer.style.display = 'block';
-        }
-        function invia() {
-             var numeroTelefono = document.getElementById('telefono').value;
-             invia_numero('/add_phone', numeroTelefono);
-        }
-        function deletenumber(button) {
-            var row = button.closest('tr');
-            var numeroElement = row.querySelector('td:first-child');
-            var numeroTelefono = numeroElement.textContent;
-            invia_numero('/delete_phone', numeroTelefono);
-           
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

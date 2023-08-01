@@ -1,24 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dettagli Prove d'Esame</title>
-</head>
-<body>
-    <h1>Dettagli Prove d'Esame</h1>
-    {% for codice_corso, exams in grouped_exam_list.items() %}
-        <h2>Corso: {{ exams[0]['nome_corso'] }} (Codice: {{ codice_corso }})</h2>
-        <table border="1">
-            <tr>
-                <th>Voto</th>
-                <th>Data Esame</th>
-            </tr>
-            {% for exam in exams %}
-                <tr>
-                    <td>{{ exam['voto'] }}</td>
-                    <td>{{ exam['data_esame'] }}</td>
-                </tr>
-            {% endfor %}
-        </table>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="st_es">
+<h2>Dettagli Prove d'Esame</h2>
+{% for codice_corso, exams in grouped_exam_list.items() %}
+<h3>Corso: {{ exams[0]['nome_corso'] }} (Codice: {{ codice_corso }})</h3>
+<table border="1" class="tableC">
+    <tr>
+        <th>Voto</th>
+        <th>Data Esame</th>
+    </tr>
+    {% for exam in exams %}
+    <tr>
+        <td>{{ exam['voto'] }}</td>
+        <td>{{ exam['data_esame'] }}</td>
+    </tr>
     {% endfor %}
-</body>
-</html>
+</table>
+</div>
+{% endfor %}
+{% endblock %}

@@ -20,6 +20,7 @@
 
 <script>
     var dettagliUtente;
+    var previousSelectedItem = null;
     function mostraDettagli(elemento) {
         // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
         var listaUtenti = document.querySelectorAll('.utenti ul li');
@@ -27,9 +28,15 @@
             utente.classList.remove('utente-selezionato');
         });
 
+        // Remove the class "utente-selezionato" from the previously selected item
+        if (previousSelectedItem) {
+            previousSelectedItem.classList.remove('utente-selezionato');
+        }
         // Aggiunge la classe "utente-selezionato" all'elemento selezionato
         elemento.classList.add('utente-selezionato');
 
+        // Store the reference to the currently selected item as the new previously selected item
+        previousSelectedItem = elemento;
 
         var st = elemento.getAttribute('value');
         const stringSplitted = st.split(" ")

@@ -1,30 +1,33 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
-<table border="1">
-    <thead>
-        <tr>
-            <th>Codice Corso di Laurea</th>
-            <th>Nome Corso di Laurea</th>
-            <th>Specializzazione</th>
-            <th>Indirizzo</th>
-            <th>Elimina</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for corso in corsi_di_laurea %}
-        <tr>
-            <td>{{ corso.codice }}</td>
-            <td>{{ corso.nome }}</td>
-            <td>{{ corso.specializzazione }}</td>
-            <td>{{ corso.indirizzo }}</td>
-            <td>
-                <form action="/Admin/elimina_corso_laurea" method="post">
-                    <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
-                    <input type="submit" value="Elimina">
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="del_c">
+    <h3>Elimina Corso Laurea</h3>
+    <table class="tableC" border="1">
+        <thead>
+            <tr>
+                <th>Codice Corso di Laurea</th>
+                <th>Nome Corso di Laurea</th>
+                <th>Specializzazione</th>
+                <th>Indirizzo</th>
+                <th>Elimina</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for corso in corsi_di_laurea %}
+            <tr>
+                <td>{{ corso.codice }}</td>
+                <td>{{ corso.nome }}</td>
+                <td>{{ corso.specializzazione }}</td>
+                <td>{{ corso.indirizzo }}</td>
+                <td>
+                    <form action="/Admin/elimina_corso_laurea" method="post">
+                        <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
+                        <input type="submit" value="Elimina">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

@@ -1,23 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Menù a tendina e tabella</title>
-</head>
-<body>
-    <h2>Menù a tendina</h2>
+{% extends 'baseUsers.html' %}
+{% block content %}
+<div class="del_cd">
+    <h2>Elimina Corsi Docenti</h2>
     <form>
-        <label for="DocenteSelect">Seleziona Docente</label>
-        <select id="DocenteSelect" name="DocenteSelect">
-            {% for docente in docenti %}
+        <p>Seleziona Docente
+            <select id="DocenteSelect" name="DocenteSelect">
+                {% for docente in docenti %}
                 <option value="{{ docente.codice_fiscale }}">{{ docente.nome + " " + docente.cognome }}</option>
-            {% endfor %}
-        </select>
-        <button type="button" onclick="showTable()">Mostra Tabella</button>
+                {% endfor %}
+            </select>
+            <button type="button" onclick="showTable()">Mostra Tabella</button>
+        </p>
     </form>
 
     <div id="tableContainer" style="display: none;">
         <h2>Tabella</h2>
-        <table border="1">
+        <table border="1" class="tableC">
             <thead>
                 <tr>
                     <th>Codice fiscale Docente</th>
@@ -32,99 +30,92 @@
             </tbody>
         </table>
     </div>
+</div>
+<script>
+    function showTable() {
+        var DocenteSelect = document.getElementById("DocenteSelect");
+        var selectedDocente_cf = DocenteSelect.value;
+        var selectedDocenteNome = DocenteSelect.options[DocenteSelect.selectedIndex].text;
+        var course = JSON.parse('{{ corsi | safe }}')
+        var corsi_docenti = JSON.parse('{{ corsi_doc | safe }}')
 
-    <script>
+        populateTable(selectedDocente_cf, selectedDocenteNome, corsi_docenti, course);
+    }
 
-        function showTable() {
-            var DocenteSelect = document.getElementById("DocenteSelect");
-            var selectedDocente_cf = DocenteSelect.value;
-            var selectedDocenteNome = DocenteSelect.options[DocenteSelect.selectedIndex].text;
-            var course = JSON.parse('{{ corsi | safe }}')
-            var corsi_docenti = JSON.parse('{{ corsi_doc | safe }}')
+    function populateTable(docente_CF, docente_Nome, corsi_docenti, course) {
+        var tableBody = document.getElementById('tableBody');
 
-            populateTable(selectedDocente_cf, selectedDocenteNome, corsi_docenti, course);
-        }
+        // Clean the table body before populating the data
+        tableBody.innerHTML = '';
+        // Loop through the corsi_docenti list to find matching elements
+        for (let i = 0; i < corsi_docenti.length; i++) {
+            const corso_docente = corsi_docenti[i];
 
-        function populateTable(docente_CF, docente_Nome, corsi_docenti, course) {
-            var tableBody = document.getElementById('tableBody');
+            // Check if the Docente matches docente_CF
+            if (corso_docente.Docente === docente_CF) {
+                // Find the corresponding course name from the "course" list
+                const corso = course.find(course => course.codice === corso_docente.Corso);
 
-            // Clean the table body before populating the data
-            tableBody.innerHTML = '';
-            // Loop through the corsi_docenti list to find matching elements
-            for (let i = 0; i < corsi_docenti.length; i++) {
-                    const corso_docente = corsi_docenti[i];
+                if (corso) {
+                    // Create a new row for the table
+                    const newRow = document.createElement('tr');
 
-                    // Check if the Docente matches docente_CF
-                    if (corso_docente.Docente === docente_CF) {
-                        // Find the corresponding course name from the "course" list
-                        const corso = course.find(course => course.codice === corso_docente.Corso);
+                    // Populate the columns with data
+                    const cfCell = document.createElement('td');
+                    cfCell.textContent = docente_CF;
+                    newRow.appendChild(cfCell);
 
-                        if (corso) {
-                            // Create a new row for the table
-                            const newRow = document.createElement('tr');
+                    const nomeDocenteCell = document.createElement('td');
+                    nomeDocenteCell.textContent = docente_Nome;
+                    newRow.appendChild(nomeDocenteCell);
 
-                            // Populate the columns with data
-                            const cfCell = document.createElement('td');
-                            cfCell.textContent = docente_CF;
-                            newRow.appendChild(cfCell);
+                    const codiceCorsoCell = document.createElement('td');
+                    codiceCorsoCell.textContent = corso_docente.Corso;
+                    newRow.appendChild(codiceCorsoCell);
 
-                            const nomeDocenteCell = document.createElement('td');
-                            nomeDocenteCell.textContent = docente_Nome;
-                            newRow.appendChild(nomeDocenteCell);
+                    const nomeCorsoCell = document.createElement('td');
+                    nomeCorsoCell.textContent = corso ? corso.nome : 'Course Not Found';
+                    newRow.appendChild(nomeCorsoCell);
 
-                            const codiceCorsoCell = document.createElement('td');
-                            codiceCorsoCell.textContent = corso_docente.Corso;
-                            newRow.appendChild(codiceCorsoCell);
+                    const actionCell = document.createElement('td');
+                    const button = document.createElement('button');
+                    button.textContent = 'Send Data';
+                    button.onclick = sendData.bind(null, newRow);
+                    actionCell.appendChild(button);
+                    newRow.appendChild(actionCell);
 
-                            const nomeCorsoCell = document.createElement('td');
-                            nomeCorsoCell.textContent = corso ? corso.nome : 'Course Not Found';
-                            newRow.appendChild(nomeCorsoCell);
-
-                            const actionCell = document.createElement('td');
-                            const button = document.createElement('button');
-                            button.textContent = 'Send Data';
-                            button.addEventListener('click', () => {
-                                sendData(i);
-                            });
-                            actionCell.appendChild(button);
-                            newRow.appendChild(actionCell);
-
-                            // Add the row to the table body
-                            tableBody.appendChild(newRow);
-                        }
-                    }
+                    // Add the row to the table body
+                    tableBody.appendChild(newRow);
                 }
-            var tableContainer = document.getElementById("tableContainer");
-            tableContainer.style.display = "block";
+            }
         }
+        var tableContainer = document.getElementById("tableContainer");
+        tableContainer.style.display = "block";
+    }
 
 
-        function sendData(rowIndex) {
-            var table = document.getElementById('tableBody');
-            var rowData = table.rows[rowIndex].cells;
+    function sendData(row) {
+        var cells=row.getElementsByTagName("td");
+        var dataToSend = {
+            doc_code: cells[0].innerHTML,
+            course_code: cells[2].innerHTML,
+        };
+        
+        // Invia i dati al server (implementazione a tua discrezione)
 
-            var dataToSend = {
-                'doc_code': rowData[0].innerHTML,
-                'course_code': rowData[2].innerHTML,
-            };
+        fetch('/Admin/delete_corso_Docente', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify( dataToSend )
+        })
+            .then(response => response.json())
+            .then(data => {
 
-            // Invia i dati al server (implementazione a tua discrezione)
-            console.log('Dati da inviare:', dataToSend);
-
-            fetch('/Admin/delete_corso_Docente', {
-                 method: 'POST',
-                headers: {
-                     'Content-Type': 'application/json'
-                },
-                 body: JSON.stringify({dataToSend})
-             })
-             .then(response => response.json())
-             .then(data => {
-
-             })
-             .catch(error => console.error('Errore:', error));
-            window.location.assign("/Admin");
-        }
-    </script>
-</body>
-</html>
+            })
+            .catch(error => console.error('Errore:', error));
+        window.location.assign("/Admin");
+    }
+</script>
+{% endblock %}

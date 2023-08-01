@@ -1,33 +1,33 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
-<h2>Menù a tendina</h2>
-<form>
-    <select id="corsoLaureaSelect" name="corsoLaurea">
-        {% for corso in corsi_Laurea %}
-        <option value="{{ corso.codice }}">{{ corso.nome }}</option>
-        {% endfor %}
-    </select>
-    <button type="button" onclick="showTable()">Mostra Tabella</button>
-</form>
-
-<div id="tableContainer" style="display: none;">
-    <h2>Tabella</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Codice Corso Laurea</th>
-                <th>Nome Corso Laurea</th>
-                <th>Codice Corso</th>
-                <th>Nome Corso</th>
-                <th>Azione</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- La tabella verrà popolata tramite JavaScript -->
-        </tbody>
-    </table>
+<div class="del_cc">
+    <h2>Elimina Corsi in Corso Laurea</h2>
+    <form>
+        <select id="corsoLaureaSelect" name="corsoLaurea">
+            {% for corso in corsi_Laurea %}
+            <option value="{{ corso.codice }}">{{ corso.nome }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" onclick="showTable()">Mostra Tabella</button>
+    </form>
+    <br><br>
+    <div id="tableContainer" style="display: none;">
+        <table border="1" class="tableC">
+            <thead>
+                <tr>
+                    <th>Codice Corso Laurea</th>
+                    <th>Nome Corso Laurea</th>
+                    <th>Codice Corso</th>
+                    <th>Nome Corso</th>
+                    <th>Azione</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- La tabella verrà popolata tramite JavaScript -->
+            </tbody>
+        </table>
+    </div>
 </div>
-
 <script>
     function showTable() {
         var corsoLaureaSelect = document.getElementById("corsoLaureaSelect");
@@ -45,7 +45,6 @@
             codiceCorsoLaurea: codiceCorsoLaurea,
             codiceCourse: codiceDegCourse
         };
-
         fetch('/Admin/delete_corso_corsoLaurea', {
             method: 'POST',
             headers: {
