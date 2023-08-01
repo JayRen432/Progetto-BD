@@ -202,8 +202,8 @@ def phone_number_aux(mysql, cf_docente):
     return phone_numbers 
 
 def add_number_aux(mysql, number_to_add, cf_docente):
-    if not number_to_add.isdigit() or len(number_to_add) != 7:
-        raise ValueError("Il numero di telefono deve contenere esattamente 7 cifre.")
+    if not number_to_add.isdigit() or len(number_to_add) != 10:
+        raise ValueError("Il numero di telefono deve contenere esattamente 10 cifre.")
     cursor = mysql.cursor()
     query = 'INSERT INTO numeri_telefono(NumTelefono, CodFiscale) VALUES (%s, %s)'
     cursor.execute(query, (number_to_add, cf_docente))
