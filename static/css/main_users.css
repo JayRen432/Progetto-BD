@@ -9,6 +9,7 @@ body {
 p {
     text-align: center;
     font-size: 25px;
+    font-family: 'Courier New', Courier, monospace;
     color: #a8aeb4;
 }
 
@@ -38,6 +39,15 @@ button {
     font-size: medium;
 }
 
+th,
+td,
+tr {
+    text-align: left;
+    font-size: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #a8aeb4;
+}
+
 img {
     width: 25%;
     height: 25%;
@@ -53,6 +63,27 @@ a {
 input {
     font-family: 'Courier New', Courier, monospace;
     font-size: small;
+}
+
+button {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+}
+
+ul {
+    list-style: none;
+}
+
+li {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+    color: #91989f;
+}
+
+select {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+    color: #a8aeb4;
 }
 
 /* MAIN CONTAINER */
@@ -76,7 +107,6 @@ input {
 }
 
 .sidebar ul {
-    list-style: none;
     padding: 20px;
 }
 
@@ -171,10 +201,21 @@ input {
 .add_u,
 .dett_u,
 .del_u,
+.del_c,
+.del_cc,
+.del_cd,
+.del_e,
+.as_v,
 .add_cl,
 .add_c,
 .add_e,
-.add_d {
+.asg_cc,
+.asg_cd,
+.numT,
+.dis_u,
+.add_d,
+.st_es,
+.st_p {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -184,7 +225,10 @@ input {
 
 .add_u,
 .dett_u,
-.del_u {
+.del_u,
+.del_c,
+.del_cd,
+.del_cc {
     flex: 1;
 }
 
@@ -194,9 +238,20 @@ input {
 
 .add_u,
 .del_u,
+.del_c,
+.del_cc,
+.del_cd,
+.del_e,
+.as_v,
+.numT,
 .add_cl,
 .add_c,
 .add_e,
+.asg_cc,
+.asg_cd,
+.dis_u,
+.st_es,
+.st_p,
 .add_d {
     background-color: #e0e0e0;
 }
@@ -205,6 +260,14 @@ input {
 .add_cl button,
 .add_c button,
 .add_e button,
+.asg_cc button,
+.asg_cd button,
+.numT button,
+.del_cc button,
+.del_cd button,
+.as_v button,
+.del_e button,
+.st_p button,
 .add_d button {
     background-color: #007bff;
     color: #fff;
@@ -219,6 +282,15 @@ input {
 .add_cl button:hover,
 .add_c button:hover,
 .add_e button:hover,
+.asg_cc button:hover,
+.asg_cd button:hover,
+.del_cc button:hover,
+.del_cd button:hover,
+.numT button:hover,
+.as_v button:hover,
+.del_e button:hover,
+.st_bp button:hover,
+
 .add_d button:hover {
     background-color: #0056b3;
     white-space: nowrap;
@@ -228,6 +300,8 @@ input {
 .add_cl input,
 .add_c input,
 .add_e input,
+.asg_cc input,
+.asg_cd input,
 .add_d input {
     display: block;
     padding: 10px;
@@ -235,7 +309,75 @@ input {
     border-radius: 3px;
 }
 
+.asg_cc select,
+.asg_cd select,
+.del_cd select,
+.numT select,
+.del_cc select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+.dis_u li{
+    font-size: 25px;
+}
+
+
+.form-group {
+    margin-bottom: 2px;
+}
+
+.form-group p {
+    display: inline-block;
+    padding: 5px;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    display: inline-block;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
 
 .utente-selezionato {
     background-color: rgb(191, 191, 191);
+}
+
+
+/* TABELLE */
+.tableC {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+
+.tableC th,
+.tableC td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.tableC th {
+    background-color: #f2f2f2;
+}
+
+
+.tableC input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.tableC input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.tableC input[type="submit"]:focus {
+    outline: none;
 }
