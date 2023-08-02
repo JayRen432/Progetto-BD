@@ -8,7 +8,14 @@ app = Flask(__name__)
 
 app.debug = True
 
-
+'''
+    Funzione che permette di effettuare il login
+    @param mail: mail dell'utente
+    @param password: password dell'utente
+    @param mysql: connessione al database
+    @return info_studente: informazioni dello studente
+    @return info_docente: informazioni del docente
+'''
 def login_aux(mail, password, mysql):
     hash_password = hashlib.sha256(password.encode("utf-8"))
     hash_value = hash_password.hexdigest()
@@ -62,7 +69,10 @@ def insertResult(dictionaryL, rowSQL, string, number=None):
 
     dictionaryL.update(dic)
 
-
+'''
+la funzione is_cf_present_in_studenti riceve come parametri il codice fiscale dello studente e la connessione al database
+la funzioen controlla che il codicefiscale dello studente non sia già presente nella tabella Studenti
+'''
 def is_cf_present_in_docenti(cf_studente, mysql):
     cursor = mysql.cursor()
     query = "SELECT COUNT(*) FROM Docenti WHERE CodiceFiscale = %s"
@@ -71,51 +81,27 @@ def is_cf_present_in_docenti(cf_studente, mysql):
     cursor.close()
     return count > 0
 
+'''
+la funzione sign_up_aux riceve come parametri la connessione al database, il codice fiscale dello studente, il nome, il cognome, la data di nascita, l'email, la password e il corso di laurea
+i dati vengono inseriti nella tabella temporaryuser attraverso la INSERT
+@param mysql
+@param codicefiscale
+@param name
+@param surname
+@param dateofbirth
+@param email
+@param password
+@param corsolaurea
 
-def is_valid_codicefiscale(codicefiscale):
-    if not codicefiscale[:6].isalpha():
-        return False
-
-    if (
-        not codicefiscale[6:8].isalnum()
-        or not codicefiscale[9:11].isalnum()
-        or not codicefiscale[12:15].isalnum()
-    ):
-        return False
-
-    if (
-        not codicefiscale[8].isalpha()
-        or not codicefiscale[11].isalpha()
-        or not codicefiscale[15].isalpha()
-    ):
-        return False
-
-    return True
-
-
+'''
 def sign_up_aux(
     codicefiscale, name, surname, dateofbirth, email, password, corsolaurea, mysql
-):  # inserisce uno studente nella tabella temporaryuser e ritorna 1
+): 
     hash_password = hashlib.sha256(password.encode("utf-8"))
     hash_value = hash_password.hexdigest()
-    domini_consentiti = [
-        "gmail.com",
-        "outlook.com",
-        "libero.it",
-        "yahoo.com",
-        "virgilio.it",
-    ]
-    dominio = email.split("@")[-1].lower()
-    if dominio not in domini_consentiti:
-        raise ValueError(
-            "Email non valida. Utilizzare un'email con uno dei seguenti domini: @gmail.com, @outlook.com, @libero.it, @yahoo.com, @virgilio.it"
-        )
 
     if is_cf_present_in_docenti(codicefiscale, mysql):
         raise ValueError("Il Codice Fiscale è già presente nella tabella Docenti.")
-
-    if not is_valid_codicefiscale(codicefiscale) or len(codicefiscale) != 16:
-        raise ValueError("Il Codice Fiscale non è del formato giusto.")
 
     cursor = mysql.cursor()
     query = "INSERT INTO temporaryuser(codicefiscale, nome, cognome, annoNascita, mail, matricola, password, CorsoLaurea) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
@@ -136,7 +122,13 @@ def sign_up_aux(
     cursor.close()
     return 1
 
+'''
+la funzione sign_up_corsolaurea riceve come parametri la connessione al database e la lista dei corsi di laurea
+attraverso la SELECT seleziona i dati dei corsi di laurea e li visualizza a schermo
+@param mysql
+@param corsi
 
+'''
 def sign_up_corsolaurea(corsi, mysql):
     cursor = mysql.cursor()
     query = "SELECT NomeCorsoLaurea, CodCorsoLaurea FROM Corsi_di_Laurea"
@@ -149,133 +141,6 @@ def sign_up_corsolaurea(corsi, mysql):
         i += 1
 
 
-def crea_esame_inserisci(
-    mysql, corso, nome_esame, codice_esame, data, tipo, valore, cf_docente
-):
-    cursor = mysql.cursor()
-    query = "INSERT INTO esami (CodEsame, Docente, Corso, NomeEsame, Data, Tipo, Valore) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    cursor.execute(
-        query, (codice_esame, cf_docente, corso, nome_esame, data, tipo, valore)
-    )
-    mysql.commit()
-    cursor.close()
-
-
-def crea_esame_docenti(mysql, cf_docente):
-    cursor = mysql.cursor()
-    query = "SELECT c.CodiceCorso, c.NomeCorso  FROM corsi c JOIN insegna i ON c.CodiceCorso = i.CodCorso WHERE i.CodFiscale = %s"
-    cursor.execute(query, (cf_docente,))
-    course_data = cursor.fetchall()
-    cursor.close()
-    lista_corsi = [{"CodiceCorso": row[0], "NomeCorso": row[1]} for row in course_data]
-    return lista_corsi
-
-
-def take_cf(mysql, matr):
-    cursor = mysql.cursor()
-    query = "SELECT CodiceFiscale FROM studenti WHERE matricola = %s"
-    cursor.execute(query, (matr,))
-    student = cursor.fetchone()
-    cursor.close()
-    return student
-
-
-def assegna_voto_aux(mysql, codiceEsame):
-    cursor = mysql.cursor()
-    query = "SELECT s.matricola, s.Nome, s.Cognome, s.CodiceFiscale FROM iscrizione_appelli ia JOIN studenti s ON ia.Studente = s.CodiceFiscale WHERE ia.Esame = %s"
-    cursor.execute(query, (codiceEsame,))
-    student_data = cursor.fetchall()
-    cursor.close()
-    studenti = [
-        {"matricola": row[0], "Nome": row[1], "Cognome": row[2]} for row in student_data
-    ]
-    session["matricola"] = studenti[0]["matricola"]
-    return studenti
-
-
-def tabella_esami(mysql):
-    cf_docente = session.get("codicefiscale")
-    cursor = mysql.cursor()
-
-    query = "SELECT E.CodEsame, E.Corso, E.Data, E.Tipo FROM Esami E LEFT JOIN (SELECT Esame, COUNT(*) AS num_sostenuti FROM Sostenuti GROUP BY Esame) S ON E.CodEsame = S.Esame LEFT JOIN (SELECT Esame, COUNT(*) AS num_iscrizioni FROM Iscrizione_Appelli GROUP BY Esame) I ON E.CodEsame = I.Esame WHERE E.Docente = %s AND (S.num_sostenuti < I.num_iscrizioni OR (S.num_sostenuti IS NULL AND I.num_iscrizioni > 0) OR (S.num_sostenuti = 0 AND I.num_iscrizioni > 0))"
-    cursor.execute(query, cf_docente)
-    esami = []
-    rows = cursor.fetchall()
-    if rows:
-        for row in rows:
-            esame = {
-                "CodEsame": row[0],
-                "Corso": row[1],
-                "Data": str(row[2]),
-                "Tipo": row[3],
-            }
-            esami.append(esame)
-    cursor.close()
-    return esami
-
-
-def elimina_esame_post(mysql, esame, cf_docente):
-    cursor = mysql.cursor()
-    query = "DELETE FROM esami WHERE CodEsame = %s AND Docente = %s"
-    cursor.execute(
-        query,
-        (
-            esame,
-            cf_docente,
-        ),
-    )
-    mysql.commit()
-    cursor.close()
-
-
-def elimina_esame_get(mysql, cf_docente):
-    cursor = mysql.cursor()
-    query = "SELECT e.CodEsame, e.Corso, e.Data, e.Tipo, e.Valore FROM esami e WHERE e.Docente = %s"
-    cursor.execute(query, (cf_docente,))
-    exam_data = cursor.fetchall()
-    cursor.close()
-    lista_esami = [
-        {
-            "CodEsame": row[0],
-            "Corso": row[1],
-            "Data": row[2],
-            "Tipo": row[3],
-            "Valore": row[4],
-        }
-        for row in exam_data
-    ]
-    return lista_esami
-
-
-def phone_number_aux(mysql, cf_docente):
-    phone_numbers = []
-    cursor = mysql.cursor()
-    query = "SELECT NumTelefono FROM numeri_telefono WHERE CodFiscale = %s"
-    cursor.execute(query, (cf_docente,))
-    numbers_data = cursor.fetchall()
-    cursor.close()
-    phone_numbers = [row[0] for row in numbers_data]
-    session["phone_numbers"] = phone_numbers
-    return phone_numbers
-
-
-def add_number_aux(mysql, number_to_add, cf_docente):
-    if not number_to_add.isdigit() or len(number_to_add) != 10:
-        raise ValueError("Il numero di telefono deve contenere esattamente 10 cifre.")
-    cursor = mysql.cursor()
-    query = "INSERT INTO numeri_telefono(NumTelefono, CodFiscale) VALUES (%s, %s)"
-    cursor.execute(query, (number_to_add, cf_docente))
-    mysql.commit()
-    cursor.close()
-
-
-def delete_number_aux(mysql, numero_telefono, cf_docente):
-    cursor = mysql.cursor()
-    query = "DELETE FROM numeri_telefono WHERE NumTelefono = %s AND CodFiscale = %s"
-    cursor.execute(query, (numero_telefono, cf_docente))
-    mysql.commit()
-    cursor.close()
-
 
 def sign_up_control(
     codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
@@ -287,7 +152,13 @@ def sign_up_control(
     else:
         return True
 
-
+'''
+la funzione bacheca_aux restituisce una lista di dizionari contenenti i dati degli esami effettuati dallo studente
+riceve come parametri la connessione al database e il codice fiscale dello studente
+@param mysql
+@return righe_uniche
+attraverso la SELECT seleziona i dati degli esami prenotati dallo studente e li inserisce in una lista di dizionari
+'''
 def bacheca_aux(mysql):
     cursor = mysql.cursor()
     cf = session.get("codicefiscale")
@@ -301,11 +172,17 @@ def bacheca_aux(mysql):
     ]
     return righe_uniche
 
-
+'''
+la funzione prenotazioni_aux restituisce una lista di dizionari contenenti i dati degli esami prenotati dallo studente
+riceve come parametri la connessione al database e il codice fiscale dello studente
+@param mysql
+@param cf
+@return righe_iniziali
+attraverso la SELECT seleziona i dati degli esami prenotabilo dallo studente e li inserisce in una lista di dizionari
+'''
 def prenotazioni_aux(mysql):
     corsolaurea = session.get("corsoLaurea")
     matricola = session.get("matricola")
-    print(corsolaurea," ",matricola)
     cursor = mysql.cursor()
     query = "SELECT c.CodiceCorso, c.NomeCorso, e.Data, e.CodEsame, e.Tipo  FROM studenti s JOIN corsi_di_laurea cl ON s.CorsoLaurea = cl.CodCorsoLaurea JOIN appartenenti a ON cl.CodCorsoLaurea = a.CorsoLaurea JOIN corsi c ON a.CodCorso = c.CodiceCorso JOIN esami e ON c.CodiceCorso = e.Corso WHERE s.CorsoLaurea = %s AND e.CodEsame NOT IN (SELECT Esame FROM sostenuti so JOIN studenti s ON so.Studente = s.CodiceFiscale WHERE matricola = %s)"
     cursor.execute(query, (corsolaurea, matricola))
@@ -323,7 +200,14 @@ def prenotazioni_aux(mysql):
     ]
     return righe_iniziali
 
+'''
+la funzione add_row_aux riceve come parametri la connessione al database, il codice dell'esame e il codice fiscale dello studente
+i dati vengono inseriti nella tabella iscrizione_appelli attraverso la INSERT
+@param mysql
+@param esame
+@param cf
 
+'''
 def add_row_aux(mysql, esame, cf):
     cursor = mysql.cursor()
     query = "INSERT INTO iscrizione_appelli(Studente, Esame) VALUES (%s, %s)"
@@ -331,7 +215,13 @@ def add_row_aux(mysql, esame, cf):
     mysql.commit()
     cursor.close()
 
+'''
+la funzione delete_appello_aux riceve come parametri la connessione al database e il codice dell'esame
+i dati vengono eliminati dalla tabella iscrizione_appelli attraverso la DELETE
+@param mysql
+@param esame
 
+'''
 def delete_appello_aux(mysql, esame):
     cursor = mysql.cursor()
     query = "DELETE FROM iscrizione_appelli WHERE Esame = %s"
@@ -340,7 +230,13 @@ def delete_appello_aux(mysql, esame):
     mysql.commit()
     cursor.close()
 
-
+'''
+la funzione exam_details_aux restituisce una lista di dizionari contenenti i dati degli esami sostenuti dallo studente
+riceve come parametri la connessione al database
+@param mysql
+@return exam_list
+attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li inserisce in una lista di dizionari
+'''
 def exam_details_aux(mysql):
     cursor = mysql.cursor()
     cf = session.get("codicefiscale")
@@ -356,5 +252,59 @@ def exam_details_aux(mysql):
             "data_esame": row[3],
         }
         for row in risultatiesami_data
+    ]
+    return exam_list
+
+def get_all_course(mysql):
+    cursor = mysql.cursor()
+    query = "SELECT * FROM Corsi c JOIN Appartenenti a ON c.CodiceCorso = a.CodCorso ORDER BY a.Anno"
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+    mysql.commit()
+    cursor.close()
+
+    all_course = []
+    for row in rows:
+        data = {
+            "codiceCorso": row[0],
+            "nomeCorso": row[1],
+            "codiceCorsoLaurea": row[2],
+            "anno": row[4]
+        }
+        all_course.append(data)
+    return all_course
+
+def isNone(x):
+    if x:
+        return x
+    else:
+        return ""
+    
+'''
+la funzione show_list_exam_aux restituisce una lista di dizionari contenenti i dati degli esami sostenuti dallo studente
+riceve come parametri la connessione al database e il codice fiscale dello studente
+@param mysql
+@param cf
+@return corsi
+attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li inserisce in una lista di dizionari
+'''
+def show_list_exam_aux(mysql, cf):
+    cursor = mysql.cursor()
+    query = "SELECT c.CodiceCorso, c.NomeCorso, s.data, s.voto, s.valore FROM Corsi c JOIN Appartenenti a ON c.CodiceCorso = a.CodCorso JOIN Studenti s ON a.CorsoLaurea = s.CorsoLaurea LEFT JOIN (SELECT e.Corso, e.data, s.voto, e.valore FROM Esami e JOIN Sostenuti s ON e.CodEsame = s.Esame WHERE s.Studente = %s) s ON c.CodiceCorso = s.Corso WHERE s.CodiceFiscale = %s"
+    cursor.execute(query, (cf, cf))
+    exam_data = cursor.fetchall()
+    cursor.close()
+    corsi = [
+        {
+            "CodiceCorso": row[0],
+            "NomeCorso": row[1],
+            "Data": isNone(row[2]),
+            "Voto": isNone(row[3]),
+            "Valore": isNone(row[4]),
+        }
+        for row in exam_data
+    ]
+    return corsi
     ]
     return exam_list
