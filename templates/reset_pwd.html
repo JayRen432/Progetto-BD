@@ -1,17 +1,14 @@
-{% extends 'baseMenu.html' %}
+{% extends 'baseUsers.html' %}
 {% block content %}
 
-
-<div class="form_container">
+<div class="rs_pwd">
     <h2>Reset della Password</h2>
     <p>Inserisci la tua nuova password:</p>
     <form class="reset-form" method="POST" action="reset_pwd">
-
-    <input type="password" name="password" placeholder="Nuova password"><br>
-    <input type="password" name="confirm_password" placeholder="Conferma password"><br>
-    <input type="email" name="email" placeholder="Email"><br>
-    <button type="submit">Conferma</button>
+        <input type="password" name="password" placeholder="Nuova password"><br>
+        <input type="password" name="confirm_password" placeholder="Conferma password"><br>
+        <input type="email" name="email" placeholder="Email"><br>
+        <button type="submit">Conferma</button>
     </form>
-
 </div>
 {% endblock %}

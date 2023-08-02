@@ -1,21 +1,19 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
 <div class="index-container">
-    <h3 style="color: green;">Elenco Corsi Scientifici:</h3>
-    {% for corso in elenco_corsi_scientifici %}
-        <a href="{{ corso }}">{{ corso }}</a><br/>
-    {% endfor %}
-    <h3 style="color: red;">Elenco Corsi Umanistici:</h3>
-    {% for corso in elenco_corsi_umanistici %}
-        <a href="{{ corso }}">{{ corso }}</a><br/>
-    {% endfor %}
-    <h3 style="color: orange;">Elenco Corsi Economia:</h3>
-    {% for corso in elenco_corsi_economici %}
-        <a href="{{ corso }}">{{ corso }}</a><br/>
-    {% endfor %}
-    <h3 style="color: blue;">Elenco Corsi Lingua:</h3>
-    {% for corso in elenco_corsi_lingua %}
-        <a href="{{ corso }}">{{ corso }}</a><br/>
-    {% endfor %}
+    <h1>Lista Corsi di Laurea</h1>
+    <ul class="links">
+        {% for corso_laurea in corsi_Laurea %}
+        <li style="font-size: 30px;">{{ corso_laurea.nome }} (Codice: {{ corso_laurea.codice }})</li>
+        <ul class="sub-links">
+            {% for corso in corsi %}
+            {% if corso.codiceCorsoLaurea == corso_laurea.codice %}
+            <li style="font-size: 25px;">{{ corso.nomeCorso }} ({{ corso.anno }})</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        <br>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

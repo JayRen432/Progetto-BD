@@ -95,12 +95,12 @@
 
 
     function sendData(row) {
-        var cells=row.getElementsByTagName("td");
+        var cells = row.getElementsByTagName("td");
         var dataToSend = {
             doc_code: cells[0].innerHTML,
             course_code: cells[2].innerHTML,
         };
-        
+
         // Invia i dati al server (implementazione a tua discrezione)
 
         fetch('/Admin/delete_corso_Docente', {
@@ -108,7 +108,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify( dataToSend )
+            body: JSON.stringify(dataToSend)
         })
             .then(response => response.json())
             .then(data => {

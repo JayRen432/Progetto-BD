@@ -13,11 +13,11 @@
 </div>
 <script>
     function notNull(cc, n, s, i) {
-    if (cc === null || cc.trim() === '' ||
-        n === null || n.trim() === '' ||
-        s === null || s.trim() === '' ||
-        i === null || i.trim() === '') return false;
-    return true; // All fields are not null
+        if (cc === null || cc.trim() === '' ||
+            n === null || n.trim() === '' ||
+            s === null || s.trim() === '' ||
+            i === null || i.trim() === '') return false;
+        return true; // All fields are not null
     }
     function inviaDati() {
         const codiceCorso = document.getElementById("codice_corso").value;
@@ -40,10 +40,10 @@
 
                 })
             })
-            .catch(error => {
-                console.error('Errore durante l\'invio dei dati al server:', error);
-            });
-             window.location.assign("/Admin");
+                .catch(error => {
+                    console.error('Errore durante l\'invio dei dati al server:', error);
+                });
+            window.location.assign("/Admin");
         }
         else {
             alert("Please fill in all the required fields.");

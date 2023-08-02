@@ -3,7 +3,7 @@
 <div class="add_container">
     <div class="add_u">
         <h2>Elenco Utenti</h2>
-        <ul class="links">
+        <ul class="elencs">
             {% for user in users %}
             <li value="{{ user.codiceFiscale }} {{ user.nome }} {{ user.cognome }} {{ user.mail }} {{ user.annoNascita }} {{ user.matricola }} {{ user.password }} {{ user.CorsoLaurea }}"
                 onclick="mostraDettagli(this)">{{ user.nome +" " + user.cognome}}</li>

@@ -1,7 +1,7 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
 <div class="st_bp">
-    <h2>Tabella Prenotazioni agli Appelli</h2>
+    <h2>Bacheca Prenotazioni agli Appelli</h2>
     <table id="tabella" border="1" class="tableC">
         <thead>
             <tr>
@@ -26,24 +26,24 @@
         </tbody>
     </table>
 </div>
-    <script>
-        function delete_appello(button) {
-            var riga = button.parentElement.parentElement;
+<script>
+    function delete_appello(button) {
+        var riga = button.parentElement.parentElement;
 
-            var rigaDati = {
-                "CodiceCorso": riga.cells[0].innerText,
-                "NomeCorso": riga.cells[1].innerText,
-                "Data": riga.cells[2].innerText,
-                "CodEsame": riga.cells[3].innerText,
-            };
+        var rigaDati = {
+            "CodiceCorso": riga.cells[0].innerText,
+            "NomeCorso": riga.cells[1].innerText,
+            "Data": riga.cells[2].innerText,
+            "CodEsame": riga.cells[3].innerText,
+        };
 
-            // Invia i dati della riga al server Python
-            fetch('/delete_appello', { method: 'POST', headers: { 'Content-Type': 'application/json'}, body: JSON.stringify(rigaDati) })
+        // Invia i dati della riga al server Python
+        fetch('/delete_appello', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rigaDati) })
             .then(response => response.json())
-            .then(data => { alert(data.message);  })// Messaggio di conferma dal server
+            .then(data => { alert(data.message); })// Messaggio di conferma dal server
             .catch(error => console.error('Errore:', error));
-            window.location.assign('/stud');
-        }
+        window.location.assign('/stud');
+    }
 
-    </script>
+</script>
 {% endblock %}

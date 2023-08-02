@@ -10,7 +10,7 @@
         </select>
     </p>
     <p>Codice corso di Laurea selezionato: <span id="nomCorsoSpan"></span></p>
-    <p>Seleziona il secondo corso di laurea:
+    <p>Seleziona il corso di insegnamento:
         <select id="corsoDiLaurea2" onchange="updateSpan('corsoDiLaurea2', 'nomCorsoSpan2')">
             <option selected disabled hidden>-----------</option>
             <!-- Gli elementi del secondo menu verranno inseriti dinamicamente qui -->
@@ -31,9 +31,9 @@
 <script>
     // Le due liste di corsi di laurea da passare come input
     const listaCorsi1 = [
-                {% for corso in lista_corsi_laurea %}
-                    { codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" },
-                {% endfor %}
+        {% for corso in lista_corsi_laurea %}
+    { codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" },
+    {% endfor %}
             ];
     const listaCorsi2 = [{% for corso in lista_corsi %}{ codice: "{{ corso.codice }}", nome: "{{ corso.nome }}" }, {% endfor %}];
 

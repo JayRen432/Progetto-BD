@@ -12,16 +12,16 @@
         </thead>
         <tbody>
             {% for corso in corsi %}
-                <tr>
-                    <td>{{ corso.codice }}</td>
-                    <td>{{ corso.nome }}</td>
-                    <td>
-                        <form action="/Admin/elimina_corso" method="post">
-                            <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
-                            <input type="submit" value="Elimina">
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ corso.codice }}</td>
+                <td>{{ corso.nome }}</td>
+                <td>
+                    <form action="/Admin/elimina_corso" method="post">
+                        <input type="hidden" name="codice_corso" value="{{ corso.codice }}">
+                        <input type="submit" value="Elimina">
+                    </form>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
