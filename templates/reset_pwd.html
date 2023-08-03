@@ -1,10 +1,21 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
-
+<script>
+    function checkResetForm() {
+        var ml = document.getElementsByName("mail");
+        var pwd = document.getElementsByName("password");
+        var pwd_c = document.getElementsByName("confirm_password");
+        if (pwd[0].value === "" || pwd_c[0].value === "" || ml[0].value === "") {
+            alert("Uno dei campi è vuoto");
+            return false;
+        }
+        return true;
+    }
+</script>
 <div class="rs_pwd">
     <h2>Reset della Password</h2>
     <p>Inserisci la tua nuova password:</p>
-    <form class="reset-form" method="POST" action="reset_pwd">
+    <form class="reset-form" method="POST" action="/reset_pwd" onsubmit="return checkResetForm()">
         <input type="password" name="password" placeholder="Nuova password"><br>
         <input type="password" name="confirm_password" placeholder="Conferma password"><br>
         <input type="email" name="email" placeholder="Email"><br>

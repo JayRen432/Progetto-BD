@@ -1,9 +1,25 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
+<script>
+    function checkSignUpForm() {
+        var nm = document.getElementsByName("Nome");
+        var srnm = document.getElementsByName("Cognome");
+        var dt = document.getElementsByName("AnnoNascita");
+        var cf = document.getElementsByName("Codicefiscale");
+        var ml = document.getElementsByName("Email");
+        var pwd = document.getElementsByName("password");
+        var cl = document.getElementById("corso_di_laurea");
+        if (nm[0].value == "" || srnm[0].value == "" || dt[0].value == "" || cf[0].value == "" || ml[0].value == "" || pwd[0].value == "" || cl.selectedIndex == 0) {
+            alert("Uno dei campi è vuoto");
+            return false;
+        }
+        return true;
+    }
+</script>
 <div class="form_container">
     <h2>Sign Up</h2>
     <p>Inserisci le informazioni richieste:</p>
-    <form class="signup-form" method="POST" action="/sign_up">
+    <form class="signup-form" method="POST" action="/sign_up" onsubmit="return checkSignUpForm()">
         <input type="text" name="Nome" placeholder="Name"><br>
         <input type="text" name="Cognome" placeholder="Surname"><br>
         <input type="date" name="AnnoNascita" placeholder="00/00/00"><br>

@@ -1,9 +1,20 @@
 {% extends 'baseMenu.html' %}
 {% block content %}
+<script>
+    function checkLoginForm() {
+        var ml = document.getElementsByName("mail");
+        var pwd = document.getElementsByName("password");
+        if (pwd[0].value == "" || ml[0].value == "") {
+            alert("Uno dei campi è vuoto");
+            return false;
+        }
+        return true;
+    }
+</script>
 <div class="form_container">
     <h2>Login</h2>
     <p>Inserisci le tue credenziali:</p>
-    <form class="login-form" method="POST" action="/login">
+    <form class="login-form" method="POST" action="/login" onsubmit="return checkLoginForm()">
         <input type="email" name="mail" placeholder="name@example.com"><br>
         <input type="password" name="password" placeholder="Password"><br>
         <button type="submit">Login</button>
