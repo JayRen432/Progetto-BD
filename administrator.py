@@ -1,7 +1,7 @@
 import pymysql
 import json
 import hashlib
-from utenti import *
+from studenti import *
 
 '''
 la funzione add_degree_course_aux riceve come parametro il codice del corso di laurea, il nome del corso di laurea, 
@@ -135,21 +135,6 @@ def assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql):
     cursor.execute(query, (corso_laurea, corso, anno))
     mysql.commit()
     cursor.close()
-
-'''
-la funzione is_cf_present_in_studenti riceve come parametro il codice fiscale del docente e restituisce True se il codice fiscale è presente tra gli studenti
-@param cf_docente: codice fiscale del docente
-@param mysql: connessione al database
-@return count > 0: True se il codice fiscale è presente tra gli studenti, False altrimenti
-
-'''
-def is_cf_present_in_studenti(cf_docente, mysql):
-    cursor = mysql.cursor()
-    query = "SELECT COUNT(*) FROM Studenti WHERE CodiceFiscale = %s"
-    cursor.execute(query, (cf_docente,))
-    count = cursor.fetchone()[0]
-    cursor.close()
-    return count > 0
 
 '''
 la funzione add_docente_aux riceve come parametro i dati del docente contenuti in doc e aggiunge il docente attraverso la INSERT

@@ -1,8 +1,9 @@
 from flask import *
 from flask.sessions import SessionMixin
 from administrator import *
-from utenti import *
-from utenti_doc import *
+from studenti import *
+from docenti import *
+from auxiliary import *
 # Create Flask Instance
 app = Flask(__name__)
 # Set debug mode to True
@@ -19,6 +20,11 @@ mysql = pymysql.connect(
 )
 
 
+'''
+la funzione index() permette di accedere alla pagina iniziale del sito
+la funzione get_degree_course restituisce la lista dei corsi di laurea 
+la funzion get_all_course restituisce la liste dei corsi appartenenti ad un corso di laurea
+'''
 @app.route("/")
 def index():
     session.clear()
@@ -26,6 +32,8 @@ def index():
     corsi_Laurea = get_degree_course(mysql)
     corsi = get_all_course(mysql)
     return render_template("index.html", corsi = corsi, corsi_Laurea = corsi_Laurea)
+
+
 '''
 la funzione resetpwd() permette di resettare la password dell'utente
 essa prende in input la nuova password e la conferma della nuova password
@@ -38,19 +46,12 @@ def resetpwd():
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         email = request.form["email"]
-        if password == confirm_password:
-            hash_password = hashlib.sha256(confirm_password.encode("utf-8"))
-            hash_value = hash_password.hexdigest()
-            cursor = mysql.cursor()
-            query = "UPDATE Studenti SET password = %s WHERE mail = %s"
-            cursor.execute(query, (hash_value, email))
-            mysql.commit()
-            cursor.close()
-            return redirect("/login")
+        tab=checkMail(email)
+        reset_pwd_aux(mysql, email, password, confirm_password,tab)
     return render_template("reset_pwd.html")
 
 
-# localhost:5000/sign_up
+
 '''
 la funzione signUp() permette di registrare un nuovo utente
 essa prende in input i dati inseriti dall'utente e controlla
@@ -59,9 +60,7 @@ successivamente se il numero ricevuto dalla funzione sign_up_aux() è 1 allora l
 altrimenti l'utente è già registrato e deve attendere che la segreteria accetti la sua richiesta
 la funzione sign_up_corsolaurea serve a visualizzare nel menù a tendina i corsi di laurea disponibili
 '''
-@app.route(
-    "/sign_up", methods=["GET", "POST"]
-)  # se number è 1 l'utente si è registrato e deve attendere che la segreteria lo accetti
+@app.route("/sign_up", methods=["GET", "POST"])
 def signUp():
     corsi = {}
     if request.method == "POST":
@@ -94,7 +93,6 @@ def signUp():
     return render_template("sign_up.html", corsiLaurea=corsi)
 
 
-# localhost:5000/login
 '''
 la funzione login() permette di effettuare il login
 essa prende in input la mail e la password inserite dall'utente
@@ -132,6 +130,7 @@ def login():
             return redirect("/Admin")
     return render_template("login.html")
 
+
 '''
 la funzione index_studenti() permette di visualizzare il menù degli studenti
 '''
@@ -142,6 +141,7 @@ def index_studenti():
     else:
         abort(403)
 
+
 '''
 la funzione index_docenti() permette di visualizzare il menù dei docenti
 '''
@@ -151,6 +151,7 @@ def index_docenti():
         return render_template("menu_docenti.html")
     else:
         abort(403)
+
 
 '''
 la funzione home_stud() permette di visualizzare le informazioni dello studente
@@ -174,6 +175,7 @@ def home_stud():
         ruolo=ruolo,
     )
 
+
 '''
 la funzione home_docenti() permette di visualizzare le informazioni del docente
 '''
@@ -195,6 +197,7 @@ def home_docenti():
         anno_nascita=anno_nascita,
         ruolo=ruolo,
     )
+
 
 '''
 la funzione administrator() permette di visualizzare il menù dell'amministratore
@@ -797,15 +800,24 @@ def log_out():
     return redirect(url_for("index"))
 
 '''
-la funzione reset permette di resettare la sessione
+la funzione reset permette di resettare la password rimanendo in sessione,
+se invece il ruolo è None o si è fuori sessione rediretta il sito a index
 '''
 @app.route("/reset")
 def reset():
-    session.clear()
-    session["ruolo"] = None
-    return redirect(url_for("resetpwd"))
+    if "ruolo" in session:
+        if session["ruolo"] == None:
+            return redirect(url_for("index"))
+        else:
+            return redirect(url_for("resetpwd"))
+    else:
+        session.clear()
+        return redirect(url_for("index"))
 
-
+'''
+la funzione ret, nel caso in cui venga visualizzata una pagina di errore (404 403 500),
+tramite link "Return" l'utente torna all'index corrispondente al ruolo presente in sessione
+'''
 @app.route("/return")
 def ret():
     print(session["ruolo"])
