@@ -1,0 +1,92 @@
+
+
+
+
+VINCOLI INSERITI
+
+DELIMITER //
+CREATE TRIGGER check_età_doc_insert
+BEFORE INSERT ON progettobasi.docenti
+FOR EACH ROW
+BEGIN
+    IF YEAR(CURDATE()) - YEAR(NEW.annoNascita) < 30 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The teacher must be at least 30 years old.';
+    END IF;
+END//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER check_età_doc_update
+BEFORE UPDATE ON progettobasi.docenti
+FOR EACH ROW
+BEGIN
+    IF YEAR(CURDATE()) - YEAR(NEW.annoNascita) < 30 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The teacher must be at least 30 years old.';
+    END IF;
+END//
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER check_età_stud_insert
+BEFORE INSERT ON progettobasi.studenti
+FOR EACH ROW
+BEGIN
+    IF YEAR(CURDATE()) - YEAR(NEW.annoNascita) < 18 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The student must be at least 18 years old.';
+    END IF;
+END//
+DELIMITER ;
+
+CREATE TRIGGER check_età_stud_update
+BEFORE UPDATE ON progettobasi.studenti
+FOR EACH ROW
+BEGIN
+    IF YEAR(CURDATE()) - YEAR(NEW.annoNascita) < 18 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The student must be at least 18 years old.';
+    END IF;
+END//
+DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER check_matricola_order
+BEFORE INSERT ON progettobasi.studenti
+FOR EACH ROW
+BEGIN
+    DECLARE max_matricola_value INT;
+    SELECT MAX(matricola) INTO max_matricola_value FROM studenti_testing;
+
+    IF NEW.matricola != max_matricola_value+1 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Matricola must be in ascending order.';
+    END IF;
+END//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER check_anno_esame
+BEFORE INSERT ON testing.esami_testing
+FOR EACH ROW
+BEGIN
+    IF (YEAR(CURDATE()) - YEAR(NEW.Data) > 0) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The exam cannot be in the past.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+ALTER TABLE progettobasi.temporaryuser
+ADD CONSTRAINT check_email_temporary
+CHECK (
+            email LIKE '%@gmail.com'
+            OR email LIKE '%@outlook.com'
+            OR email LIKE '%@libero.it'
+            OR email LIKE '%@yahoo.com'
+            OR email LIKE '%@virgilio.it'
+        )
