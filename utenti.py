@@ -72,6 +72,9 @@ def insertResult(dictionaryL, rowSQL, string, number=None):
 '''
 la funzione is_cf_present_in_docenti riceve come parametri il codice fiscale dello studente e la connessione al database
 la funzioen controlla che il codicefiscale dello studente non sia già presente nella tabella Docenti
+@param cf_docente: codice fiscale del docente
+@param mysql: connessione al database
+@return count > 0: True se il codice fiscale è presente tra gli studenti, False altrimenti
 '''
 def is_cf_present_in_docenti(cf_studente, mysql):
     cursor = mysql.cursor()
