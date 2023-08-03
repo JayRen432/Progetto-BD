@@ -1,0 +1,125 @@
+CREATE DATABASE IF NOT EXISTS progettobasi;
+
+USE progettobasi;
+
+CREATE TABLE Corsi_di_Laurea (
+    CodCorsoLaurea VARCHAR(50) PRIMARY KEY,
+    NomeCorsoLaurea VARCHAR(100) UNIQUE,
+    Specializzazione VARCHAR(100),
+    indirizzo VARCHAR(200)
+);
+
+CREATE TABLE Corsi (
+    CodiceCorso VARCHAR(50) PRIMARY KEY,
+    NomeCorso VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Appartenenti (
+    CorsoLaurea VARCHAR(50),
+    CodCorso VARCHAR(50),
+    Anno VARCHAR(20),
+    PRIMARY KEY (CorsoLaurea, CodCorso),
+    FOREIGN KEY (CorsoLaurea) REFERENCES Corsi_di_Laurea(CodCorsoLaurea) ON DELETE CASCADE,
+    FOREIGN KEY (CodCorso) REFERENCES Corsi(CodiceCorso) ON DELETE CASCADE
+);
+
+CREATE TABLE Studenti (
+    CodiceFiscale VARCHAR(16) PRIMARY KEY,
+    Nome VARCHAR(100),
+    Cognome VARCHAR(100),
+    mail VARCHAR(100),
+    annoNascita VARCHAR(20),
+    matricola VARCHAR(6) UNIQUE,
+    password VARCHAR(520),
+    CorsoLaurea VARCHAR(30),
+    CHECK (mail = CONCAT(matricola, '@stud.unive.it')),
+    CHECK (
+        LENGTH(CodiceFiscale) = 16 AND
+        CodiceFiscale REGEXP '^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$'
+    ),
+    FOREIGN KEY (CorsoLaurea) REFERENCES Corsi_di_Laurea(CodCorsoLaurea) ON DELETE CASCADE
+);
+
+CREATE TABLE temporaryuser (
+    CodiceFiscale VARCHAR(16) PRIMARY KEY,
+    Nome VARCHAR(100),
+    Cognome VARCHAR(100),
+    mail VARCHAR(100),
+    annoNascita VARCHAR(20),
+    matricola VARCHAR(6) DEFAULT '000000',
+    password VARCHAR(520),
+    CorsoLaurea VARCHAR(30),
+    CHECK (
+        mail LIKE '%@gmail.com'
+        OR mail LIKE '%@outlook.com'
+        OR mail LIKE '%@libero.it'
+        OR mail LIKE '%@yahoo.com'
+        OR mail LIKE '%@virgilio.it'
+    ),
+    CHECK (
+        LENGTH(CodiceFiscale) = 16 AND
+        CodiceFiscale REGEXP '^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$'
+    ),
+    FOREIGN KEY (CorsoLaurea) REFERENCES Corsi_di_Laurea(CodCorsoLaurea) ON DELETE CASCADE
+);
+
+CREATE TABLE Docenti (
+    CodiceFiscale VARCHAR(16) PRIMARY KEY,
+    Nome VARCHAR(100),
+    Cognome VARCHAR(100),
+    mail VARCHAR(100),
+    annoNascita VARCHAR(20),
+    password VARCHAR(520),
+    CHECK (mail LIKE '%@unive.it'),
+    CHECK (
+        LENGTH(CodiceFiscale) = 16 AND
+        CodiceFiscale REGEXP '^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$'
+    )
+);
+
+CREATE TABLE Numeri_Telefono (
+    NumTelefono VARCHAR(20) PRIMARY KEY,
+    CodFiscale VARCHAR(16),
+    FOREIGN KEY (CodFiscale) REFERENCES Docenti(CodiceFiscale) ON DELETE CASCADE,
+    CHECK (
+        LENGTH(NumTelefono) = 10 AND
+        NumTelefono REGEXP '^[0-9]{10}$'
+    )
+);
+
+CREATE TABLE Insegna (
+    CodCorso VARCHAR(50),
+    CodFiscale VARCHAR(16),
+    PRIMARY KEY (CodCorso, CodFiscale),
+    FOREIGN KEY (CodCorso) REFERENCES Corsi(CodiceCorso) ON DELETE CASCADE,
+    FOREIGN KEY (CodFiscale) REFERENCES Docenti(CodiceFiscale) ON DELETE CASCADE
+);
+
+CREATE TABLE Esami (
+    CodEsame VARCHAR(50) PRIMARY KEY,
+    Docente VARCHAR(16),
+    Corso VARCHAR(50),
+    NomeEsame VARCHAR(100),
+    Data DATE,
+    Tipo VARCHAR(50),
+    Valore INT,
+    FOREIGN KEY (Docente) REFERENCES Docenti(CodiceFiscale) ON DELETE CASCADE,
+    FOREIGN KEY (Corso) REFERENCES Corsi(CodiceCorso) ON DELETE CASCADE
+);
+
+CREATE TABLE Sostenuti (
+    Esame VARCHAR(50),
+    Studente VARCHAR(16),
+    voto VARCHAR(5),
+    PRIMARY KEY (Esame, Studente),
+    FOREIGN KEY (Esame) REFERENCES Esami(CodEsame) ON DELETE CASCADE,
+    FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale) ON DELETE CASCADE
+);
+
+CREATE TABLE Iscrizione_Appelli (
+    Studente VARCHAR(16),
+    Esame VARCHAR(50),
+    PRIMARY KEY (Studente, Esame),
+    FOREIGN KEY (Esame) REFERENCES Esami(CodEsame) ON DELETE CASCADE,
+    FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale) ON DELETE CASCADE
+);
