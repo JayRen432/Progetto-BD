@@ -32,6 +32,10 @@ CREATE TABLE Studenti (
     matricola VARCHAR(6) UNIQUE,
     password VARCHAR(520),
     CorsoLaurea VARCHAR(30),
+    CHECK (
+        LENGTH(matricola) = 6 AND
+        matricola REGEXP '^[0-9]{6}$'
+    )
     CHECK (mail = CONCAT(matricola, '@stud.unive.it')),
     CHECK (
         LENGTH(CodiceFiscale) = 16 AND
@@ -123,3 +127,4 @@ CREATE TABLE Iscrizione_Appelli (
     FOREIGN KEY (Esame) REFERENCES Esami(CodEsame) ON DELETE CASCADE,
     FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale) ON DELETE CASCADE
 );
+
