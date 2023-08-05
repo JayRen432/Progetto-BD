@@ -332,8 +332,8 @@ def add_course():
             data = request.get_json()
             cod_corso = data.get("codiceCorso")
             nome_corso = data.get("nome")
-
-            add_course_aux(cod_corso, nome_corso)
+            valore = data.get("cfu")
+            add_course_aux(cod_corso, nome_corso, valore)
             return redirect(url_for("administrator"))
         else:
             return render_template("Crea_corso.html")
@@ -617,10 +617,9 @@ def crea_esame():
             codice_esame = request.form["codice_esame"]
             data = request.form["data"]
             tipo = request.form["tipo"]
-            valore = request.form["valore"]
             valorePerc = request.form["valorePerc"]
             crea_esame_inserisci(
-                corso, nome_esame, codice_esame, data, tipo, valore, cf_docente, valorePerc
+                corso, nome_esame, codice_esame, data, tipo,cf_docente, valorePerc
             )
 
         lista_corsi = crea_esame_docenti(cf_docente)
@@ -920,6 +919,23 @@ def ret():
     else:
         session.clear()
         return redirect(url_for("index"))
+
+@app.route("/stud/accetta_voti", methods=["GET", "POST"])
+def accetta():
+    cf = session.get("codicefiscale")
+    if "ruolo" in session and session["ruolo"] == "Studente":
+        if request.method == "POST":
+            data = request.get_json()
+            print(data)    
+            accetta_post(data, cf)
+            return "ok"
+        else:
+            data_list = accetta_get(cf)
+
+            return render_template('Accetta_rifiuta.html', data_list=data_list)
+    else:
+        abort(403)
+
 
 
 if __name__ == "__main__":
