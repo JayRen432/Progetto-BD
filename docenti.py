@@ -32,7 +32,7 @@ i dati vengono inseriti nella tabella esami attraverso la INSERT
 
 
 def crea_esame_inserisci(
-    corso, nome_esame, codice_esame, data, tipo, valore, cf_docente
+    corso, nome_esame, codice_esame, data, tipo, valore, cf_docente, valPerc
 ):
     esami = Esami(
         Corso=corso,
@@ -42,6 +42,7 @@ def crea_esame_inserisci(
         Tipo=tipo,
         Valore=valore,
         Docente=cf_docente,
+        ValorePerc=valPerc,
     )
     db.session.add(esami)
     db.session.commit()
@@ -85,7 +86,7 @@ def assegna_voto_aux(codiceEsame):
     query = (
         db.session.query(Iscrizione_Appelli, Studenti)
         .join(Studenti, Iscrizione_Appelli.Studente == Studenti.CodiceFiscale)
-        .filter_by(Iscrizione_Appelli.Esame == codiceEsame)
+        .filter(Iscrizione_Appelli.Esame == codiceEsame)
     )
     student_data = query.all()
     studenti = [
@@ -193,7 +194,7 @@ def delete_number_aux(numero_telefono, cf_docente):
 
 
 """
-la funzione ricevi_dati_aux riceve come parametri la connessione al database, il codice fiscale dello studente, il codice dell'esame e il voto
+la funzione ricevi_dati_aux riceve come parametri il codice fiscale dello studente, il codice dell'esame e il voto
 @param mysql
 @param cf
 @param codiceEsame
@@ -202,8 +203,8 @@ i dati vengono inseriti nella tabella sostenuti attraverso la INSERT
 """
 
 
-def ricevi_dati_aux(cf, codiceEsame, voto):
-    sostenuti = Sostenuti(Esame=codiceEsame, Studente=cf, voto=voto)
+def ricevi_dati_aux(cf, codiceEsame, votoEsame):
+    sostenuti = Sostenuti(Esame=codiceEsame, Studente=cf, voto=votoEsame)
     db.session.add(sostenuti)
     db.session.commit()
 
@@ -237,14 +238,14 @@ def tabella_esami():
     cf_docente = session.get("codicefiscale")
 
     subquery_sostenuti = (
-        db.session.query(Sostenuti.Esame, db.func.count("*").label("num_sostenuti"))
+        db.session.query(Sostenuti.Esame, db.func.count().label("num_sostenuti"))
         .group_by(Sostenuti.Esame)
         .subquery()
     )
+
     subquery_iscrizioni = (
         db.session.query(
-            Iscrizione_Appelli.Esame, db.func.count("*").label("num_iscrizioni")
-        )
+            Iscrizione_Appelli.Esame, db.func.count().label("num_iscrizioni"))
         .group_by(Iscrizione_Appelli.Esame)
         .subquery()
     )
@@ -254,18 +255,24 @@ def tabella_esami():
         .outerjoin(subquery_sostenuti, Esami.CodEsame == subquery_sostenuti.c.Esame)
         .outerjoin(subquery_iscrizioni, Esami.CodEsame == subquery_iscrizioni.c.Esame)
         .filter(
-            Esami.Docente == cf_docente,
-            subquery_sostenuti.c.num_sostenuti < subquery_iscrizioni.c.num_iscrizioni,
-            db.or_(
-                subquery_sostenuti.c.num_sostenuti == None,
-                subquery_iscrizioni.c.num_iscrizioni > 0,
-            ),
             db.and_(
-                subquery_sostenuti.c.num_sostenuti == 0,
-                subquery_iscrizioni.c.num_iscrizioni > 0,
-            ),
+                Esami.Docente == cf_docente,
+                db.or_(
+                    subquery_sostenuti.c.num_sostenuti
+                    < subquery_iscrizioni.c.num_iscrizioni,
+                    db.and_(
+                        subquery_sostenuti.c.num_sostenuti.is_(None),
+                        subquery_iscrizioni.c.num_iscrizioni > 0,
+                    ),
+                    db.and_(
+                        subquery_sostenuti.c.num_sostenuti == 0,
+                        subquery_iscrizioni.c.num_iscrizioni > 0,
+                    ),
+                ),
+            )
         )
     )
+
     esami = []
 
     if rows:

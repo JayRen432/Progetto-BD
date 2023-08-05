@@ -618,8 +618,9 @@ def crea_esame():
             data = request.form["data"]
             tipo = request.form["tipo"]
             valore = request.form["valore"]
+            valorePerc = request.form["valorePerc"]
             crea_esame_inserisci(
-                corso, nome_esame, codice_esame, data, tipo, valore, cf_docente
+                corso, nome_esame, codice_esame, data, tipo, valore, cf_docente, valorePerc
             )
 
         lista_corsi = crea_esame_docenti(cf_docente)

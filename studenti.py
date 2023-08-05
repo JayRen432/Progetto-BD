@@ -115,12 +115,37 @@ riceve come parametri la connessione al database e il codice fiscale dello stude
 @param mysql
 @param cf
 @return righe_iniziali
-attraverso la SELECT seleziona i dati degli esami prenotabilo dallo studente e li inserisce in una lista di dizionari
+attraverso la SELECT seleziona i dati degli esami prenotabili dallo studente e li inserisce in una lista di dizionari
 '''
 def prenotazioni_aux(corsolaurea, matricola):
-    subquery = Sostenuti.query.join(Studenti, Sostenuti.Studente == Studenti.CodiceFiscale).filter_by(matricola = matricola).with_entities(Sostenuti.Esame)
-    subquery = subquery.subquery()
-    prenotazioni_data = Studenti.query.join(Corsi_di_Laurea, Studenti.CorsoLaurea == Corsi_di_Laurea.CodCorsoLaurea).join(Appartenenti, Corsi_di_Laurea.CodCorsoLaurea == Appartenenti.CorsoLaurea).join(Corsi, Appartenenti.CodCorso == Corsi.CodiceCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Esami.Data >= func.current_date(),and_(Studenti.CorsoLaurea == corsolaurea, Esami.CodEsame.notin_(subquery))).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame, Esami.Tipo).distinct()
+    #subquery = Sostenuti.query.join(Studenti, Sostenuti.Studente == Studenti.CodiceFiscale).filter(Studenti.matricola == matricola, and_(Sostenuti.voto == 'INSUF' or (Sostenuti.voto).)).with_entities(Sostenuti.Esame)
+   # subquery = subquery.subquery()
+    esami_insufficienti = (
+    Studenti.query
+    .join(Corsi_di_Laurea, Studenti.CorsoLaurea == Corsi_di_Laurea.CodCorsoLaurea)
+    .join(Appartenenti, Corsi_di_Laurea.CodCorsoLaurea == Appartenenti.CorsoLaurea)
+    .join(Corsi, Appartenenti.CodCorso == Corsi.CodiceCorso)
+    .join(Esami, Corsi.CodiceCorso == Esami.Corso)
+    .outerjoin(Sostenuti, and_(Studenti.CodiceFiscale == Sostenuti.Studente, Esami.CodEsame == Sostenuti.Esame))
+    .filter(and_(Studenti.matricola == matricola, Sostenuti.voto == 'INSUF'))
+    .with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame, Esami.Tipo)
+    .distinct()
+)
+
+    esami_senza_voto = (
+    Studenti.query
+    .join(Corsi_di_Laurea, Studenti.CorsoLaurea == Corsi_di_Laurea.CodCorsoLaurea)
+    .join(Appartenenti, Corsi_di_Laurea.CodCorsoLaurea == Appartenenti.CorsoLaurea)
+    .join(Corsi, Appartenenti.CodCorso == Corsi.CodiceCorso)
+    .join(Esami, Corsi.CodiceCorso == Esami.Corso)
+    .outerjoin(Sostenuti, and_(Studenti.CodiceFiscale == Sostenuti.Studente, Esami.CodEsame == Sostenuti.Esame))
+    .filter(and_(Studenti.matricola == matricola, Sostenuti.voto == None))
+    .with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame, Esami.Tipo)
+    .distinct()
+)
+    prenotazioni_data = esami_insufficienti.union(esami_senza_voto)
+    #prenotazioni_data = db.session.query(Esami).outerjoin(Iscrizione_Appelli, (Esami.CodEsame == Iscrizione_Appelli.Esame) & (Iscrizione_Appelli.Studente == Studenti.CodiceFiscale)).outerjoin(Sostenuti, (Esami.CodEsame == Sostenuti.Esame) & (Sostenuti.Studente == matricola)).filter((Iscrizione_Appelli.Studente == None) | ((Sostenuti.voto == 'INSUF') & (Sostenuti.Studente == matricola))).all()
+    
     righe_iniziali = [
         {
             "CodiceCorso": row.CodiceCorso,
@@ -153,18 +178,21 @@ i dati vengono eliminati dalla tabella iscrizione_appelli attraverso la DELETE
 @param esame
 
 '''
-def delete_appello_aux(mysql, esame):
+def delete_appello_aux(esame):
     Iscrizione_Appelli.query.filter_by(Esame = esame).delete()
     db.session.commit()
 
 def which_voto(voto):
-    if voto == 0:
-        return 'INSUF'
-    elif voto > 30: 
-        return '30L'
+    print(voto)
+    if voto is not None:
+        if voto == 0:
+            return 'INSUF'
+        elif voto > 30: 
+            return '30L'
+        else:
+            return voto
     else:
-        return voto
-        
+       return ""
 
 '''
 la funzione exam_details_aux restituisce una lista di dizionari contenenti i dati degli esami sostenuti dallo studente
@@ -217,6 +245,13 @@ riceve come parametri la connessione al database e il codice fiscale dello stude
 @return corsi
 attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li inserisce in una lista di dizionari
 '''
+def checkdata(voto, data):
+    print(voto)
+    if voto == "" or voto == 'INSUF':
+        return ""
+    else: 
+        return data
+
 def show_list_exam_aux(cf):
     max_data = Corsi.query.join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, func.max(Esami.Data).label('max_data')).group_by(Corsi.CodiceCorso).subquery()
     subquery = Esami.query.join(Sostenuti, Esami.CodEsame == Sostenuti.Esame).filter(and_(Sostenuti.Studente == cf, Sostenuti.voto != 'INSUF')).with_entities(Esami.Corso, Esami.Data, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), Esami.Valore).group_by(Esami.Corso, Esami.Data, Esami.Valore)
@@ -224,14 +259,15 @@ def show_list_exam_aux(cf):
 
     exam_data = (db.session.query(Corsi, sub, max_data.c.max_data).join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Studenti, Appartenenti.CorsoLaurea == Studenti.CorsoLaurea).outerjoin(sub, sub.c.Corso == Corsi.CodiceCorso).outerjoin(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, func.sum(sub.c.sommavoti), sub.c.Valore).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, sub.c.Valore))
     
-    corsi = [
-        {
+    corsi = []
+    for row in exam_data:
+        data = {
             "CodiceCorso": row.CodiceCorso,
             "NomeCorso": row.NomeCorso,
-            "Data": isNone(row.max_data),
+            "Data": (row.max_data),
             "Voto": isNone(which_voto(row[3])),
             "Valore": isNone(row.Valore),
         }
-        for row in exam_data
-    ]
+        data["Data"] = checkdata(data["Voto"], data["Data"])
+        corsi.append(data)
     return corsi
