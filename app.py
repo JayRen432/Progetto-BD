@@ -6,12 +6,6 @@ from studenti import *
 from docenti import *
 from auxiliary import *
 
-
-@app.route("/secret")
-def secret():
-    return render_template("provaAlert.html")
-
-
 """
 la funzione index() permette di accedere alla pagina iniziale del sito
 la funzione get_degree_course restituisce la lista dei corsi di laurea 
