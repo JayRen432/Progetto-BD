@@ -230,7 +230,8 @@ select {
 .es,
 .rs_pwd,
 .st_les,
-.st_p {
+.st_p,
+.st_ar{
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -270,6 +271,7 @@ select {
 .dis_u,
 .st_es,
 .st_p,
+.st_ar,
 .st_bp,
 .rs_pwd,
 .add_d {
@@ -288,6 +290,7 @@ select {
 .as_v button,
 .del_e button,
 .st_p button,
+.st_ar button,
 .st_bp button,
 .dc_v button,
 .rs_pwd button,
@@ -314,6 +317,7 @@ select {
 .del_e button:hover,
 .st_bp button:hover,
 .st_p button:hover,
+.st_ar button:hover,
 .dc_v button:hover,
 .rs_pwd button:hover,
 .add_d button:hover {
@@ -327,6 +331,7 @@ select {
 .add_e input,
 .asg_cc input,
 .asg_cd input,
+.st_ar input,
 .rs_pwd input,
 .add_d input {
     display: block;
