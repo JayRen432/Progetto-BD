@@ -1,13 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
-import pymysql
-import json
 import hashlib
-from classes import Studente
-
-app = Flask(__name__)
-
-app.debug = True
-
+from classi import *
 
 '''
     Funzione che permette di effettuare il login
@@ -17,42 +10,34 @@ app.debug = True
     @return info_studente: informazioni dello studente
     @return info_docente: informazioni del docente
 '''
-def login_aux(mail, password, mysql):
+def login_aux(mail, password):
     hash_password = hashlib.sha256(password.encode("utf-8"))
     hash_value = hash_password.hexdigest()
-    cursor = mysql.cursor()
-    query = "SELECT * FROM studenti WHERE mail = %s AND password = %s"
-    cursor.execute(query, (mail, hash_value))
-    studente = cursor.fetchone()
-    cursor.close()
+    
+    studente = Studenti.query.filter_by(mail=mail, password=hash_value).first()
 
     if studente:
         info_studente = {
-            "codicefiscale": studente[0],
-            "nome": studente[1],
-            "cognome": studente[2],
-            "annoNascita": studente[3],
-            "mail": studente[4],
-            "matricola": studente[5],
-            "password": studente[6],
-            "CorsoLaurea": studente[7],
+            "codicefiscale": studente.CodiceFiscale,
+            "nome": studente.Nome,
+            "cognome": studente.Cognome,
+            "annoNascita": studente.annoNascita,
+            "mail": studente.mail,
+            "matricola": studente.matricola,
+            "password": studente.password,
+            "CorsoLaurea": studente.CorsoLaurea,
         }
         return info_studente, None
     else:
-        cursor = mysql.cursor()
-        query = "SELECT * FROM docenti WHERE mail = %s AND password = %s"
-        cursor.execute(query, (mail, hash_value))
-        docente = cursor.fetchone()
-        cursor.close()
-
+        docente = Docenti.query.filter_by(mail=mail, password=hash_value).first()
         if docente:
             info_docente = {
-                "codicefiscale": docente[0],
-                "nome": docente[1],
-                "cognome": docente[2],
-                "annoNascita": docente[3],
-                "mail": docente[4],
-                "password": docente[5],
+                "codicefiscale": docente.CodiceFiscale,
+                "nome": docente.Nome,
+                "cognome": docente.Cognome,
+                "annoNascita": docente.annoNascita,
+                "mail": docente.mail,
+                "password": docente.password,
             }
             return None, info_docente
 
@@ -81,22 +66,19 @@ def checkMail(mail):
     @param tab: stringa riguardo a che tabella riferirsi
     @return redirect: informazioni dello studente
 '''
-def reset_pwd_aux(mysql, email, pwd, c_pwd, tab):
+def reset_pwd_aux(email, pwd, c_pwd, tab):
     if pwd == c_pwd:
         hash_password = hashlib.sha256(c_pwd.encode("utf-8"))
         hash_value = hash_password.hexdigest()
-        cursor = mysql.cursor()
         if tab == "Studente":
-            query = "UPDATE studenti SET password = %s WHERE mail = %s"
-            cursor.execute(query, (hash_value, email))
-            mysql.commit()
-            cursor.close()
+            Studenti.query.filter_by(mail=email).update({"password": hash_value})
+            db.session.commit()
         elif tab == "Docente":
-            query = "UPDATE docenti SET password = %s WHERE mail = %s"
-            cursor.execute(query, (hash_value, email))
-            mysql.commit()
-            cursor.close()
+            Docenti.query.filter_by(mail=email).update({"password": hash_value})
+            db.session.commit()
         else:
             return redirect("/")
+        session.clear()
         return redirect("/login")
-    return redirect("/")
+    else:
+        return redirect("/")

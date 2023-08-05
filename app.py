@@ -1,65 +1,62 @@
 from flask import *
 from flask.sessions import SessionMixin
 from administrator import *
+from classi import *
 from studenti import *
 from docenti import *
 from auxiliary import *
-# Create Flask Instance
-app = Flask(__name__)
-# Set debug mode to True
-
-app.config["MYSQL_DATABASE_USER"] = "root"
-app.config["MYSQL_DATABASE_PASSWORD"] = "Sf35dkn@!"
-app.config["MYSQL_DATABASE_DB"] = "progettobasi"
-app.config["MYSQL_DATABASE_HOST"] = "localhost"
-mysql = pymysql.connect(
-    host=app.config["MYSQL_DATABASE_HOST"],
-    user=app.config["MYSQL_DATABASE_USER"],
-    password=app.config["MYSQL_DATABASE_PASSWORD"],
-    db=app.config["MYSQL_DATABASE_DB"],
-)
 
 
-'''
+@app.route("/secret")
+def secret():
+    return render_template("provaAlert.html")
+
+
+"""
 la funzione index() permette di accedere alla pagina iniziale del sito
 la funzione get_degree_course restituisce la lista dei corsi di laurea 
 la funzion get_all_course restituisce la liste dei corsi appartenenti ad un corso di laurea
-'''
+"""
+
+
 @app.route("/")
 def index():
     session.clear()
     session["ruolo"] = None
-    corsi_Laurea = get_degree_course(mysql)
-    corsi = get_all_course(mysql)
-    return render_template("index.html", corsi = corsi, corsi_Laurea = corsi_Laurea)
+    corsi_Laurea = get_degree_course()
+    corsi = get_all_course()
+    return render_template("index.html", corsi=corsi, corsi_Laurea=corsi_Laurea)
 
 
-'''
+"""
 la funzione resetpwd() permette di resettare la password dell'utente
 essa prende in input la nuova password e la conferma della nuova password
 se le due password coincidono allora la password viene aggiornata nel database all'intero della tabella Studenti
 in corrispondenza della mail inserita 
-'''
+"""
+
+
 @app.route("/reset_pwd", methods=["GET", "POST"])
 def resetpwd():
     if request.method == "POST":
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         email = request.form["email"]
-        tab=checkMail(email)
-        reset_pwd_aux(mysql, email, password, confirm_password,tab)
+        tab = checkMail(email)
+        return reset_pwd_aux(email, password, confirm_password, tab)
     return render_template("reset_pwd.html")
 
 
-
-'''
+"""
 la funzione signUp() permette di registrare un nuovo utente
 essa prende in input i dati inseriti dall'utente e controlla
 che l'utente abbia inserito tutti i dati richiesti
 successivamente se il numero ricevuto dalla funzione sign_up_aux() è 1 allora l'utente è stato registrato correttamente
 altrimenti l'utente è già registrato e deve attendere che la segreteria accetti la sua richiesta
 la funzione sign_up_corsolaurea serve a visualizzare nel menù a tendina i corsi di laurea disponibili
-'''
+"""
+
+
 @app.route("/sign_up", methods=["GET", "POST"])
 def signUp():
     corsi = {}
@@ -85,28 +82,29 @@ def signUp():
                     email,
                     password,
                     corsolaurea,
-                    mysql,
                 )
                 if number == 1:
-                    return redirect("/")
-    sign_up_corsolaurea(corsi, mysql)
+                    return redirect("/login")
+    sign_up_corsolaurea(corsi)
     return render_template("sign_up.html", corsiLaurea=corsi)
 
 
-'''
+"""
 la funzione login() permette di effettuare il login
 essa prende in input la mail e la password inserite dall'utente
 se l'utente è un docente allora viene reindirizzato alla pagina docenti
 se l'utente è uno studente allora viene reindirizzato alla pagina studenti
 se l'utente è l'amministratore allora viene reindirizzato alla pagina amministratore
 inoltre vengono salvati nella sessione i dati dell'utente che ha effettuato il login
-'''
+"""
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         mail = request.form["mail"]
         password = request.form["password"]
-        studente, docente = login_aux(mail, password, mysql)
+        studente, docente = login_aux(mail, password)
         if studente is not None and docente is None:
             session["codicefiscale"] = studente["codicefiscale"]
             session["nome"] = studente["nome"]
@@ -131,9 +129,11 @@ def login():
     return render_template("login.html")
 
 
-'''
+"""
 la funzione index_studenti() permette di visualizzare il menù degli studenti
-'''
+"""
+
+
 @app.route("/stud")
 def index_studenti():
     if "ruolo" in session and session["ruolo"] == "Studente":
@@ -142,9 +142,11 @@ def index_studenti():
         abort(403)
 
 
-'''
+"""
 la funzione index_docenti() permette di visualizzare il menù dei docenti
-'''
+"""
+
+
 @app.route("/Docenti")
 def index_docenti():
     if "ruolo" in session and session["ruolo"] == "Docente":
@@ -153,9 +155,11 @@ def index_docenti():
         abort(403)
 
 
-'''
+"""
 la funzione home_stud() permette di visualizzare le informazioni dello studente
-'''
+"""
+
+
 @app.route("/stud/user_data")
 def home_stud():
     # Dati utente di esempio
@@ -176,9 +180,11 @@ def home_stud():
     )
 
 
-'''
+"""
 la funzione home_docenti() permette di visualizzare le informazioni del docente
-'''
+"""
+
+
 @app.route("/Docenti/user_data")
 def home_docenti():
     # Dati utente di esempio
@@ -199,9 +205,11 @@ def home_docenti():
     )
 
 
-'''
+"""
 la funzione administrator() permette di visualizzare il menù dell'amministratore
-'''
+"""
+
+
 @app.route("/Admin")
 def administrator():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -209,28 +217,33 @@ def administrator():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione delete permette di eliminare un utente dal database, essa prende in input il codice fiscale dell'utente da eliminare
-'''
+"""
+
+
 @app.route("/Admin/delete_user", methods=["GET", "POST"])
 def delete():
     if "ruolo" in session and session["ruolo"] == "Admin":
         if request.method == "POST":
             data = request.get_json()
             cf = data.get("cod_fiscale")
-            delete_aux(cf, mysql)
+            delete_aux(cf)
             return "Utente eliminato con successo"
         else:
-            users = get_studenti(mysql)
+            users = get_studenti()
             return render_template("Delete_users.html", users=users)
     else:
         abort(403)
 
 
-'''
+"""
 la funzione add() permette di aggiungere un utente al database
 in stud si trovano i dati dello studente da aggiungere
-'''
+"""
+
+
 @app.route("/Admin/add_user", methods=["GET", "POST"])
 def add():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -246,21 +259,23 @@ def add():
                 "password": data.get("pwd"),
                 "corso_laurea": data.get("corso_di_laurea"),
             }
-            delete_tempuser(stud["codice_fiscale"], mysql)
-            add_user(stud, mysql)
+            delete_tempuser(stud["codice_fiscale"])
+            add_user(stud)
             return "Operation Complete"
         else:
-            users_info = get_temporaryuser(mysql)
+            users_info = get_temporaryuser()
             return render_template("Add_users.html", users=users_info)
     else:
         abort(403)
 
 
-'''
+"""
 la funzione add_degree_course() permette di aggiungere un corso di laurea al database
 attraverso il metodo POST si ricevono i dati del corso di laurea da aggiungere
 successivamente si richiama la funzione add_degree_course_aux() che aggiunge il corso di laurea al database
-'''
+"""
+
+
 @app.route("/Admin/aggiungi_corso_laurea", methods=["GET", "POST"])
 def add_degree_course():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -270,7 +285,7 @@ def add_degree_course():
             nome_corso = data.get("nome")
             spec = data.get("specializzazione")
             indirizzo = data.get("indirizzo")
-            add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo, mysql)
+            add_degree_course_aux(cod_corso, nome_corso, spec, indirizzo)
             return "Operation complete"
         else:
             return render_template("Crea_corso_di_laurea.html")
@@ -278,33 +293,38 @@ def add_degree_course():
         abort(403)
 
 
-'''
+"""
 la funzione delete_degree_course() permette di eliminare un corso di laurea al database
 attraverso il metodo POST si riceve il codice del corso di laurea da eliminare
 successivamente si richiama la funzione delete_degree_course_aux() che elimina il corso di laurea al database
 il metodo GET allora si richiama la funzione get_degree_course() che restituisce la lista dei corsi di laurea
-'''
+"""
+
+
 @app.route("/Admin/elimina_corso_laurea", methods=["GET", "POST"])
 def delete_degree_course():
     if "ruolo" in session and session["ruolo"] == "Admin":
         if request.method == "POST":
             codice_corso = request.form["codice_corso"]
-            delete_degree_course_aux_post(codice_corso, mysql)
+            delete_degree_course_aux_post(codice_corso)
             return redirect(url_for("administrator"))
         else:
-            corsi_di_laurea = get_degree_course(mysql)
+            corsi_di_laurea = get_degree_course()
             return render_template(
                 "Elimina_corso_di_laurea.html", corsi_di_laurea=corsi_di_laurea
             )
     else:
         abort(403)
 
-'''
+
+"""
 la funzione add_course() permette di aggiungere un corso al database
 attraverso il metodo POST si ricevono i dati del corso da aggiungere
 successivamente si richiama la funzione add_course_aux() che aggiunge il corso al database  
-il metodo GET richiama la funzione get_couse() che restituisce la lista dei corsi
-'''
+il metodo GET richiama la funzione get_course() che restituisce la lista dei corsi
+"""
+
+
 @app.route("/Admin/aggiungi_corso", methods=["GET", "POST"])
 def add_course():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -313,39 +333,44 @@ def add_course():
             cod_corso = data.get("codiceCorso")
             nome_corso = data.get("nome")
 
-            add_course_aux(cod_corso, nome_corso, mysql)
+            add_course_aux(cod_corso, nome_corso)
             return redirect(url_for("administrator"))
         else:
             return render_template("Crea_corso.html")
     else:
         abort(403)
 
-'''
+
+"""
 la funzione delete_course() permette di eliminare un corso al database
 attraverso il metodo POST si riceve il codice del corso da eliminare
 successivamente si richiama la funzione delete_course_aux() che elimina il corso al database
-il metodo GET richiama la funzione get_couse() che restituisce la lista dei corsi
+il metodo GET richiama la funzione get_course() che restituisce la lista dei corsi
 
-'''
+"""
+
+
 @app.route("/Admin/elimina_corso", methods=["GET", "POST"])
 def delete_course():
     if "ruolo" in session and session["ruolo"] == "Admin":
         if request.method == "POST":
             codice_corso = request.form["codice_corso"]
-            delete_course_aux_post(codice_corso, mysql)
+            delete_course_aux_post(codice_corso)
 
             return redirect(url_for("administrator"))
         else:
-            corsi = get_couse(mysql)
+            corsi = get_course()
             return render_template("Elimina_corso.html", corsi=corsi)
     else:
         abort(403)
 
 
-'''
+"""
 la funzione assegnaCorsoCorsoLaurea() permette di associare un corso di laurea ad un corso
 attraverso il metodo POST si ricevono i dati del corso di laurea del corso da associare e l'anno di insegnamento
-'''
+"""
+
+
 @app.route("/Admin/assegnaCorso_CorsoLaurea", methods=["GET", "POST"])
 def assegnaCorsoCorsoLaurea():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -355,11 +380,11 @@ def assegnaCorsoCorsoLaurea():
             corso = data.get("corso2")
             anno = data.get("anno")
 
-            assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno, mysql)
+            assegnaCorsoCorsoLaurea_aux(corso_laurea, corso, anno)
             return "Operation Complete"
         else:
-            corsi_laurea = get_degree_course(mysql)
-            corsi = get_couse(mysql)
+            corsi_laurea = get_degree_course()
+            corsi = get_course()
             return render_template(
                 "Associazione_corso_corsolaurea.html",
                 lista_corsi_laurea=corsi_laurea,
@@ -368,12 +393,15 @@ def assegnaCorsoCorsoLaurea():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione delete_docenti() permette di eliminare un docente dal database
 attraverso il metodo POST si riceve il codice fiscale del docente da eliminare
 successivamente si richiama la funzione delete_docenti_aux() che elimina il docente dal database
 il metodo GET richiama la funzione get_docenti() che restituisce la lista dei docenti
-'''
+"""
+
+
 @app.route("/Admin/delete_docente", methods=["GET", "POST"])
 def delete_docenti():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -381,19 +409,22 @@ def delete_docenti():
             data = request.get_json()
             codice_fiscale_da_eliminare = data.get("codice_fiscale")
 
-            delete_docenti_aux(codice_fiscale_da_eliminare, mysql)
+            delete_docenti_aux(codice_fiscale_da_eliminare)
         else:
-            docenti = get_docenti(mysql)
+            docenti = get_docenti()
             return render_template("Delete_docenti.html", users=json.dumps(docenti))
     else:
         abort(403)
 
-'''
+
+"""
 la funzione add_docente() permette di aggiungere un docente al database
 attraverso il metodo POST si ricevono i dati del docente da aggiungere
 successivamente si richiama la funzione add_docente_aux() che aggiunge il docente al database
 
-'''
+"""
+
+
 @app.route("/Admin/aggiungi_docente", methods=["GET", "POST"])
 def add_docente():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -407,7 +438,7 @@ def add_docente():
                 "anno_nascita": data.get("annoNascita"),
                 "password": data.get("password"),
             }
-            add_docente_aux(docente, mysql)
+            add_docente_aux(docente)
 
             return redirect(url_for("administrator"))
         else:
@@ -415,13 +446,16 @@ def add_docente():
     else:
         abort(403)
 
-'''
-la funzione delete_corso_crosoLaurea() permette di eliminare un corso di laurea da un corso
+
+"""
+la funzione delete_corso_corsoLaurea() permette di eliminare un corso di laurea da un corso
 attraverso il metodo POST si ricevono i dati del corso di laurea del corso da eliminare
 successivamente si richiama la funzione delete_corso_corsoLaurea_aux() che elimina il corso di laurea dal corso
-il metodo GET richiama la funzione get_degree_course() che restituisce la lista dei corsi di laurea e la funzione get_couse() che restituisce la lista dei corsi
-e la funzione get_couse_degree_course() che restituisce la lista dei corsi di laurea associati ad un corso
-'''
+il metodo GET richiama la funzione get_degree_course() che restituisce la lista dei corsi di laurea e la funzione get_course() che restituisce la lista dei corsi
+e la funzione get_course_degree_course() che restituisce la lista dei corsi di laurea associati ad un corso
+"""
+
+
 @app.route("/Admin/delete_corso_corsoLaurea", methods=["GET", "POST"])
 def delete_corso_crosoLaurea():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -429,12 +463,12 @@ def delete_corso_crosoLaurea():
             data = request.get_json()
             deg_course = data.get("codiceCorsoLaurea")
             course = data.get("codiceCourse")
-            delete_corso_corsoLaurea_aux_post(deg_course, course, mysql)
+            delete_corso_corsoLaurea_aux_post(deg_course, course)
             return "Operation Complete"
         else:
-            corsiLaurea = get_degree_course(mysql)
-            cors = get_couse(mysql)
-            corsi_corsiLaurea = get_couse_degree_course(mysql)
+            corsiLaurea = get_degree_course()
+            cors = get_course()
+            corsi_corsiLaurea = get_course_degree_course()
             return render_template(
                 "Delete_corsi_CorsiLaurea.html",
                 corsi_Laurea=corsiLaurea,
@@ -444,12 +478,15 @@ def delete_corso_crosoLaurea():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione assegna_Corso_Docente() permette di associare un corso ad un docente
 attraverso il metodo POST si ricevono i dati del corso del docente da associare
 successivamente si richiama la funzione assegna_Corso_Docente_aux() che associa il corso al docente
-il metodo GET richiama la funzione get_docenti() che restituisce la lista dei docenti e la funzione get_couse() che restituisce la lista dei corsi
-'''
+il metodo GET richiama la funzione get_docenti() che restituisce la lista dei docenti e la funzione get_course() che restituisce la lista dei corsi
+"""
+
+
 @app.route("/Admin/associazioneCorso_Docente", methods=["GET", "POST"])
 def assegna_Corso_Docente():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -457,24 +494,27 @@ def assegna_Corso_Docente():
             data = request.get_json()
             docente = data.get("cod_Docente")
             corso = data.get("cod_Corso")
-            assegna_Corso_Docente_aux(docente, corso, mysql)
+            assegna_Corso_Docente_aux(docente, corso)
             return "Operation Complete"
         else:
-            docenti = get_docenti(mysql)
-            corsi = get_couse(mysql)
+            docenti = get_docenti()
+            corsi = get_course()
             return render_template(
                 "Assegnazione_corso_docente.html", docenti=docenti, corsi=corsi
             )
     else:
         abort(403)
 
-'''
+
+"""
 la funzione delete_corso_Docente() permette di eliminare un corso da un docente
 attraverso il metodo POST si ricevono i dati del corso del docente da eliminare
 successivamente si richiama la funzione delete_corso_Docente_aux() che elimina il corso dal docente
-il metodo GET richiama la funzione get_docenti() che restituisce la lista dei docenti e la funzione get_couse() che restituisce la lista dei corsi
-e la funzione get_couse_docenti() che restituisce la lista dei corsi associati ad un docente
-'''
+il metodo GET richiama la funzione get_docenti() che restituisce la lista dei docenti e la funzione get_course() che restituisce la lista dei corsi
+e la funzione get_course_docenti() che restituisce la lista dei corsi associati ad un docente
+"""
+
+
 @app.route("/Admin/delete_corso_Docente", methods=["GET", "POST"])
 def delete_corso_Docente():
     if "ruolo" in session and session["ruolo"] == "Admin":
@@ -482,12 +522,12 @@ def delete_corso_Docente():
             data = request.get_json()
             doc_cf = data.get("doc_code")
             code_course = data.get("course_code")
-            delete_corso_Docente_aux(doc_cf, code_course, mysql)
+            delete_corso_Docente_aux(doc_cf, code_course)
             return "Operation Complete"
         else:
-            docenti = get_docenti(mysql)
-            cors = get_couse(mysql)
-            corsi_docenti = get_couse_docenti(mysql)
+            docenti = get_docenti()
+            cors = get_course()
+            corsi_docenti = get_course_docenti()
             return render_template(
                 "Delete_corsi_docenti.html",
                 docenti=docenti,
@@ -497,20 +537,23 @@ def delete_corso_Docente():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione assegna_voti() permette di assegnare un voto ad uno studente
 ha come parametro il codice dell'esame
 nel metodo GET si richiama la funzione assegna_voto_aux() che restituisce la lista degli studenti che hanno sostenuto l'esame
 @codiceEsame: codice dell'esame
 
-'''
+"""
+
+
 @app.route("/Docenti/<codiceEsame>/Assegna_voti", methods=["GET", "POST"])
 def assegna_voti(codiceEsame):
     if "ruolo" in session and session["ruolo"] == "Docente":
         if request.method == "POST":
             return "ok"
         else:
-            studenti = assegna_voto_aux(mysql, codiceEsame)
+            studenti = assegna_voto_aux(codiceEsame)
             session["CodiceEsame"] = codiceEsame
             return render_template(
                 "Inserimento_voti.html", studenti=json.dumps(studenti)
@@ -518,11 +561,14 @@ def assegna_voti(codiceEsame):
     else:
         abort(403)
 
-'''
+
+"""
 la funzione ricevi_dati() permette di ricevere i dati dello studente e il voto da assegnare
 la funzione take_cf() restituisce il codice fiscale dello studente
 la funzione ricevi_dati_aux() permette di inserire il voto dello studente nel database
-'''
+"""
+
+
 @app.route("/Docenti/ricevi-voti", methods=["POST"])
 def ricevi_dati():
     dati = request.get_json()
@@ -530,40 +576,36 @@ def ricevi_dati():
     mat = tableData[0]["matricola"]
     voto = tableData[0]["voto"]
     codiceEsame = session.get("CodiceEsame")
-    cf = take_cf(mysql, mat)
-    ricevi_dati_aux(mysql, cf, codiceEsame, voto)
+    cf = take_cf(mat)
+    ricevi_dati_aux(cf, codiceEsame, voto)
     return jsonify(mat)
 
-'''
+
+"""
 la funzione lista_esami() permette di visualizzare la lista degli esami
 viene richiamata la funzione lista_esami_aux() che restituisce la lista degli esami
-'''
+"""
+
+
 @app.route("/Docenti/Elenco_esami", methods=["GET", "POST"])
 def table_esami():
     if "ruolo" in session and session["ruolo"] == "Docente":
         if request.method == "GET":
-            esami = tabella_esami(mysql)
+            esami = tabella_esami()
             return render_template("Tabella_esami.html", esami=json.dumps(esami))
     else:
         abort(403)
 
 
-# Endpoint per la gestione della richiesta del pulsante "Assegna voti"
-def exam_get_datas():
-    cursor = mysql.cursor()
-    query = "SELECT * FROM esami"
-    cursor.execute(query)
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows
-
-'''
+"""
 la funzione crea_esame() permette di creare un esame
 attraverso il metodo POST si ricevono i dati dell'esame da creare
 successivamente si richiama la funzione crea_esame_inserisci() che crea l'esame
 il metodo GET richiama la funzione crea_esame_docenti() che restituisce la lista dei corsi
 
-'''
+"""
+
+
 @app.route("/Docenti/Crea_Esame", methods=["GET", "POST"])
 def crea_esame():
     if "ruolo" in session and session["ruolo"] == "Docente":
@@ -577,10 +619,10 @@ def crea_esame():
             tipo = request.form["tipo"]
             valore = request.form["valore"]
             crea_esame_inserisci(
-                mysql, corso, nome_esame, codice_esame, data, tipo, valore, cf_docente
+                corso, nome_esame, codice_esame, data, tipo, valore, cf_docente
             )
 
-        lista_corsi = crea_esame_docenti(mysql, cf_docente)
+        lista_corsi = crea_esame_docenti(cf_docente)
         if request.method == "POST":
             return render_template("Crea_esame.html", corsi=lista_corsi)
         else:
@@ -588,53 +630,62 @@ def crea_esame():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione elimina_esame() permette di eliminare un esame
 attraverso il metodo POST si riceve il codice dell'esame da eliminare
 successivamente si richiama la funzione elimina_esame_post() che elimina l'esame
 il metodo GET richiama la funzione elimina_esame_get() che restituisce la lista degli esami
 
-'''
+"""
+
+
 @app.route("/Docenti/Elimina_Esame", methods=["GET", "POST"])
 def elimina_Esame():
     if "ruolo" in session and session["ruolo"] == "Docente":
         cf_docente = session.get("codicefiscale")
         if request.method == "POST":
             esame = request.form.get("codEsame")
-            elimina_esame_post(mysql, esame, cf_docente)
-        lista_esami = elimina_esame_get(mysql, cf_docente)
+            elimina_esame_post(esame, cf_docente)
+        lista_esami = elimina_esame_get(cf_docente)
         return render_template("Delete_esame.html", esami=lista_esami)
     else:
         abort(403)
 
-'''
+
+"""
 la funzione phone_number() permette di visualizzare i numeri di telefono del docente
 viene richiamata la funzione phone_number_aux() che restituisce la lista dei numeri di telefono del docente
 
-'''
+"""
+
+
 @app.route("/Docenti/Numeri_di_telefono")
 def phone_number():
     if "ruolo" in session and session["ruolo"] == "Docente":
         cf_docente = session.get("codicefiscale")
         phone_numbers = session.get("phone_numbers", [])
-        phone_numbers = phone_number_aux(mysql, cf_docente)
+        phone_numbers = phone_number_aux(cf_docente)
         return render_template("Numeri_telefono.html", phone_numbers=phone_numbers)
     else:
         abort(403)
 
-'''
+
+"""
 la funzione add_phone_number() permette di aggiungere un numero di telefono al docente
 attraverso il metodo POST si riceve il numero di telefono da aggiungere
 successivamente si richiama la funzione add_number_aux() che aggiunge il numero di telefono al docente
 
-'''
+"""
+
+
 @app.route("/add_phone", methods=["POST"])
 def add_phone_number():
     cf_docente = session.get("codicefiscale")
     data = request.get_json()
     number_to_add = data.get("number")
     try:
-        add_number_aux(mysql, number_to_add, cf_docente)
+        add_number_aux(number_to_add, cf_docente)
         return jsonify(message="Numero di telefono aggiunto correttamente.")
     except Exception as e:
         return jsonify(
@@ -642,19 +693,22 @@ def add_phone_number():
             + str(e)
         )
 
-'''
+
+"""
 la funzione delete_phone_number() permette di eliminare un numero di telefono del docente
 attraverso il metodo POST si riceve il numero di telefono da eliminare
 successivamente si richiama la funzione delete_number_aux() che elimina il numero di telefono del docente
 
-'''
+"""
+
+
 @app.route("/delete_phone", methods=["POST"])
 def delete_phone_number():
     cf_docente = session.get("codicefiscale")
     data = request.get_json()
     numero_telefono = data.get("number")
     try:
-        delete_number_aux(mysql, numero_telefono, cf_docente)
+        delete_number_aux(numero_telefono, cf_docente)
         return jsonify(message="Numero di telefono eliminato correttamente.")
     except Exception as e:
         return jsonify(
@@ -680,30 +734,38 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template("403.html"), 403
 
-'''
+
+"""
 la funzione show_list_exam() permette di visualizzare la lista degli esami sostenuti dallo studente
 viene richiamata la funzione show_list_exam_aux() che restituisce la lista degli esami sostenuti dallo studente
-'''
+"""
+
+
 @app.route("/stud/lista_esami_utente")
 def show_list_exam():
     if "ruolo" in session and session["ruolo"] == "Studente":
         cf = session.get("codicefiscale")
-        corsi = show_list_exam_aux(mysql, cf)
+        corsi = show_list_exam_aux(cf)
         # Nel caso il voto sia None, oppure assente la cella corrispondente nella tabella html risulterà essere vuota
         return render_template("lista_esami_utente.html", corsi=corsi)
     else:
         abort(403)
 
-'''
+
+"""
 la funzione prenotazioni_appelli() permette di visualizzare la lista degli appelli che lo studente può prenotare
 viene richiamata la funzione prenotazioni_aux() che restituisce la lista degli appelli che lo studente può prenotare
 
-'''
+"""
+
+
 @app.route("/stud/prenotazioni_appelli", methods=["GET"])
 def prenotazioni_appelli():
     if "ruolo" in session and session["ruolo"] == "Studente":
         if request.method == "GET":
-            righe_iniziali = prenotazioni_aux(mysql)
+            corsolaurea = session.get("corsoLaurea")
+            matricola = session.get("matricola")
+            righe_iniziali = prenotazioni_aux(corsolaurea, matricola)
             if righe_iniziali.__len__() != 0:
                 session["Esame"] = righe_iniziali[0]["CodEsame"]
             else:
@@ -715,54 +777,67 @@ def prenotazioni_appelli():
         abort(403)
 
 
-'''
+"""
 la funzione bacheca_appelli permette di visualizzare la lista degli appelli che lo studente può prenotare
 viene richiamata la funzione bacheca_aux() che restituisce la lista degli appelli che lo studente ha prenotato
 
-'''
+"""
+
+
 @app.route("/stud/bacheca_prenotazione_appelli", methods=["GET"])
 def bacheca_appelli():
     if "ruolo" in session and session["ruolo"] == "Studente":
         if request.method == "GET":
-            righe_uniche = bacheca_aux(mysql)
+            codicefiscale = session.get("codicefiscale")
+            righe_uniche = bacheca_aux(codicefiscale)
         return render_template("bacheca_prenotazione_appelli.html", righe=righe_uniche)
     else:
         abort(403)
 
-'''
+
+"""
 la funzione aggiungi_riga() permette di aggiungere un appello alla lista degli appelli che lo studente può prenotare
 viene richiamata la funzione add_row_aux() che aggiunge un appello alla lista degli appelli che lo studente può prenotare
-'''
+"""
+
+
 @app.route("/aggiungi_riga", methods=["POST"])
 def aggiungi_riga():
     riga = request.get_json()
     esame = riga.get("CodEsame")
     cf = session.get("codicefiscale")
-    add_row_aux(mysql, esame, cf)
+    add_row_aux(esame, cf)
     return jsonify({"message": "Riga aggiunta con successo"})
 
-'''
+
+"""
 la funzione delete_appello() permette di eliminare un appello dalla lista degli appelli che lo studente può prenotare   
 viene richiamata la funzione delete_appello_aux() che elimina un appello dalla lista degli appelli che lo studente può prenotare
 
-'''
+"""
+
+
 @app.route("/delete_appello", methods=["POST"])
 def delete_appello():
     riga = request.get_json()
     esame = riga.get("CodEsame")
-    delete_appello_aux(mysql, esame)
+    delete_appello_aux(esame)
     return jsonify({"message": "Riga rimossa con successo"})
 
-'''
+
+"""
 la funzione exam_details() permette di visualizzare la lista degli esami sostenuti dallo studente
 viene richiamata la funzione exam_details_aux() che restituisce la lista degli esami sostenuti dallo studente
 
-'''
+"""
+
+
 @app.route("/stud/bacheca_esiti", methods=["GET"])
 def exam_details():
     if "ruolo" in session and session["ruolo"] == "Studente":
         if request.method == "GET":
-            exam_list = exam_details_aux(mysql)
+            codicefiscale = session.get("codicefiscale")
+            exam_list = exam_details_aux(codicefiscale)
         grouped_exam_list = {}
         for exam in exam_list:
             codice_corso = exam["codice_corso"]
@@ -775,9 +850,12 @@ def exam_details():
     else:
         abort(403)
 
-'''
+
+"""
 la funzione home() permette di visualizzare il menù dello studente o del docente o dell'admin in base al ruolo
-'''
+"""
+
+
 @app.route("/home")
 def home():
     if "ruolo" in session:
@@ -790,19 +868,25 @@ def home():
     else:
         abort(404)
 
-'''
+
+"""
 la funzione log_out() permette di effettuare il logout
-'''
+"""
+
+
 @app.route("/log_out")
 def log_out():
     session.clear()
     session["ruolo"] = None
     return redirect(url_for("index"))
 
-'''
+
+"""
 la funzione reset permette di resettare la password rimanendo in sessione,
 se invece il ruolo è None o si è fuori sessione rediretta il sito a index
-'''
+"""
+
+
 @app.route("/reset")
 def reset():
     if "ruolo" in session:
@@ -814,13 +898,15 @@ def reset():
         session.clear()
         return redirect(url_for("index"))
 
-'''
+
+"""
 la funzione ret, nel caso in cui venga visualizzata una pagina di errore (404 403 500),
 tramite link "Return" l'utente torna all'index corrispondente al ruolo presente in sessione
-'''
+"""
+
+
 @app.route("/return")
 def ret():
-    print(session["ruolo"])
     if "ruolo" in session:
         if session["ruolo"] == "Studente":
             return redirect(url_for("index_studenti"))
@@ -834,8 +920,7 @@ def ret():
         session.clear()
         return redirect(url_for("index"))
 
+
 if __name__ == "__main__":
     app.secret_key = "Dokkeabi"
     app.run()
-
-
