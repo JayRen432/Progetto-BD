@@ -102,9 +102,9 @@ riceve come parametri la connessione al database e il codice fiscale dello stude
 attraverso la SELECT seleziona i dati degli esami prenotati dallo studente e li inserisce in una lista di dizionari
 '''
 def bacheca_aux(cf):
-    effettuate_data = Iscrizione_Appelli.query.join(Esami, Iscrizione_Appelli.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).join(Studenti, Iscrizione_Appelli.Studente == Studenti.CodiceFiscale).filter_by(CodiceFiscale = cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame)
+    effettuate_data = Iscrizione_Appelli.query.join(Esami, Iscrizione_Appelli.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).join(Studenti, Iscrizione_Appelli.Studente == Studenti.CodiceFiscale).filter(Studenti.CodiceFiscale == cf, and_(func.current_date() < Esami.Data)).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame)
     righe_uniche = [
-        {"CodiceCorso": row[0], "NomeCorso": row[1], "Data": row[2], "CodEsame": row[3]}
+        {"CodiceCorso": row.CodiceCorso, "NomeCorso": row.NomeCorso, "Data": row.Data, "CodEsame": row.CodEsame}
         for row in effettuate_data
     ]
     return righe_uniche
@@ -120,7 +120,7 @@ attraverso la SELECT seleziona i dati degli esami prenotabilo dallo studente e l
 def prenotazioni_aux(corsolaurea, matricola):
     subquery = Sostenuti.query.join(Studenti, Sostenuti.Studente == Studenti.CodiceFiscale).filter_by(matricola = matricola).with_entities(Sostenuti.Esame)
     subquery = subquery.subquery()
-    prenotazioni_data = Studenti.query.join(Corsi_di_Laurea, Studenti.CorsoLaurea == Corsi_di_Laurea.CodCorsoLaurea).join(Appartenenti, Corsi_di_Laurea.CodCorsoLaurea == Appartenenti.CorsoLaurea).join(Corsi, Appartenenti.CodCorso == Corsi.CodiceCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(and_(Studenti.CorsoLaurea == corsolaurea, Esami.CodEsame.notin_(subquery))).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame, Esami.Tipo).distinct()
+    prenotazioni_data = Studenti.query.join(Corsi_di_Laurea, Studenti.CorsoLaurea == Corsi_di_Laurea.CodCorsoLaurea).join(Appartenenti, Corsi_di_Laurea.CodCorsoLaurea == Appartenenti.CorsoLaurea).join(Corsi, Appartenenti.CodCorso == Corsi.CodiceCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Esami.Data >= func.current_date(),and_(Studenti.CorsoLaurea == corsolaurea, Esami.CodEsame.notin_(subquery))).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data, Esami.CodEsame, Esami.Tipo).distinct()
     righe_iniziali = [
         {
             "CodiceCorso": row.CodiceCorso,
@@ -157,6 +157,15 @@ def delete_appello_aux(mysql, esame):
     Iscrizione_Appelli.query.filter_by(Esame = esame).delete()
     db.session.commit()
 
+def which_voto(voto):
+    if voto == 0:
+        return 'INSUF'
+    elif voto > 30: 
+        return '30L'
+    else:
+        return voto
+        
+
 '''
 la funzione exam_details_aux restituisce una lista di dizionari contenenti i dati degli esami sostenuti dallo studente
 riceve come parametri la connessione al database
@@ -166,13 +175,14 @@ attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li 
 '''
 def exam_details_aux(cf):
     cf = session.get("codicefiscale")
-    risultatiesami_data = Studenti.query.join(Sostenuti, Studenti.CodiceFiscale == Sostenuti.Studente).join(Esami, Sostenuti.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data,func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti')).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Data)
+    max_data = Corsi.query.join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, func.max(Esami.Data).label('max_data')).group_by(Corsi.CodiceCorso).subquery()
+    risultatiesami_data = Studenti.query.join(Sostenuti, Studenti.CodiceFiscale == Sostenuti.Studente).join(Esami, Sostenuti.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).join(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Sostenuti.Studente == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso,func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), max_data.c.max_data).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data)
     exam_list = [
         {
             "codice_corso": row.CodiceCorso,
             "nome_corso": row.NomeCorso,
-            "voto": row[3],
-            "data_esame": row.Data,
+            "voto": which_voto(row.sommavoti),
+            "data_esame": row.max_data,   
         }
         for row in risultatiesami_data
     ]
@@ -208,17 +218,18 @@ riceve come parametri la connessione al database e il codice fiscale dello stude
 attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li inserisce in una lista di dizionari
 '''
 def show_list_exam_aux(cf):
-    subquery = Esami.query.join(Sostenuti, Esami.CodEsame == Sostenuti.Esame).filter_by(Studente = cf).with_entities(Esami.Corso, Esami.Data, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), Esami.Valore).group_by(Esami.Corso, Esami.Data, Esami.Valore)
+    max_data = Corsi.query.join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, func.max(Esami.Data).label('max_data')).group_by(Corsi.CodiceCorso).subquery()
+    subquery = Esami.query.join(Sostenuti, Esami.CodEsame == Sostenuti.Esame).filter(and_(Sostenuti.Studente == cf, Sostenuti.voto != 'INSUF')).with_entities(Esami.Corso, Esami.Data, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), Esami.Valore).group_by(Esami.Corso, Esami.Data, Esami.Valore)
     sub = subquery.subquery()
 
-    exam_data = (db.session.query(Corsi, sub).join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Studenti, Appartenenti.CorsoLaurea == Studenti.CorsoLaurea).outerjoin(sub, sub.c.Corso == Corsi.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, sub.c.Data, func.sum(sub.c.sommavoti), sub.c.Valore).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, sub.c.Data, sub.c.Valore))
+    exam_data = (db.session.query(Corsi, sub, max_data.c.max_data).join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Studenti, Appartenenti.CorsoLaurea == Studenti.CorsoLaurea).outerjoin(sub, sub.c.Corso == Corsi.CodiceCorso).outerjoin(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, func.sum(sub.c.sommavoti), sub.c.Valore).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, sub.c.Valore))
     
     corsi = [
         {
             "CodiceCorso": row.CodiceCorso,
             "NomeCorso": row.NomeCorso,
-            "Data": isNone(row.Data),
-            "Voto": isNone(row[3]),
+            "Data": isNone(row.max_data),
+            "Voto": isNone(which_voto(row[3])),
             "Valore": isNone(row.Valore),
         }
         for row in exam_data
