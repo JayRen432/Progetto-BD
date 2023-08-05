@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabella dinamica</title>
+</head>
+<body>
+    <h1>Tabella dinamica</h1>
+    <table border="1">
+        <tr>
+            <th>NomeCorso</th>
+            <th>CodEsame</th>
+            <th>voto</th>
+            <th>Data</th>
+            <th>Azione</th>
+        </tr>
+        <!-- Utilizzo della struttura di controllo for per iterare attraverso i dati -->
+        {% for data in data_list %}
+        <tr>
+            <td>{{ data.NomeCorso }}</td>
+            <td>{{ data.CodEsame }}</td>
+            <td>{{ data.voto }}</td>
+            <td>{{ data.Data }}</td>
+            <td>
+                <input type="radio" name="azione_{{ loop.index }}" value="ACCETTATO">Accetta
+                <input type="radio" name="azione_{{ loop.index }}" value="RIFIUTATO">Rifiuta
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="button" onclick="inviaDati()">Invia al server</button>
+    <script>
+        function inviaDati() {
+            var righeTabella = document.getElementsByTagName("tr");
+            var datiSelezionati = [];
+
+            for (var i = 1; i < righeTabella.length; i++) {
+                var riga = righeTabella[i];
+                var radioButtons = riga.getElementsByTagName("input");
+                var azione = "";
+
+                for (var j = 0; j < radioButtons.length; j++) {
+                    if (radioButtons[j].type === "radio" && radioButtons[j].checked) {
+                        azione = radioButtons[j].value;
+                        break;
+                    }
+                }
+
+                if (azione !== "") {
+                    var nomeCorso = riga.cells[0].innerText;
+                    var codEsame = riga.cells[1].innerText;
+                    var voto = riga.cells[2].innerText;
+                    var data = riga.cells[3].innerText;
+
+                    datiSelezionati.push({
+                        "NomeCorso": nomeCorso,
+                        "CodEsame": codEsame,
+                        "voto": voto,
+                        "Data": data,
+                        "Azione": azione
+                    });
+                }
+            }
+
+            // Ora hai i dati delle righe selezionate nella variabile "datiSelezionati"
+            // Puoi inviarli al server tramite una richiesta AJAX o fare altre operazioni.
+            fetch('/stud/accetta_voti', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datiSelezionati)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Esegui operazioni con la risposta del server (se necessario)
+                
+            })
+            .catch(error => console.error('Errore:', error));
+            window.location.assign("/stud");
+        
+        }
+    </script>
+</body>
+</html>
