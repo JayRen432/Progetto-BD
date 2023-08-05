@@ -6,9 +6,14 @@
         var pwd = document.getElementsByName("password");
         var pwd_c = document.getElementsByName("confirm_password");
         if (pwd[0].value === "" || pwd_c[0].value === "" || ml[0].value === "") {
-            alert("Uno dei campi è vuoto");
+            showAlert('warning', 'i campi non possono essere vuoti');
             return false;
         }
+        if(pwd[0].value === pwd_c[0].value){
+            showAlert('warning', 'i campi le due password sono diverse');
+            return false;
+        }
+        showAlert('info', 'tutti i campi sono stati inseriti');
         return true;
     }
 </script>

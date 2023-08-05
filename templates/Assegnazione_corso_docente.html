@@ -30,7 +30,7 @@
         let docente = selettore_docente.value;
         let corso = selettore_corso.value;
         if (docente === '-----------' || corso === '-----------') {
-            alert("Seleziona dei dati validi");
+            showAlert('info','Seleziona dei dati validi');
         }
         else {
             fetch('/Admin/associazioneCorso_Docente', {

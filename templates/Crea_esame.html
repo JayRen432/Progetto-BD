@@ -1,8 +1,37 @@
 {% extends 'baseUsers.html' %}
 {% block content %}
+<script>
+    function checkEsame() {
+        var ce = document.getElementsByName("codice_esame");
+        var ne = document.getElementsByName("nome_esame");
+        var a = document.getElementsByName("data");
+        var c = document.getElementById("corso");
+        var t = document.getElementById("tipo");
+        var v = document.getElementById("valore");
+        var vp = document.getElementById("valorePerc");
+
+        if (ce[0].value === "" || ne[0].value === "" || a[0].value === "" || c.value === "" || t.value === "" || v.value === "" || vp.value === "") {
+            showAlert('warning', 'Inserire in tutti i campi i dati');
+            return false;
+        }
+
+        var today = new Date();
+        var examDate = new Date(a[0].value);
+        var oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        if (examDate < oneWeekFromNow) {
+            showAlert('warning', 'La data dell\'esame deve essere compresa tra oggi e una settimana da oggi.');
+            return false;
+        }
+
+        showAlert('info', 'Dati inseriti correttamente');
+        return true;
+    }
+
+</script>
 <div class="add_e">
     <h1>Inserisci i dati:</h1>
-    <form action="/Docenti/Crea_Esame" method="POST">
+    <form action="/Docenti/Crea_Esame" method="POST" onsubmit="return checkEsame()">
         <div class="form-group">
             <p style="text-align: left;">Corso: </p>
             <select name="corso" id="corso">
@@ -40,6 +69,22 @@
                 <option value="3">3 crediti</option>
                 <option value="6">6 crediti</option>
                 <option value="12">12 crediti</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <p style="text-align: left;">Valore Percentuale:</p>
+            <select name="valorePerc" id="valorePerc">
+                <option value="0">PROVA BONUS</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100" selected>100%</option>
             </select>
             <button type="submit">Invia dati</button>
         </div>

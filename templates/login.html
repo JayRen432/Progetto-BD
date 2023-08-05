@@ -5,9 +5,27 @@
         var ml = document.getElementsByName("mail");
         var pwd = document.getElementsByName("password");
         if (pwd[0].value == "" || ml[0].value == "") {
-            alert("Uno dei campi è vuoto");
+            showAlert('warning', 'mail e password non possono essere vuoti');
             return false;
         }
+
+        // Check if the mail contains valid domain
+        var validDomains = ['@stud.unive.it', '@administrator.com', '@unive.it'];
+        var validDomainFound = false;
+
+        for (var i = 0; i < validDomains.length; i++) {
+            if (mailValue.includes(validDomains[i])) {
+                validDomainFound = true;
+                break;
+            }
+        }
+
+        if (!validDomainFound) {
+            showAlert('warning', 'Mail deve contenere un dominio valido (@stud.unive.it, @administrator.com o @unive.it)');
+            return false;
+        }
+
+        showAlert('info', 'Mail e password inserite');
         return true;
     }
 </script>

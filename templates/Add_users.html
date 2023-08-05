@@ -21,6 +21,33 @@
 <script>
     var dettagliUtente;
     var previousSelectedItem = null;
+    function checkUtente() {
+        var mat = document.querySelector('input[name="matricola"]').value;
+        var mail = document.querySelector('input[name="mail"]').value;
+        var matRegex = /^[0-9]{6}$/;
+
+        if (mat === '' || mail === '') {
+            showAlert('warning', 'Mail e Matricola non inserite');
+            return false;
+        }
+
+        if (!mat.match(matRegex)) {
+            showAlert('warning', 'Matricola incorretta (inserire 6 CIFRE)');
+            return false;
+        }
+
+        if (!/^[0-9]*$/.test(mat)) {
+            showAlert('warning', 'La matricola non può contenere lettere');
+            return false;
+        }
+
+        if (mail !== mat + '@stud.unive.it') {
+            showAlert('warning', 'Mail non valida, deve contenere la matricola seguita da "@stud.unive.it"');
+            return false;
+        }
+        showAlert('info', 'Mail e matricola sono corrette');
+        return true;
+    }
     function mostraDettagli(elemento) {
         // Rimuove la classe "utente-selezionato" da tutti gli elementi della lista
         var listaUtenti = document.querySelectorAll('.utenti ul li');
@@ -68,30 +95,32 @@
     }
 
     function aggiungiUtente() {
-        if (dettagliUtente) {
-            var data = {
-                cod_fiscale: dettagliUtente.cod_fiscale,
-                nome: dettagliUtente.name,
-                cognome: dettagliUtente.surname,
-                matricola: document.querySelector('input[name="matricola"]').value,
-                mail: document.querySelector('input[name="mail"]').value,
-                anno_nascita: dettagliUtente.birthday,
-                pwd: dettagliUtente.pwd,
-                corso_di_laurea: dettagliUtente.corsoLaurea
-            };
-            // Effettua la richiesta al server usando fetch
-            fetch('/Admin/add_user', {
-                method: 'POST', // Metodo HTTP per inviare i dati
-                headers: {
-                    'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
-                },
-                body: JSON.stringify(data)
-            })
-                .then(data => {
-                    window.location.assign("/Admin");
+        if (checkUtente()){
+            if (dettagliUtente) {
+                var data = {
+                    cod_fiscale: dettagliUtente.cod_fiscale,
+                    nome: dettagliUtente.name,
+                    cognome: dettagliUtente.surname,
+                    matricola: document.querySelector('input[name="matricola"]').value,
+                    mail: document.querySelector('input[name="mail"]').value,
+                    anno_nascita: dettagliUtente.birthday,
+                    pwd: dettagliUtente.pwd,
+                    corso_di_laurea: dettagliUtente.corsoLaurea
+                };
+                // Effettua la richiesta al server usando fetch
+                fetch('/Admin/add_user', {
+                    method: 'POST', // Metodo HTTP per inviare i dati
+                    headers: {
+                        'Content-Type': 'application/json', // Specifica il tipo di contenuto come JSON
+                    },
+                    body: JSON.stringify(data)
                 })
+                    .then(data => {
+                        window.location.assign("/Admin");
+                    })
+            }
+            window.location.assign("/Admin");
         }
-        window.location.assign("/Admin");
     }
 </script>
 {% endblock %}

@@ -29,14 +29,11 @@
 
 <script>
     function check() {
-        if ((document.form1.corso_di_laurea.value) != "-----------") {
-            return true;
-        }
-        else if ((document.form1.anno_corsi.value) != "-----------") {
+        if ((document.form1.corso_di_laurea.value) != "-----------" || (document.form1.anno_corsi.value) != "-----------") {
             return true;
         }
         else {
-            alert("All the fields are empty!");
+            showAlert('warning','All the fields are empty!');
             return false;
         }
     }

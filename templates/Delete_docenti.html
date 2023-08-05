@@ -79,9 +79,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // La risposta dal server è arrivata
-                    // Puoi aggiornare la pagina o gestire la risposta a tuo piacimento
-                    alert(data);
+                    showAlert('success',data.message);
                 })
                 .catch(error => {
                     // Gestione dell'errore

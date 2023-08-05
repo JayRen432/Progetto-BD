@@ -13,8 +13,12 @@
 <script>
     function notNull(cc, n) {
         if (cc === null || cc.trim() === '' ||
-            n === null || n.trim() === '') return false;
-        return true; // All fields are not null
+            n === null || n.trim() === '') {
+            showAlert('warning', 'Inserire in tutti i campi i dati');
+            return false;
+        }
+        showAlert('info', 'Dati inseriti correttamente');
+        return true;
     }
     function inviaDati() {
         const codiceCorso = document.getElementById("codice_corso").value;
@@ -36,9 +40,6 @@
                 .catch(error => {
                     console.error('Errore durante l\'invio dei dati al server:', error);
                 });
-        }
-        else {
-            alert("Please fill in all the required fields.");
         }
     }
 </script>

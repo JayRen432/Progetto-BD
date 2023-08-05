@@ -56,9 +56,7 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                // Puoi gestire la risposta del server qui se necessario
-                // ...
-                alert('Dati inviati con successo al server!');
+                showAlert('success','Dati inviati con successo al server!');
             })
         window.location.assign("/Admin");
     }

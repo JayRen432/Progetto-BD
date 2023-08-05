@@ -15,7 +15,55 @@
         {% block content %}
 
         {% endblock %}
+        <div class="alert-container">
+            <div class="alert danger">
+                <span class="closebtn" onclick="hideAlert('danger')">&times;</span>
+                <strong>Danger!</strong>
+                <p name="p_danger"></p>
+            </div>
+
+            <div class="alert success">
+                <span class="closebtn" onclick="hideAlert('success')">&times;</span>
+                <strong>Success!</strong>
+                <p name="p_success"></p>
+            </div>
+
+            <div class="alert info">
+                <span class="closebtn" onclick="hideAlert('info')">&times;</span>
+                <strong>Info!</strong>
+                <p name="p_info"></p>
+            </div>
+
+            <div class="alert warning">
+                <span class="closebtn" onclick="hideAlert('warning')">&times;</span>
+                <strong>Warning!</strong>
+                <p name="p_warning"></p>
+            </div>
+        </div>
     </div>
+    <script>
+        function showAlert(alertType, message) {
+            var alertDiv = document.querySelector('.alert.' + alertType);
+            if (alertDiv) {
+                var pElement = alertDiv.querySelector('p[name="p_' + alertType + '"]');
+                if (pElement) {
+                    pElement.textContent = message;
+                }
+                alertDiv.classList.add('visible');
+            }
+        }
+
+        function hideAlert(alertType) {
+            var alertDiv = document.querySelector('.alert.' + alertType);
+            if (alertDiv && !alertDiv.classList.contains('unclosable')) { // Check if the alert is not marked as unclosable
+                alertDiv.classList.remove('visible');
+                var pElement = alertDiv.querySelector('p[name="p_' + alertType + '"]');
+                if (pElement) {
+                    pElement.textContent = '';
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>

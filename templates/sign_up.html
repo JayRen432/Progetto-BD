@@ -9,10 +9,40 @@
         var ml = document.getElementsByName("Email");
         var pwd = document.getElementsByName("password");
         var cl = document.getElementById("corso_di_laurea");
+        
         if (nm[0].value == "" || srnm[0].value == "" || dt[0].value == "" || cf[0].value == "" || ml[0].value == "" || pwd[0].value == "" || cl.selectedIndex == 0) {
-            alert("Uno dei campi è vuoto");
+            showAlert('warning', 'i campi non possono essere vuoti');
             return false;
         }
+        var birthYear = new Date(dt).getFullYear();
+        var currentYear = new Date().getFullYear();
+        var age = currentYear - birthYear;
+
+        if (age < 18) {
+            showAlert('warning', 'L\'età deve essere maggiore o uguale a 18');
+            return false;
+        }
+        var validDomains = ['@outlook.com', '@libero.it', '@yahoo.com', '@virgilio.it', '@gmail.com'];
+        var validDomainFound = false;
+        for (var i = 0; i < validDomains.length; i++) {
+            if (mailValue.includes(validDomains[i])) {
+                validDomainFound = true;
+                break;
+            }
+        }
+
+        if (!validDomainFound) {
+            showAlert('warning', 'Mail deve contenere un dominio valido (@outlook.com, @libero.it, @yahoo.com, @virgilio.it,@gmail.com)');
+            return false;
+        }
+
+        var cfRegex = /^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$/;
+        if (!cf.match(cfRegex)) {
+            showAlert('warning', 'Il codice fiscale non ha il formato corretto');
+            return false;
+        }
+
+        showAlert('info', 'tutti i campi sono stati inseriti');
         return true;
     }
 </script>

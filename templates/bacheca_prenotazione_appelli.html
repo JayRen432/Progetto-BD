@@ -40,7 +40,7 @@
         // Invia i dati della riga al server Python
         fetch('/delete_appello', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rigaDati) })
             .then(response => response.json())
-            .then(data => { alert(data.message); })// Messaggio di conferma dal server
+            .then(data => { showAlert('success',data.message); })// Messaggio di conferma dal server
             .catch(error => console.error('Errore:', error));
         window.location.assign('/stud');
     }

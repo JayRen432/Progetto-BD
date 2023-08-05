@@ -7,6 +7,7 @@
     <meta name="author" content="Bertocco Marco">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/main_menu.css">
+    <link rel="stylesheet" href="/static/css/alert.css">
     <link rel="icon" type="image/x-icon" href="/static/images/logod.ico">
 </head>
 
@@ -23,6 +24,31 @@
         {% block content %}
 
         {% endblock %}
+        <div class="alert-container">
+            <div class="alert danger">
+                <span class="closebtn" onclick="hideAlert('danger')">&times;</span>
+                <strong>Danger!</strong>
+                <p name="p_danger"></p>
+            </div>
+
+            <div class="alert success">
+                <span class="closebtn" onclick="hideAlert('success')">&times;</span>
+                <strong>Success!</strong>
+                <p name="p_success"></p>
+            </div>
+
+            <div class="alert info">
+                <span class="closebtn" onclick="hideAlert('info')">&times;</span>
+                <strong>Info!</strong>
+                <p name="p_info"></p>
+            </div>
+
+            <div class="alert warning">
+                <span class="closebtn" onclick="hideAlert('warning')">&times;</span>
+                <strong>Warning!</strong>
+                <p name="p_warning"></p>
+            </div>
+        </div>
     </div>
     <div class="bottom-bar">
         <a href="#" class="copy-link" id="copyLinkTelephone">telephone: +39 XXX XXX XXXX</a>
@@ -46,6 +72,29 @@
                 alert('Content copied to clipboard: ' + contentToCopy);
             });
         });
+
+
+        function showAlert(alertType, message) {
+            var alertDiv = document.querySelector('.alert.' + alertType);
+            if (alertDiv) {
+                var pElement = alertDiv.querySelector('p[name="p_' + alertType + '"]');
+                if (pElement) {
+                    pElement.textContent = message;
+                }
+                alertDiv.classList.add('visible');
+            }
+        }
+
+        function hideAlert(alertType) {
+            var alertDiv = document.querySelector('.alert.' + alertType);
+            if (alertDiv && !alertDiv.classList.contains('unclosable')) { // Check if the alert is not marked as unclosable
+                alertDiv.classList.remove('visible');
+                var pElement = alertDiv.querySelector('p[name="p_' + alertType + '"]');
+                if (pElement) {
+                    pElement.textContent = '';
+                }
+            }
+        }
     </script>
 </body>
 

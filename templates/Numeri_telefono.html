@@ -18,8 +18,6 @@
     </table>
     </br>
     <button id="mostraFormButton" onclick="mostraForm()">Aggiungi Nuovo numero di telefono</button>
-
-
     <div id="formContainer" style="display: none;">
         <form id="numeroForm">
             </br>
@@ -45,9 +43,23 @@
         var formContainer = document.getElementById('formContainer');
         formContainer.style.display = 'block';
     }
+    function checkTelefono(nt) {
+        if (nt === null || nt.trim() === '') {
+            showAlert('warning', 'Inserire il numero di telefono');
+            return false;
+        }
+        if (nt.length !== 16) {
+            showAlert('warning', 'Il numero di telefono deve essere lungo 16 caratteri');
+            return false;
+        }
+        showAlert('info','Numero telefono è inserito correttamente')
+        return true;
+    }
     function invia() {
         var numeroTelefono = document.getElementById('telefono').value;
-        invia_numero('/add_phone', numeroTelefono);
+        if (checkTelefono(numeroTelefono)) {
+            invia_numero('/add_phone', numeroTelefono);
+        }
     }
     function deletenumber(button) {
         var row = button.closest('tr');
