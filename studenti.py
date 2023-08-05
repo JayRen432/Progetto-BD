@@ -183,7 +183,6 @@ def delete_appello_aux(esame):
     db.session.commit()
 
 def which_voto(voto):
-    print(voto)
     if voto is not None:
         if voto == 0:
             return 'INSUF'
@@ -254,10 +253,10 @@ def checkdata(voto, data):
 
 def show_list_exam_aux(cf):
     max_data = Corsi.query.join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, func.max(Esami.Data).label('max_data')).group_by(Corsi.CodiceCorso).subquery()
-    subquery = Esami.query.join(Sostenuti, Esami.CodEsame == Sostenuti.Esame).filter(and_(Sostenuti.Studente == cf, Sostenuti.voto != 'INSUF')).with_entities(Esami.Corso, Esami.Data, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), Esami.Valore).group_by(Esami.Corso, Esami.Data, Esami.Valore)
+    subquery = Esami.query.join(Sostenuti, Esami.CodEsame == Sostenuti.Esame).filter(and_(Sostenuti.Studente == cf, Sostenuti.voto != 'INSUF')).with_entities(Esami.Corso, Esami.Data, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti')).group_by(Esami.Corso, Esami.Data)
     sub = subquery.subquery()
 
-    exam_data = (db.session.query(Corsi, sub, max_data.c.max_data).join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Studenti, Appartenenti.CorsoLaurea == Studenti.CorsoLaurea).outerjoin(sub, sub.c.Corso == Corsi.CodiceCorso).outerjoin(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, func.sum(sub.c.sommavoti), sub.c.Valore).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, sub.c.Valore))
+    exam_data = (db.session.query(Corsi, sub, max_data.c.max_data).join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Studenti, Appartenenti.CorsoLaurea == Studenti.CorsoLaurea).outerjoin(sub, sub.c.Corso == Corsi.CodiceCorso).outerjoin(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, func.sum(sub.c.sommavoti), Corsi.Valore).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data, Corsi.Valore))
     
     corsi = []
     for row in exam_data:
@@ -271,3 +270,24 @@ def show_list_exam_aux(cf):
         data["Data"] = checkdata(data["Voto"], data["Data"])
         corsi.append(data)
     return corsi
+
+def accetta_get(cf):
+    da_accettare = []
+    dati = Sostenuti.query.join(Esami, Sostenuti.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).filter(Sostenuti.stato == 'DA RIVEDERE', Sostenuti.voto != 'INSUF', Sostenuti.Studente == cf).with_entities(Esami.CodEsame, Corsi.NomeCorso, Esami.Data, Sostenuti.voto)
+    for row in dati:
+        data = {
+            "CodEsame": row.CodEsame,
+            "NomeCorso": row.NomeCorso,
+            "Data": row.Data,
+            "voto": row.voto
+        }
+        da_accettare.append(data)
+    return da_accettare
+
+def accetta_post(data, cf):
+    
+    for item in data:
+        #Studenti.query.filter_by(mail=email).update({"password": hash_value})
+        Sostenuti.query.filter_by(Studente=cf, Esame=item["CodEsame"]).update({"stato": item["Azione"]})
+    db.session.commit()
+
