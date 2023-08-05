@@ -144,7 +144,6 @@ def prenotazioni_aux(corsolaurea, matricola):
     .distinct()
 )
     prenotazioni_data = esami_insufficienti.union(esami_senza_voto)
-    #prenotazioni_data = db.session.query(Esami).outerjoin(Iscrizione_Appelli, (Esami.CodEsame == Iscrizione_Appelli.Esame) & (Iscrizione_Appelli.Studente == Studenti.CodiceFiscale)).outerjoin(Sostenuti, (Esami.CodEsame == Sostenuti.Esame) & (Sostenuti.Studente == matricola)).filter((Iscrizione_Appelli.Studente == None) | ((Sostenuti.voto == 'INSUF') & (Sostenuti.Studente == matricola))).all()
     
     righe_iniziali = [
         {
@@ -203,11 +202,12 @@ attraverso la SELECT seleziona i dati degli esami sostenuti dallo studente e li 
 def exam_details_aux(cf):
     cf = session.get("codicefiscale")
     max_data = Corsi.query.join(Appartenenti, Corsi.CodiceCorso == Appartenenti.CodCorso).join(Esami, Corsi.CodiceCorso == Esami.Corso).filter(Studenti.CodiceFiscale == cf).with_entities(Corsi.CodiceCorso, func.max(Esami.Data).label('max_data')).group_by(Corsi.CodiceCorso).subquery()
-    risultatiesami_data = Studenti.query.join(Sostenuti, Studenti.CodiceFiscale == Sostenuti.Studente).join(Esami, Sostenuti.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).join(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Sostenuti.Studente == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso,func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), max_data.c.max_data).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, max_data.c.max_data)
+    risultatiesami_data = Studenti.query.join(Sostenuti, Studenti.CodiceFiscale == Sostenuti.Studente).join(Esami, Sostenuti.Esame == Esami.CodEsame).join(Corsi, Esami.Corso == Corsi.CodiceCorso).join(max_data, Corsi.CodiceCorso == max_data.c.CodiceCorso).filter(Sostenuti.Studente == cf).with_entities(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Tipo, func.sum(((Sostenuti.voto)* (Esami.ValorePerc/100)).cast(Integer)).label('sommavoti'), max_data.c.max_data).group_by(Corsi.CodiceCorso, Corsi.NomeCorso, Esami.Tipo,max_data.c.max_data)
     exam_list = [
         {
             "codice_corso": row.CodiceCorso,
             "nome_corso": row.NomeCorso,
+            "tipo": row.Tipo,
             "voto": which_voto(row.sommavoti),
             "data_esame": row.max_data,   
         }
@@ -290,4 +290,3 @@ def accetta_post(data, cf):
         #Studenti.query.filter_by(mail=email).update({"password": hash_value})
         Sostenuti.query.filter_by(Studente=cf, Esame=item["CodEsame"]).update({"stato": item["Azione"]})
     db.session.commit()
-

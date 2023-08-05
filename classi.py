@@ -23,6 +23,7 @@ class Corsi(db.Model):
     __tablename__ = "corsi"
     CodiceCorso = db.Column(db.String(50), primary_key=True)
     NomeCorso = db.Column(db.String(100), unique=True)
+    Valore = db.Column(db.Integer)
 
 class Appartenenti(db.Model):
     __tablename__ = "appartenenti"
@@ -79,14 +80,14 @@ class Esami(db.Model):
     NomeEsame = db.Column(db.String(100))
     Data = db.Column(db.Date)
     Tipo = db.Column(db.String(50))
-    Valore = db.Column(db.Integer)
     ValorePerc = db.Column(db.Integer)
 
 class Sostenuti(db.Model):
     __tablename__ = "sostenuti"
     Esame = db.Column(db.String(50), db.ForeignKey('esami.CodEsame'), primary_key=True)
     Studente = db.Column(db.String(16), db.ForeignKey('studenti.CodiceFiscale'), primary_key=True)
-    voto = db.Column(db.String(5))
+    voto = db.Column(db.String(20))
+    stato= db.Column(db.String(20), default='DA RIVEDERE')
 
 class Iscrizione_Appelli(db.Model):
     __tablename__ = "iscrizione_appelli"
