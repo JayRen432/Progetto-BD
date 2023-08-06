@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from classi import *
 
-
 """
 la funzione is_cf_present_in_docenti riceve come parametro il codice fiscale dello studente e restituisce True se il codice fiscale è presente tra i docenti
 @param cf_studente: codice fiscale dello studente
@@ -11,7 +10,7 @@ la funzione is_cf_present_in_docenti riceve come parametro il codice fiscale del
 """
 
 
-def is_cf_present_in_docenti(cf_studente, mysql):
+def is_cf_present_in_docenti(cf_studente):
     count = Docenti.query.filter_by(CodiceFiscale=cf_studente).count()
     return count > 0
 
@@ -24,7 +23,6 @@ i dati vengono inseriti nella tabella esami attraverso la INSERT
 @param nome_esame
 @param codice_esame
 @param data
-@param tipo
 @param valore
 @param cf_docente
 
@@ -32,16 +30,15 @@ i dati vengono inseriti nella tabella esami attraverso la INSERT
 
 
 def crea_esame_inserisci(
-    corso, nome_esame, codice_esame, data, tipo, valore, cf_docente, valPerc
+        corso, nome_esame, codice_esame, data,tipo, cf_docente, valPerc
 ):
     esami = Esami(
         Corso=corso,
         CodEsame=codice_esame,
         NomeEsame=nome_esame,
         Data=data,
-        Tipo=tipo,
-        Valore=valore,
         Docente=cf_docente,
+        Tipo=tipo,
         ValorePerc=valPerc,
     )
     db.session.add(esami)
@@ -124,7 +121,7 @@ attraverso una query seleziona i dati degli esami insegnati dal docente attraver
 
 def elimina_esame_get(cf_docente):
     exam_data = Esami.query.with_entities(
-        Esami.CodEsame, Esami.Corso, Esami.Data, Esami.Tipo, Esami.Valore
+        Esami.CodEsame, Esami.Corso, Esami.Data, Esami.Tipo, Esami.ValorePerc,
     ).filter_by(Docente=cf_docente)
 
     lista_esami = [
@@ -133,7 +130,7 @@ def elimina_esame_get(cf_docente):
             "Corso": row.Corso,
             "Data": row.Data,
             "Tipo": row.Tipo,
-            "Valore": row.Valore,
+            "ValorePerc": row.ValorePerc,
         }
         for row in exam_data
     ]

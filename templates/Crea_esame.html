@@ -7,10 +7,9 @@
         var a = document.getElementsByName("data");
         var c = document.getElementById("corso");
         var t = document.getElementById("tipo");
-        var v = document.getElementById("valore");
         var vp = document.getElementById("valorePerc");
 
-        if (ce[0].value === "" || ne[0].value === "" || a[0].value === "" || c.value === "" || t.value === "" || v.value === "" || vp.value === "") {
+        if (ce[0].value === "" || ne[0].value === "" || a[0].value === "" || c.value === "" || t.value === "" || vp.value === "") {
             showAlert('warning', 'Inserire in tutti i campi i dati');
             return false;
         }
@@ -60,15 +59,6 @@
                 <option value="Orale">Orale</option>
                 <option value="Progetto">Progetto</option>
                 <option value="Compitino">Compitino</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <p style="text-align: left;">Valore:</p>
-            <select name="valore" id="valore">
-                <option value="0">IDONEITÀ</option>
-                <option value="3">3 crediti</option>
-                <option value="6">6 crediti</option>
-                <option value="12">12 crediti</option>
             </select>
         </div>
         <div class="form-group">

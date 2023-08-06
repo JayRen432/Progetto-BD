@@ -1,4 +1,6 @@
 import hashlib
+
+from docenti import *
 from studenti import *
 from classi import *
 
@@ -75,8 +77,8 @@ la funzione add_course_aux riceve come parametro il codice del corso, il nome de
 """
 
 
-def add_course_aux(codice, nome):
-    corso = Corsi(CodiceCorso=codice, NomeCorso=nome)
+def add_course_aux(codice, nome, valore):
+    corso = Corsi(CodiceCorso=codice, NomeCorso=nome, Valore=valore)
     db.session.add(corso)
     db.session.commit()
 

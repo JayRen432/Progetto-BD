@@ -5,6 +5,9 @@ from sqlalchemy import create_engine, Column, Integer, String, MetaData, Foreign
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import func
+
+from docenti import *
+
 app = Flask(__name__)
 
 app.debug = True
@@ -26,7 +29,7 @@ def sign_up_aux(codicefiscale, name, surname, dateofbirth, email, password, cors
     hash_password = hashlib.sha256(password.encode("utf-8"))
     hash_value = hash_password.hexdigest()
 
-    if is_cf_present_in_studenti(codicefiscale):
+    if is_cf_present_in_docenti(codicefiscale):
         raise ValueError("Il Codice Fiscale è già presente nella tabella Docenti.")
 
     temporary_user = TemporaryUser(
@@ -144,18 +147,36 @@ def prenotazioni_aux(corsolaurea, matricola):
     .distinct()
 )
     prenotazioni_data = esami_insufficienti.union(esami_senza_voto)
-    
-    righe_iniziali = [
-        {
-            "CodiceCorso": row.CodiceCorso,
-            "NomeCorso": row.NomeCorso,
-            "Data": row.Data,
-            "CodEsame": row.CodEsame,
-            "Tipo": row.Tipo,
-        }
-        for row in prenotazioni_data
-    ]
-    return righe_iniziali
+
+    iscrizioni_totali = (
+        Iscrizione_Appelli.query.all()
+    )
+    righe_inziali = []
+
+    if not iscrizioni_totali:
+        for item in prenotazioni_data:
+            data = {
+                "CodiceCorso": item.CodiceCorso,
+                "NomeCorso": item.NomeCorso,
+                "Data": item.Data,
+                "CodEsame": item.CodEsame,
+                "Tipo": item.Tipo,
+            }
+            righe_inziali.append(data)
+    else:
+        for item in prenotazioni_data:
+            for item2 in iscrizioni_totali:
+                if not (item.CodEsame == item2.Esame and session.get("codicefiscale") == item2.Studente):
+                    data = {
+                        "CodiceCorso": item.CodiceCorso,
+                        "NomeCorso": item.NomeCorso,
+                        "Data": item.Data,
+                        "CodEsame": item.CodEsame,
+                        "Tipo": item.Tipo,
+                    }
+                    righe_inziali.append(data)
+
+    return righe_inziali
 
 '''
 la funzione add_row_aux riceve come parametri la connessione al database, il codice dell'esame e il codice fiscale dello studente

@@ -8,7 +8,7 @@
             <th>Nome esame</th>
             <th>Data</th>
             <th>Tipo</th>
-            <th>Valore</th>
+            <th>Valore Percentuale</th>
             <th>Elimina</th>
         </tr>
         {% for esame in esami %}
@@ -17,7 +17,7 @@
             <td>{{ esame['CodEsame'] }}</td>
             <td>{{ esame['Data'] }}</td>
             <td>{{ esame['Tipo'] }}</td>
-            <td>{{ esame['Valore'] }} crediti</td>
+            <td>{{ esame['ValorePerc'] }} %</td>
             <td>
                 <form action="/Docenti/Elimina_Esame" method="POST">
                     <input type="hidden" name="codEsame" value="{{ esame['CodEsame'] }}">

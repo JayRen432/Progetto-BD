@@ -63,7 +63,7 @@ class Docenti(db.Model):
     password = db.Column(db.String(520))
 
 class Numeri_Telefono(db.Model):
-    __tablename__ = "numeri_telfono"
+    __tablename__ = "numeri_telefono"
     NumTelefono = db.Column(db.String(20), primary_key=True)
     CodFiscale = db.Column(db.String(16), db.ForeignKey('docenti.CodiceFiscale'))
 

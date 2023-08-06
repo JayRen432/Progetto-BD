@@ -10,7 +10,7 @@
         var pwd = document.getElementsByName("password");
         var cl = document.getElementById("corso_di_laurea");
         
-        if (nm[0].value == "" || srnm[0].value == "" || dt[0].value == "" || cf[0].value == "" || ml[0].value == "" || pwd[0].value == "" || cl.selectedIndex == 0) {
+        if (nm[0].value === "" || srnm[0].value === "" || dt[0].value === "" || cf[0].value === "" || ml[0].value === "" || pwd[0].value === "" || cl.selectedIndex === 0) {
             showAlert('warning', 'i campi non possono essere vuoti');
             return false;
         }

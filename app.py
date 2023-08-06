@@ -66,7 +66,7 @@ def signUp():
             corsolaurea = request.form["corsoLaurea"]
 
             if sign_up_control(
-                codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
+                    codicefiscale, name, surname, dateofbirth, email, password, corsolaurea
             ):
                 number = sign_up_aux(
                     codicefiscale,
@@ -434,7 +434,7 @@ def add_docente():
             }
             add_docente_aux(docente)
 
-            return redirect(url_for("administrator"))
+            return "tutto ok"
         else:
             return render_template("Add_docente.html")
     else:
@@ -612,9 +612,7 @@ def crea_esame():
             data = request.form["data"]
             tipo = request.form["tipo"]
             valorePerc = request.form["valorePerc"]
-            crea_esame_inserisci(
-                corso, nome_esame, codice_esame, data, tipo,cf_docente, valorePerc
-            )
+            crea_esame_inserisci(corso, nome_esame, codice_esame, data, tipo, cf_docente, valorePerc)
 
         lista_corsi = crea_esame_docenti(cf_docente)
         if request.method == "POST":
@@ -684,7 +682,7 @@ def add_phone_number():
     except Exception as e:
         return jsonify(
             message="Errore durante l'aggiunta del numero di telefono. Dettagli: "
-            + str(e)
+                    + str(e)
         )
 
 
@@ -707,7 +705,7 @@ def delete_phone_number():
     except Exception as e:
         return jsonify(
             message="Errore durante l'eliminazione del numero di telefono. Dettagli: "
-            + str(e)
+                    + str(e)
         )
 
 
@@ -914,13 +912,14 @@ def ret():
         session.clear()
         return redirect(url_for("index"))
 
+
 @app.route("/stud/accetta_voti", methods=["GET", "POST"])
 def accetta():
     cf = session.get("codicefiscale")
     if "ruolo" in session and session["ruolo"] == "Studente":
         if request.method == "POST":
             data = request.get_json()
-            print(data)    
+            print(data)
             accetta_post(data, cf)
             return "ok"
         else:
@@ -929,7 +928,6 @@ def accetta():
             return render_template('Accetta_rifiuta.html', data_list=data_list)
     else:
         abort(403)
-
 
 
 if __name__ == "__main__":

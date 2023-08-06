@@ -33,12 +33,10 @@
             showAlert('warning', 'Inserire in tutti i campi i dati');
             return false;
         }
-
         if (!m.includes('@unive.it')) {
             showAlert('warning', 'La mail deve contenere "@unive.it"');
             return false;
         }
-
         var birthYear = new Date(a).getFullYear();
         var currentYear = new Date().getFullYear();
         var age = currentYear - birthYear;
@@ -47,7 +45,6 @@
             showAlert('warning', 'L\'età deve essere maggiore o uguale a 30');
             return false;
         }
-
         if (cf.length !== 16) {
             showAlert('warning', 'Il codice fiscale deve essere lungo 16 caratteri');
             return false;
