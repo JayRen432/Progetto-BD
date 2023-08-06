@@ -119,6 +119,7 @@ CREATE TABLE Sostenuti (
     Esame VARCHAR(50),
     Studente VARCHAR(16),
     voto VARCHAR(5),
+    stato VARCHAR(20) DEFAULT 'DA RIVEDERE',
     PRIMARY KEY (Esame, Studente),
     FOREIGN KEY (Esame) REFERENCES Esami(CodEsame) ON DELETE CASCADE,
     FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale) ON DELETE CASCADE
