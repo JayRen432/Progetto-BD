@@ -11,7 +11,8 @@ CREATE TABLE Corsi_di_Laurea (
 
 CREATE TABLE Corsi (
     CodiceCorso VARCHAR(50) PRIMARY KEY,
-    NomeCorso VARCHAR(100) UNIQUE
+    NomeCorso VARCHAR(100) UNIQUE,
+    Valore INT 
 );
 
 CREATE TABLE Appartenenti (
@@ -106,9 +107,12 @@ CREATE TABLE Esami (
     NomeEsame VARCHAR(100),
     Data DATE,
     Tipo VARCHAR(50),
-    Valore INT,
+    ValorePerc INT,
     FOREIGN KEY (Docente) REFERENCES Docenti(CodiceFiscale) ON DELETE CASCADE,
-    FOREIGN KEY (Corso) REFERENCES Corsi(CodiceCorso) ON DELETE CASCADE
+    FOREIGN KEY (Corso) REFERENCES Corsi(CodiceCorso) ON DELETE CASCADE,
+    CHECK (
+	ValorePerc <= 100
+    )
 );
 
 CREATE TABLE Sostenuti (
@@ -127,4 +131,3 @@ CREATE TABLE Iscrizione_Appelli (
     FOREIGN KEY (Esame) REFERENCES Esami(CodEsame) ON DELETE CASCADE,
     FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale) ON DELETE CASCADE
 );
-
