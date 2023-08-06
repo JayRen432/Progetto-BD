@@ -14,7 +14,8 @@ CREATE TABLE Corsi_di_Laurea (
 -- Creazione della tabella Corsi
 CREATE TABLE Corsi (
     CodiceCorso VARCHAR(50) PRIMARY KEY,
-    NomeCorso VARCHAR(100) UNIQUE
+    NomeCorso VARCHAR(100) UNIQUE,
+    Valore INT
 );
 
 -- Creazione della tabella Appartenenti
@@ -86,7 +87,6 @@ CREATE TABLE Esami (
     NomeEsame VARCHAR(100),
     Data DATE,
     Tipo VARCHAR(50),
-    Valore INT,
     FOREIGN KEY (Docente) REFERENCES Docenti(CodiceFiscale),
     FOREIGN KEY (Corso) REFERENCES Corsi(CodiceCorso)
 );
@@ -96,6 +96,7 @@ CREATE TABLE Sostenuti (
     Esame VARCHAR(50),
     Studente VARCHAR(16),
     voto VARCHAR(5),
+    stato VARCHAR(20) DEFAULT 'DA RIVEDERE',
     PRIMARY KEY (Esame, Studente),
     FOREIGN KEY (Esame) REFERENCES Esami(CodEsame),
     FOREIGN KEY (Studente) REFERENCES Studenti(CodiceFiscale)
